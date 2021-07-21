@@ -38,6 +38,7 @@ class LgThinq extends utils.Adapter {
             this.config.interval = 0.5;
         }
         this.requestClient = axios.create();
+
         this.defaultHeaders = {
             "x-api-key": constants.API_KEY,
             "x-client-id": constants.API_CLIENT_ID,
@@ -66,8 +67,10 @@ class LgThinq extends utils.Adapter {
         // }
 
         this.gateway = await this.requestClient.get(constants.GATEWAY_URL, { headers: this.defaultHeaders }).then((res) => res.data.result);
+        this.lgeapi_url = `https://${this.gateway.countryCode.toLowerCase()}.lgeapi.com/`;
         this.session = await this.login(this.config.user, this.config.password);
         this.userNumber = await this.getUserNumber(this.session.accessToken);
+        this.log.info(this.userNumber);
     }
 
     async login(username, password) {
@@ -82,8 +85,8 @@ class LgThinq extends utils.Adapter {
             "X-Device-Platform": "ADR",
             "X-Device-Language-Type": "IETF",
             "X-Device-Publish-Flag": "Y",
-            "X-Device-Country": this.gateway.country_code,
-            "X-Device-Language": this.gateway.language_code,
+            "X-Device-Country": this.gateway.countryCode,
+            "X-Device-Language": this.gateway.languageCode,
             "X-Signature": loginForm.match(/signature\s+:\s+"([^"]+)"/)[1],
             "X-Timestamp": loginForm.match(/tStamp\s+:\s+"([^"]+)"/)[1],
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
@@ -97,13 +100,13 @@ class LgThinq extends utils.Adapter {
         };
 
         // try login with username and hashed password
-        const loginUrl = this.gateway.emp_base_url + "emp/v2.0/account/session/" + encodeURIComponent(username);
+        const loginUrl = this.gateway.empTermsUri + "/" + "emp/v2.0/account/session/" + encodeURIComponent(username);
         const res = await this.requestClient
             .post(loginUrl, qs.stringify(data), { headers })
             .then((res) => res.data)
             .catch((err) => {
                 if (!err.response) {
-                    throw err;
+                    this.log.error(err);
                 }
 
                 const { code, message } = err.response.data.error;
@@ -115,7 +118,7 @@ class LgThinq extends utils.Adapter {
             });
 
         // dynamic get secret key for emp signature
-        const empSearchKeyUrl = this.gateway.login_base_url + "searchKey?key_name=OAUTH_SECRETKEY&sever_type=OP";
+        const empSearchKeyUrl = this.gateway.empSpxUri + "/" + "searchKey?key_name=OAUTH_SECRETKEY&sever_type=OP";
         const secretKey = await this.requestClient
             .get(empSearchKeyUrl)
             .then((res) => res.data)
@@ -151,15 +154,19 @@ class LgThinq extends utils.Adapter {
             .then((res) => res.data)
             .catch((err) => {
                 this.log.error(err.response.data.error.message);
+                rejects();
+                return;
             });
         if (token.status !== 1) {
             this.log.error(token.message);
+            rejects();
+            return;
         }
 
         this.lgeapi_url = token.oauth2_backend_url || this.lgeapi_url;
 
         // login to old gateway also - thinq v1
-        const memberLoginUrl = this.gateway.thinq1_url + "member/login";
+        const memberLoginUrl = this.gateway.thinq1Uri + "/" + "member/login";
         const memberLoginHeaders = {
             "x-thinq-application-key": "wideq",
             "x-thinq-security-key": "nuts_securitykey",
@@ -167,8 +174,8 @@ class LgThinq extends utils.Adapter {
             "x-thinq-token": token.access_token,
         };
         const memberLoginData = {
-            countryCode: this.gateway.country_code,
-            langCode: this.gateway.language_code,
+            countryCode: this.gateway.countryCode,
+            langCode: this.gateway.languageCode,
             loginType: "EMP",
             token: token.access_token,
         };
@@ -183,7 +190,7 @@ class LgThinq extends utils.Adapter {
             .then((res) => res.data)
             .then((data) => data.lgedmRoot.jsessionId);
 
-        return { access_token: token.access_token, refresh_token: token.refresh_token, expires_in: token.expires_in };
+        return { accessToken: token.access_token, refreshToken: token.refresh_token, expiresIn: token.expires_in };
     }
 
     async refreshNewToken(session) {
@@ -233,18 +240,18 @@ class LgThinq extends utils.Adapter {
 
     async getLoginUrl() {
         const params = {
-            country: this.gateway.country_code,
-            language: this.gateway.language_code,
+            country: this.gateway.countryCode,
+            language: this.gateway.languageCode,
             client_id: constants.CLIENT_ID,
             svc_list: constants.SVC_CODE,
             svc_integrated: "Y",
-            redirect_uri: this.gateway.login_base_url + "login/iabClose",
+            redirect_uri: this.gateway.empSpxUri + "/" + "login/iabClose",
             show_thirdparty_login: "LGE,MYLG",
             division: "ha:T20",
-            callback_url: this.gateway.login_base_url + "login/iabClose",
+            callback_url: this.gateway.empSpxUri + "/" + "login/iabClose",
         };
 
-        return this.gateway.login_base_url + "login/signIn" + qs.stringify(params, { addQueryPrefix: true });
+        return this.gateway.empSpxUri + "/" + "login/signIn" + qs.stringify(params, { addQueryPrefix: true });
     }
 
     signature(message, secret) {

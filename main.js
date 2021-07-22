@@ -66,10 +66,13 @@ class LgThinq extends utils.Adapter {
             .catch((error) => {
                 this.log.error(error);
             });
+        this.log.info(this.gateway)
         if (this.gateway) {
             this.lgeapi_url = `https://${this.gateway.countryCode.toLowerCase()}.lgeapi.com/`;
 
-            this.session = await this.login(this.config.user, this.config.password);
+            this.session = await this.login(this.config.user, this.config.password).catch((error) => {
+                this.log.error(error);
+            });
             if (this.session.accessToken) {
                 this.setState("info.connection", false, true);
                 this.refreshTokenInterval = setInterval(() => {

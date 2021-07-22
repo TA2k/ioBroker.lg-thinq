@@ -65,31 +65,33 @@ class LgThinq extends utils.Adapter {
             .then((res) => res.data.result)
             .catch((error) => {
                 this.log.error(error);
-                return;
             });
-        this.lgeapi_url = `https://${this.gateway.countryCode.toLowerCase()}.lgeapi.com/`;
-        this.session = await this.login(this.config.user, this.config.password);
-        if (this.session.accessToken) {
-            this.setState("info.connection", false, true);
-            this.refreshTokenInterval = setInterval(() => {
-                this.refreshNewToken(this.session);
-            }, this.session.expiresIn * 1000);
-            this.userNumber = await this.getUserNumber(this.session.accessToken);
-            this.defaultHeaders["x-user-no"] = this.userNumber;
-            this.defaultHeaders["x-emp-token"] = this.session.accessToken;
-            const listDevices = await this.getListDevices();
-            listDevices.forEach(async (element) => {
-                await this.setObjectNotExistsAsync(element.deviceId, {
-                    type: "device",
-                    common: {
-                        name: element.alias,
-                        role: "indicator",
-                    },
-                    native: {},
+        if (this.gateway) {
+            this.lgeapi_url = `https://${this.gateway.countryCode.toLowerCase()}.lgeapi.com/`;
+
+            this.session = await this.login(this.config.user, this.config.password);
+            if (this.session.accessToken) {
+                this.setState("info.connection", false, true);
+                this.refreshTokenInterval = setInterval(() => {
+                    this.refreshNewToken(this.session);
+                }, this.session.expiresIn * 1000);
+                this.userNumber = await this.getUserNumber(this.session.accessToken);
+                this.defaultHeaders["x-user-no"] = this.userNumber;
+                this.defaultHeaders["x-emp-token"] = this.session.accessToken;
+                const listDevices = await this.getListDevices();
+                listDevices.forEach(async (element) => {
+                    await this.setObjectNotExistsAsync(element.deviceId, {
+                        type: "device",
+                        common: {
+                            name: element.alias,
+                            role: "indicator",
+                        },
+                        native: {},
+                    });
+                    this.extractKeys(this, element.deviceId, element);
                 });
-                this.extractKeys(this, element.deviceId, element);
-            });
-            this.log.debug(JSON.stringify(listDevices));
+                this.log.debug(JSON.stringify(listDevices));
+            }
         }
     }
 

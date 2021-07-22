@@ -74,16 +74,16 @@ class LgThinq extends utils.Adapter {
             this.session = await this.login(this.config.user, this.config.password).catch((error) => {
                 this.log.error(error);
             });
-            if (this.session && this.session.accessToken) {
+            if (this.session && this.session.access_token) {
                 this.log.debug(JSON.stringify(this.session));
                 this.setState("info.connection", true, true);
                 this.log.info("Login successful");
                 this.refreshTokenInterval = setInterval(() => {
-                    this.refreshNewToken(this.session);
-                }, this.session.expiresIn * 1000);
-                this.userNumber = await this.getUserNumber(this.session.accessToken);
+                    this.refreshNewToken();
+                }, this.session.expires_in * 1000);
+                this.userNumber = await this.getUserNumber();
                 this.defaultHeaders["x-user-no"] = this.userNumber;
-                this.defaultHeaders["x-emp-token"] = this.session.accessToken;
+                this.defaultHeaders["x-emp-token"] = this.session.access_token;
                 const listDevices = await this.getListDevices();
 
                 this.log.info("Found: " + listDevices.length + " devices");
@@ -228,15 +228,15 @@ class LgThinq extends utils.Adapter {
             .then((res) => res.data)
             .then((data) => data.lgedmRoot.jsessionId);
 
-        return { accessToken: token.access_token, refreshToken: token.refresh_token, expiresIn: token.expires_in };
+        return token;
     }
 
-    async refreshNewToken(session) {
+    async refreshNewToken() {
         this.log.debug("refreshToken");
         const tokenUrl = this.lgeapi_url + "oauth2/token";
         const data = {
             grant_type: "refresh_token",
-            refresh_token: session.refreshToken,
+            refresh_token: this.session.refresh_token,
         };
 
         const timestamp = DateTime.utc().toRFC2822();
@@ -255,18 +255,18 @@ class LgThinq extends utils.Adapter {
         this.log.debug(JSON.stringify(resp));
         if (this.session) {
             this.session.access_token = resp.access_token;
-            this.defaultHeaders["x-emp-token"] = this.session.accessToken;
+            this.defaultHeaders["x-emp-token"] = this.session.access_token;
         }
     }
 
-    async getUserNumber(accessToken) {
+    async getUserNumber() {
         const profileUrl = this.lgeapi_url + "users/profile";
         const timestamp = DateTime.utc().toRFC2822();
         const signature = this.signature(`/users/profile\n${timestamp}`, constants.OAUTH_SECRET_KEY);
 
         const headers = {
             Accept: "application/json",
-            Authorization: "Bearer " + accessToken,
+            Authorization: "Bearer " + this.session.access_token,
             "X-Lge-Svccode": "SVC202",
             "X-Application-Key": constants.APPLICATION_KEY,
             "lgemp-x-app-key": constants.CLIENT_ID,
@@ -338,6 +338,10 @@ class LgThinq extends utils.Adapter {
                     this.log.error(error);
                     if (error.response && error.response.data) {
                         this.log.error(JSON.stringify(error.response.data));
+                    }
+                    if (error.response && error.response.status === 403) {
+                        this.log.info("Try to refresh Token");
+                        this.refreshNewToken();
                     }
                     return;
                 });

@@ -134,7 +134,7 @@ class LgThinq extends utils.Adapter {
                     this.log.error(err);
                     return;
                 }
-
+                this.log(JSON.stringify(err.response.data));
                 const { code, message } = err.response.data.error;
                 if (code === "MS.001.03") {
                     this.log.error("Double-check your country in configuration");
@@ -148,10 +148,7 @@ class LgThinq extends utils.Adapter {
         const empSearchKeyUrl = this.gateway.empSpxUri + "/" + "searchKey?key_name=OAUTH_SECRETKEY&sever_type=OP";
         const secretKey = await this.requestClient
             .get(empSearchKeyUrl)
-            .then((res) => {
-                this.log.debug(JSON.stringify(res.data));
-                return res.data;
-            })
+            .then((res) =>  res.data)
             .then((data) => data.returnData);
 
         const timestamp = DateTime.utc().toRFC2822();

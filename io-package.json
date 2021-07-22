@@ -79,7 +79,7 @@
         "interval": 5,
         "country": "DE",
         "language": "de_DE",
-        "thinq1": true,
+        "thinq1": false,
         "platform": "LGThinQ"
     },
     "objects": [],

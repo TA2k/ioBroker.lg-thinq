@@ -60,7 +60,13 @@ class LgThinq extends utils.Adapter {
             "x-message-id": this.random_string(22),
         };
 
-        this.gateway = await this.requestClient.get(constants.GATEWAY_URL, { headers: this.defaultHeaders }).then((res) => res.data.result).catch((error)=>this.log.error(error));
+        this.gateway = await this.requestClient
+            .get(constants.GATEWAY_URL, { headers: this.defaultHeaders })
+            .then((res) => res.data.result)
+            .catch((error) => {
+                this.log.error(error);
+                return;
+            });
         this.lgeapi_url = `https://${this.gateway.countryCode.toLowerCase()}.lgeapi.com/`;
         this.session = await this.login(this.config.user, this.config.password);
         if (this.session.accessToken) {

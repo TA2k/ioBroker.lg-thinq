@@ -100,7 +100,9 @@ class LgThinq extends utils.Adapter {
                 });
                 this.log.debug(JSON.stringify(listDevices));
                 this.updateInterval = setInterval(async () => {
-                    const listDevices = await this.getListDevices();
+                    const listDevices = await this.getListDevices().catch((error) => {
+                        this.log.error(error);
+                    });
 
                     listDevices.forEach(async (element) => {
                         this.extractKeys(this, element.deviceId, element);
@@ -230,6 +232,7 @@ class LgThinq extends utils.Adapter {
     }
 
     async refreshNewToken(session) {
+        this.log.debug("refreshToken");
         const tokenUrl = this.lgeapi_url + "oauth2/token";
         const data = {
             grant_type: "refresh_token",
@@ -249,6 +252,7 @@ class LgThinq extends utils.Adapter {
             "Content-Type": "application/x-www-form-urlencoded",
         };
         const resp = await this.requestClient.post(tokenUrl, qs.stringify(data), { headers }).then((resp) => resp.data);
+        this.log.debug(JSON.stringify(resp));
         if (this.session) {
             this.session.access_token = resp.access_token;
             this.defaultHeaders["x-emp-token"] = this.session.accessToken;
@@ -317,20 +321,24 @@ class LgThinq extends utils.Adapter {
     }
 
     async getListDevices() {
-        const homes = await this.getListHomes();
-        this.extractKeys(this, "homes", homes);
-
+        if (!this.homes) {
+            this.homes = await this.getListHomes();
+            this.extractKeys(this, "homes", this.homes);
+        }
         const headers = this.defaultHeaders;
         const devices = [];
 
         // get all devices in home
-        for (let i = 0; i < homes.length; i++) {
-            const homeUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/homes/" + homes[i].homeId);
+        for (let i = 0; i < this.homes.length; i++) {
+            const homeUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/homes/" + this.homes[i].homeId);
             const resp = await this.requestClient
                 .get(homeUrl, { headers })
                 .then((res) => res.data)
                 .catch((error) => {
                     this.log.error(error);
+                    if (error.response && error.response.data) {
+                        this.log.error(JSON.stringify(error.response.data));
+                    }
                     return;
                 });
             if (resp) {

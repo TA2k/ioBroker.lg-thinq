@@ -66,7 +66,7 @@ class LgThinq extends utils.Adapter {
             .catch((error) => {
                 this.log.error(error);
             });
-        this.log.info(this.gateway)
+        this.log.info(JSON.stringify(this.gateway));
         if (this.gateway) {
             this.lgeapi_url = `https://${this.gateway.countryCode.toLowerCase()}.lgeapi.com/`;
 

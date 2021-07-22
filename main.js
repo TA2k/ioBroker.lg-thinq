@@ -149,11 +149,11 @@ class LgThinq extends utils.Adapter {
         const secretKey = await this.requestClient
             .get(empSearchKeyUrl)
             .then((res) => {
-                this.log.debug(JSON.stringify(res));
+                this.log.debug(JSON.stringify(res.data));
                 return res.data;
             })
             .then((data) => data.returnData);
-        
+
         const timestamp = DateTime.utc().toRFC2822();
         const empData = {
             account_type: res.account.userIDType,

@@ -66,14 +66,14 @@ class LgThinq extends utils.Adapter {
             .catch((error) => {
                 this.log.error(error);
             });
-        this.log.info(JSON.stringify(this.gateway));
         if (this.gateway) {
             this.lgeapi_url = `https://${this.gateway.countryCode.toLowerCase()}.lgeapi.com/`;
 
             this.session = await this.login(this.config.user, this.config.password).catch((error) => {
                 this.log.error(error);
             });
-            if (this.session.accessToken) {
+            if (this.session && this.session.accessToken) {
+                this.log.debug(this.session);
                 this.setState("info.connection", false, true);
                 this.refreshTokenInterval = setInterval(() => {
                     this.refreshNewToken(this.session);
@@ -148,9 +148,12 @@ class LgThinq extends utils.Adapter {
         const empSearchKeyUrl = this.gateway.empSpxUri + "/" + "searchKey?key_name=OAUTH_SECRETKEY&sever_type=OP";
         const secretKey = await this.requestClient
             .get(empSearchKeyUrl)
-            .then((res) => res.data)
+            .then((res) => {
+                this.log.debug(JSON.stringify(res));
+                return res.data;
+            })
             .then((data) => data.returnData);
-
+        
         const timestamp = DateTime.utc().toRFC2822();
         const empData = {
             account_type: res.account.userIDType,

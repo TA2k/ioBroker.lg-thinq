@@ -15,6 +15,10 @@
 
 Adapter for LG ThinQ
 
+###You can finde the values for a device under:
+###lg-thinq.0.xxxxxx-device-id-xxxx-xxxxxxxx.snapshot
+
+
 ## Changelog
 
 ### 0.0.1

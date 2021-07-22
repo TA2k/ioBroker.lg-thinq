@@ -60,7 +60,7 @@ class LgThinq extends utils.Adapter {
             "x-message-id": this.random_string(22),
         };
 
-        this.gateway = await this.requestClient.get(constants.GATEWAY_URL, { headers: this.defaultHeaders }).then((res) => res.data.result);
+        this.gateway = await this.requestClient.get(constants.GATEWAY_URL, { headers: this.defaultHeaders }).then((res) => res.data.result).catch((error)=>this.log.error(error));
         this.lgeapi_url = `https://${this.gateway.countryCode.toLowerCase()}.lgeapi.com/`;
         this.session = await this.login(this.config.user, this.config.password);
         if (this.session.accessToken) {
@@ -81,7 +81,7 @@ class LgThinq extends utils.Adapter {
                     },
                     native: {},
                 });
-                this.extractKeys(this, element.alias, element);
+                this.extractKeys(this, element.deviceId, element);
             });
             this.log.debug(JSON.stringify(listDevices));
         }

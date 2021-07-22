@@ -38,8 +38,10 @@ class LgThinq extends utils.Adapter {
             this.log.info("Set interval to minimum 0.5");
             this.config.interval = 0.5;
         }
+        // @ts-ignore
         this.requestClient = axios.create();
-
+        this.updateInterval = null;
+        this.session = {};
         this.extractKeys = extractKeys;
         this.defaultHeaders = {
             "x-api-key": constants.API_KEY,
@@ -73,8 +75,9 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
             });
             if (this.session && this.session.accessToken) {
-                this.log.debug(this.session);
-                this.setState("info.connection", false, true);
+                this.log.debug(JSON.stringify(this.session));
+                this.setState("info.connection", true, true);
+                this.log.info("Login successful");
                 this.refreshTokenInterval = setInterval(() => {
                     this.refreshNewToken(this.session);
                 }, this.session.expiresIn * 1000);
@@ -82,6 +85,8 @@ class LgThinq extends utils.Adapter {
                 this.defaultHeaders["x-user-no"] = this.userNumber;
                 this.defaultHeaders["x-emp-token"] = this.session.accessToken;
                 const listDevices = await this.getListDevices();
+
+                this.log.info("Found: " + listDevices.length + " devices");
                 listDevices.forEach(async (element) => {
                     await this.setObjectNotExistsAsync(element.deviceId, {
                         type: "device",
@@ -94,6 +99,14 @@ class LgThinq extends utils.Adapter {
                     this.extractKeys(this, element.deviceId, element);
                 });
                 this.log.debug(JSON.stringify(listDevices));
+                this.updateInterval = setInterval(async () => {
+                    const listDevices = await this.getListDevices();
+
+                    listDevices.forEach(async (element) => {
+                        this.extractKeys(this, element.deviceId, element);
+                    });
+                    this.log.debug(JSON.stringify(listDevices));
+                }, this.config.interval * 60 * 1000);
             }
         }
     }
@@ -139,8 +152,6 @@ class LgThinq extends utils.Adapter {
                 if (code === "MS.001.03") {
                     this.log.error("Double-check your country in configuration");
                 }
-
-                this.log.error(message);
                 return;
             });
 
@@ -238,9 +249,10 @@ class LgThinq extends utils.Adapter {
             "Content-Type": "application/x-www-form-urlencoded",
         };
         const resp = await this.requestClient.post(tokenUrl, qs.stringify(data), { headers }).then((resp) => resp.data);
-
-        this.session.access_token = resp.access_token;
-        this.defaultHeaders["x-emp-token"] = this.session.accessToken;
+        if (this.session) {
+            this.session.access_token = resp.access_token;
+            this.defaultHeaders["x-emp-token"] = this.session.accessToken;
+        }
     }
 
     async getUserNumber(accessToken) {
@@ -301,27 +313,32 @@ class LgThinq extends utils.Adapter {
         const headers = this.defaultHeaders;
         const deviceUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + device_id);
 
-        return requestClient.get(deviceUrl, { headers }).then((res) => res.data.result);
+        return this.requestClient.get(deviceUrl, { headers }).then((res) => res.data.result);
     }
 
     async getListDevices() {
         const homes = await this.getListHomes();
+        this.extractKeys(this, "homes", homes);
+
         const headers = this.defaultHeaders;
         const devices = [];
 
         // get all devices in home
         for (let i = 0; i < homes.length; i++) {
             const homeUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/homes/" + homes[i].homeId);
-            const resp = await this.requestClient.get(homeUrl, { headers }).then((res) => res.data);
-
-            devices.push(...resp.result.devices);
+            const resp = await this.requestClient
+                .get(homeUrl, { headers })
+                .then((res) => res.data)
+                .catch((error) => {
+                    this.log.error(error);
+                    return;
+                });
+            if (resp) {
+                devices.push(...resp.result.devices);
+            }
         }
 
         return devices;
-    }
-
-    async getDeviceModelInfo(device) {
-        return await this.requestClient.get(device.modelJsonUri).then((res) => res.data);
     }
 
     async getListHomes() {
@@ -340,7 +357,7 @@ class LgThinq extends utils.Adapter {
     async sendCommandToDevice(device_id, values) {
         const headers = this.defaultHeaders;
         const controlUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + device_id + "/control-sync");
-        return requestClient
+        return this.requestClient
             .post(
                 controlUrl,
                 {
@@ -353,71 +370,14 @@ class LgThinq extends utils.Adapter {
             .then((resp) => resp.data);
     }
 
-    async sendMonitorCommand(deviceId, cmdOpt, workId) {
-        const headers = this.monitorHeaders;
-        const data = {
-            cmd: "Mon",
-            cmdOpt,
-            deviceId,
-            workId,
-        };
-        return await this.requestClient
-            .post(this.gateway.thinq1Uri + "/" + "rti/rtiMon", { lgedmRoot: data }, { headers })
-            .then((res) => res.data.lgedmRoot)
-            .then((data) => {
-                if ("returnCd" in data) {
-                    const code = data.returnCd;
-                    if (code === "0106") {
-                        throw new NotConnectedError(data.returnMsg || "");
-                    } else if (code !== "0000") {
-                        throw new TokenError(code + " - " + data.returnMsg || "");
-                    }
-                }
-
-                return data;
-            });
-    }
-
-    async getMonitorResult(device_id, work_id) {
-        const headers = this.monitorHeaders;
-        const workList = [{ deviceId: device_id, workId: work_id }];
-        return await this.requestClient
-            .post(this.gateway.thinq1Uri + "/" + "rti/rtiResult", { lgedmRoot: { workList } }, { headers })
-            .then((resp) => resp.data.lgedmRoot)
-            .then((data) => {
-                if ("returnCd" in data) {
-                    const code = data.returnCd;
-                    if (code === "0106") {
-                        throw new NotConnectedError(data.returnMsg || "");
-                    } else if (code !== "0000") {
-                        throw new TokenError(code + " - " + data.returnMsg || "");
-                    }
-                }
-
-                const workList = data.workList;
-                if (workList.returnCode !== "0000") {
-                    throw new MonitorError(data);
-                }
-
-                if (!("returnData" in workList)) {
-                    return null;
-                }
-
-                return Buffer.from(workList.returnData, "base64");
-            });
-    }
-
     /**
      * Is called when adapter shuts down - callback has to be called under any circumstances!
      * @param {() => void} callback
      */
     onUnload(callback) {
         try {
-            // Here you must clear all timeouts or intervals that may still be active
-            // clearTimeout(timeout1);
-            // clearTimeout(timeout2);
-            // ...
-            // clearInterval(interval1);
+            clearInterval(this.updateInterval);
+            clearInterval(this.refreshTokenInterval);
 
             callback();
         } catch (e) {

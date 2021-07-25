@@ -98,7 +98,7 @@ class LgThinq extends utils.Adapter {
                         },
                         native: {},
                     });
-                    this.extractKeys(this, element.deviceId, element);
+                    this.extractKeys(this, element.deviceId, element, null, false, true);
                     this.getDeviceModelInfo(element);
                 });
                 this.log.debug(JSON.stringify(listDevices));
@@ -404,8 +404,51 @@ class LgThinq extends utils.Adapter {
                             type: "boolean",
                             role: "boolean",
                             write: true,
+                            read: true,
                         },
                         native: {},
+                    });
+                });
+            }
+
+            if (deviceModel["MonitoringValue"]) {
+                let type = "";
+                Object.keys(device["snapshot"]).forEach((subElement) => {
+                    if (subElement !== "meta" && subElement !== "static" && typeof device["snapshot"][subElement] === "object") {
+                        type = subElement;
+                    }
+                });
+                const path = device.deviceId + ".snapshot." + type + ".";
+                Object.keys(deviceModel["MonitoringValue"]).forEach((state) => {
+                    this.getObject(path + state, async (err, obj) => {
+                        if (obj) {
+                            const common = obj.common;
+                            common.states = {};
+                            if (deviceModel["MonitoringValue"][state]["valueMapping"]) {
+                                if (deviceModel["MonitoringValue"][state]["valueMapping"].max) {
+                                    common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
+                                    common.max = deviceModel["MonitoringValue"][state]["valueMapping"].max;
+                                } else {
+                                    const values = Object.keys(deviceModel["MonitoringValue"][state]["valueMapping"]);
+                                    values.forEach((value) => {
+                                        common.states[value] = value;
+                                    });
+                                }
+                            }
+                            // @ts-ignore
+                            await this.setObjectNotExistsAsync(path + state, {
+                                type: "state",
+                                common: common,
+                                native: {},
+                            }).catch((error) => {
+                                this.log.error(error);
+                            });
+
+                            // @ts-ignore
+                            this.extendObject(path + state, {
+                                common: common,
+                            });
+                        }
                     });
                 });
             }

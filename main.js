@@ -25,7 +25,7 @@ class LgThinq extends utils.Adapter {
             name: "lg-thinq",
         });
         this.on("ready", this.onReady.bind(this));
-        // this.on("stateChange", this.onStateChange.bind(this));
+        this.on("stateChange", this.onStateChange.bind(this));
         this.on("unload", this.onUnload.bind(this));
     }
 
@@ -42,7 +42,9 @@ class LgThinq extends utils.Adapter {
         this.requestClient = axios.create();
         this.updateInterval = null;
         this.session = {};
+        this.deviceControls = {};
         this.extractKeys = extractKeys;
+        this.subscribeStates("*");
         this.defaultHeaders = {
             "x-api-key": constants.API_KEY,
             "x-client-id": constants.API_CLIENT_ID,
@@ -97,6 +99,7 @@ class LgThinq extends utils.Adapter {
                         native: {},
                     });
                     this.extractKeys(this, element.deviceId, element);
+                    this.getDeviceModelInfo(element);
                 });
                 this.log.debug(JSON.stringify(listDevices));
                 this.updateInterval = setInterval(async () => {
@@ -313,9 +316,9 @@ class LgThinq extends utils.Adapter {
         const url = new URL(to, from);
         return url.href;
     }
-    async getDeviceInfo(device_id) {
+    async getDeviceInfo(deviceId) {
         const headers = this.defaultHeaders;
-        const deviceUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + device_id);
+        const deviceUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + deviceId);
 
         return this.requestClient.get(deviceUrl, { headers }).then((res) => res.data.result);
     }
@@ -339,7 +342,7 @@ class LgThinq extends utils.Adapter {
                     if (error.response && error.response.data) {
                         this.log.error(JSON.stringify(error.response.data));
                     }
-                    if (error.response && error.response.status === 403) {
+                    if (error.response && error.response.status === 400) {
                         this.log.info("Try to refresh Token");
                         this.refreshNewToken();
                     }
@@ -365,10 +368,52 @@ class LgThinq extends utils.Adapter {
 
         return this._homes;
     }
-
-    async sendCommandToDevice(device_id, values) {
+    async getDeviceModelInfo(device) {
+        const deviceModel = await this.requestClient
+            .get(device.modelJsonUri)
+            .then((res) => res.data)
+            .catch((error) => {
+                this.log.error(error);
+                return;
+            });
+        if (deviceModel) {
+            await this.setObjectNotExistsAsync(device.deviceId + ".remote", {
+                type: "channel",
+                common: {
+                    name: "remote control device",
+                    role: "indicator",
+                },
+                native: {},
+            });
+            if (deviceModel["ControlWifi"]) {
+                this.deviceControls[device.deviceId] = deviceModel["ControlWifi"];
+                const controlId = deviceModel["Info"].productType + "Control";
+                await this.setObjectNotExistsAsync(device.deviceId + ".remote", {
+                    type: "channel",
+                    common: {
+                        name: "remote control device",
+                        role: "indicator",
+                    },
+                    native: {},
+                });
+                Object.keys(deviceModel["ControlWifi"]).forEach((control) => {
+                    this.setObjectNotExists(device.deviceId + ".remote." + control, {
+                        type: "state",
+                        common: {
+                            name: control,
+                            type: "boolean",
+                            role: "boolean",
+                            write: true,
+                        },
+                        native: {},
+                    });
+                });
+            }
+        }
+    }
+    async sendCommandToDevice(deviceId, values) {
         const headers = this.defaultHeaders;
-        const controlUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + device_id + "/control-sync");
+        const controlUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + deviceId + "/control-sync");
         return this.requestClient
             .post(
                 controlUrl,
@@ -379,7 +424,10 @@ class LgThinq extends utils.Adapter {
                 },
                 { headers }
             )
-            .then((resp) => resp.data);
+            .then((resp) => resp.data)
+            .catch((error) => {
+                this.log.error(error);
+            });
     }
 
     /**
@@ -402,13 +450,28 @@ class LgThinq extends utils.Adapter {
      * @param {string} id
      * @param {ioBroker.State | null | undefined} state
      */
-    onStateChange(id, state) {
+    async onStateChange(id, state) {
         if (state) {
-            // The state was changed
-            this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-        } else {
-            // The state was deleted
-            this.log.info(`state ${id} deleted`);
+            if (!state.ack) {
+                if (id.indexOf(".remote.") !== -1 && state.val) {
+                    const deviceId = id.split(".")[2];
+                    const action = id.split(".")[4];
+                    const rawData = this.deviceControls[deviceId][action];
+                    const data = { ctrlKey: action, command: rawData.command, dataSetList: rawData.data };
+                    data.ctrlKey = action;
+                    if (action === "WMStop" || action === "WMOff") {
+                        data.ctrlKey = "WMControl";
+                    }
+                    this.log.debug(JSON.stringify(data));
+                    const response = await this.sendCommandToDevice(deviceId, data);
+                    this.log.debug(JSON.stringify(response));
+                    if (response && response.resultCode !== "0000") {
+                        this.log.error("Command not succesful");
+                        this.log.error(JSON.stringify(response));
+                    }
+                } else {
+                }
+            }
         }
     }
 }

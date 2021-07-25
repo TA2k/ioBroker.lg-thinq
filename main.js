@@ -369,6 +369,9 @@ class LgThinq extends utils.Adapter {
         return this._homes;
     }
     async getDeviceModelInfo(device) {
+        if (!device.modelJsonUri) {
+            return;
+        }
         const deviceModel = await this.requestClient
             .get(device.modelJsonUri)
             .then((res) => res.data)
@@ -496,12 +499,12 @@ class LgThinq extends utils.Adapter {
     async onStateChange(id, state) {
         if (state) {
             if (!state.ack) {
+                const deviceId = id.split(".")[2];
                 if (id.indexOf(".remote.") !== -1 && state.val) {
-                    const deviceId = id.split(".")[2];
                     const action = id.split(".")[4];
                     const rawData = this.deviceControls[deviceId][action];
                     const data = { ctrlKey: action, command: rawData.command, dataSetList: rawData.data };
-                    data.ctrlKey = action;
+
                     if (action === "WMStop" || action === "WMOff") {
                         data.ctrlKey = "WMControl";
                     }
@@ -513,6 +516,19 @@ class LgThinq extends utils.Adapter {
                         this.log.error(JSON.stringify(response));
                     }
                 } else {
+                    const object = await this.getObjectAsync(id);
+                    const name = object.common.name;
+                    const data = { ctrlKey: "basicCtrl", command: "Set", dataKey: name, dataValue: state.val };
+                    if (name.indexOf(".operation") !== -1) {
+                        data.command = "Operation";
+                    }
+                    this.log.debug(JSON.stringify(data));
+                    const response = await this.sendCommandToDevice(deviceId, data);
+                    this.log.debug(JSON.stringify(response));
+                    if (response && response.resultCode !== "0000") {
+                        this.log.error("Command not succesful");
+                        this.log.error(JSON.stringify(response));
+                    }
                 }
             }
         }

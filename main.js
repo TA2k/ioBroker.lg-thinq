@@ -105,7 +105,9 @@ class LgThinq extends utils.Adapter {
                     });
                     this.extractKeys(this, element.deviceId, element, null, false, true);
                     this.modelInfos[element.deviceId] = await this.getDeviceModelInfo(element);
-                    this.pollMonitor(element);
+                    await this.pollMonitor(element);
+                    await this.sleep(2000)
+                    this.extractValues(element);
                 });
 
                 this.log.debug(JSON.stringify(listDevices));
@@ -249,12 +251,13 @@ class LgThinq extends utils.Adapter {
                 if (!(device.deviceId in this.workIds)) {
                     this.log.debug(device.deviceId + " is connecting");
                     await this.startMonitor(device);
+                    await this.sleep(2000)
                 }
                 result = await this.getMonitorResult(device.deviceId, this.workIds[device.deviceId]);
                 if (result && typeof result === "object") {
                     const resultConverted = this.decodeMonitorBinary(result, this.modelInfos[device.deviceId].Monitoring.protocol);
                     this.log.debug(JSON.stringify(resultConverted));
-                    extractKeys(this, device.deviceId + ".snapshot", resultConverted);
+                    await extractKeys(this, device.deviceId + ".snapshot", resultConverted);
                     return resultConverted;
                 } else {
                     this.log.debug("No data:" + JSON.stringify(result));
@@ -401,7 +404,7 @@ class LgThinq extends utils.Adapter {
                         this.log.error(code + " - " + data.returnMsg || "");
                     }
                 }
-
+                this.log.debug(JSON.stringify(data))
                 return data;
             });
     }
@@ -431,8 +434,8 @@ class LgThinq extends utils.Adapter {
                 this.log.debug(JSON.stringify(data));
                 const workList = data.workList;
                 if (!workList || workList.returnCode !== "0000") {
-                    this.log.error(JSON.stringify(data));
-                    return data.returnCode;
+                    this.log.debug(JSON.stringify(data));
+                    return null;
                 }
 
                 if (!("returnData" in workList)) {
@@ -562,93 +565,99 @@ class LgThinq extends utils.Adapter {
                 });
             }
 
-            if (deviceModel["MonitoringValue"] || deviceModel["Value"]) {
-                let type = "";
-                if (device["snapshot"]) {
-                    Object.keys(device["snapshot"]).forEach((subElement) => {
-                        if (subElement !== "meta" && subElement !== "static" && typeof device["snapshot"][subElement] === "object") {
-                            type = subElement;
-                        }
-                    });
-                }
-                let path = device.deviceId + ".snapshot.";
-                if (type) {
-                    path = path + type + ".";
-                }
-
-                deviceModel["MonitoringValue"] &&
-                    Object.keys(deviceModel["MonitoringValue"]).forEach((state) => {
-                        this.getObject(path + state, async (err, obj) => {
-                            if (obj) {
-                                const common = obj.common;
-                                common.states = {};
-                                if (deviceModel["MonitoringValue"][state]["valueMapping"]) {
-                                    if (deviceModel["MonitoringValue"][state]["valueMapping"].max) {
-                                        common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
-                                        common.max = deviceModel["MonitoringValue"][state]["valueMapping"].max;
-                                    } else {
-                                        const values = Object.keys(deviceModel["MonitoringValue"][state]["valueMapping"]);
-                                        values.forEach((value) => {
-                                            common.states[value] = value;
-                                        });
-                                    }
-                                }
-                                // @ts-ignore
-                                await this.setObjectNotExistsAsync(path + state, {
-                                    type: "state",
-                                    common: common,
-                                    native: {},
-                                }).catch((error) => {
-                                    this.log.error(error);
-                                });
-
-                                // @ts-ignore
-                                this.extendObject(path + state, {
-                                    common: common,
-                                });
-                            }
-                        });
-                    });
-                deviceModel["Value"] &&
-                    Object.keys(deviceModel["Value"]).forEach((state) => {
-                        this.getObject(path + state, async (err, obj) => {
-                            if (obj) {
-                                const common = obj.common;
-                                common.states = {};
-                                if (deviceModel["Value"][state]["option"]) {
-                                    if (deviceModel["Value"][state]["option"].max) {
-                                        common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
-                                        common.max = deviceModel["Value"][state]["option"].max;
-                                    } else {
-                                        const values = Object.keys(deviceModel["Value"][state]["option"]);
-                                        values.forEach((value) => {
-                                            let content = deviceModel["Value"][state]["option"][value];
-                                            if (typeof content === "string") {
-                                                common.states[value] = content.replace("@", "");
-                                            }
-                                        });
-                                    }
-                                }
-                                // @ts-ignore
-                                await this.setObjectNotExistsAsync(path + state, {
-                                    type: "state",
-                                    common: common,
-                                    native: {},
-                                }).catch((error) => {
-                                    this.log.error(error);
-                                });
-
-                                // @ts-ignore
-                                this.extendObject(path + state, {
-                                    common: common,
-                                });
-                            }
-                        });
-                    });
-            }
+     
         }
         return deviceModel;
     }
+    extractValues(device) {
+        const deviceModel = this.modelInfos[device.deviceId] 
+        if (deviceModel["MonitoringValue"] || deviceModel["Value"]) {
+            this.log.debug("extract values from model")
+            let type = "";
+            if (device["snapshot"]) {
+                Object.keys(device["snapshot"]).forEach((subElement) => {
+                    if (subElement !== "meta" && subElement !== "static" && typeof device["snapshot"][subElement] === "object") {
+                        type = subElement;
+                    }
+                });
+            }
+            let path = device.deviceId + ".snapshot.";
+            if (type) {
+                path = path + type + ".";
+            }
+
+            deviceModel["MonitoringValue"] &&
+                Object.keys(deviceModel["MonitoringValue"]).forEach((state) => {
+                    this.getObject(path + state, async (err, obj) => {
+                        if (obj) {
+                            const common = obj.common;
+                            common.states = {};
+                            if (deviceModel["MonitoringValue"][state]["valueMapping"]) {
+                                if (deviceModel["MonitoringValue"][state]["valueMapping"].max) {
+                                    common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
+                                    common.max = deviceModel["MonitoringValue"][state]["valueMapping"].max;
+                                } else {
+                                    const values = Object.keys(deviceModel["MonitoringValue"][state]["valueMapping"]);
+                                    values.forEach((value) => {
+                                        common.states[value] = value;
+                                    });
+                                }
+                            }
+                            // @ts-ignore
+                            await this.setObjectNotExistsAsync(path + state, {
+                                type: "state",
+                                common: common,
+                                native: {},
+                            }).catch((error) => {
+                                this.log.error(error);
+                            });
+
+                            // @ts-ignore
+                            this.extendObject(path + state, {
+                                common: common,
+                            });
+                        }
+                    });
+                });
+            deviceModel["Value"] &&
+                Object.keys(deviceModel["Value"]).forEach((state) => {
+                    this.getObject(path + state, async (err, obj) => {
+                        if (obj) {
+                            const common = obj.common;
+                            common.states = {};
+                            if (deviceModel["Value"][state]["option"]) {
+                                if (deviceModel["Value"][state]["option"].max) {
+                                    common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
+                                    common.max = deviceModel["Value"][state]["option"].max;
+                                } else {
+                                    const values = Object.keys(deviceModel["Value"][state]["option"]);
+                                    values.forEach((value) => {
+                                        let content = deviceModel["Value"][state]["option"][value];
+                                        if (typeof content === "string") {
+                                            common.states[value] = content.replace("@", "");
+                                        }
+                                    });
+                                }
+                            }
+                            // @ts-ignore
+                            await this.setObjectNotExistsAsync(path + state, {
+                                type: "state",
+                                common: common,
+                                native: {},
+                            }).catch((error) => {
+                                this.log.error(error);
+                            });
+
+                            // @ts-ignore
+                            this.extendObject(path + state, {
+                                common: common,
+                            });
+                        }
+                    });
+                });
+        }
+    }
+
     async sendCommandToDevice(deviceId, values) {
         const headers = this.defaultHeaders;
         const controlUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + deviceId + "/control-sync");
@@ -667,7 +676,9 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
             });
     }
-
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
     /**
      * Is called when adapter shuts down - callback has to be called under any circumstances!
      * @param {() => void} callback

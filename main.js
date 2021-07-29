@@ -217,6 +217,10 @@ class LgThinq extends utils.Adapter {
         this.lgeapi_url = token.oauth2_backend_url || this.lgeapi_url;
 
         // login to old gateway also - thinq v1
+        await this.loginOldGateway(token);
+        return token;
+    }
+    async loginOldGateway(token) {
         const memberLoginUrl = this.gateway.thinq1Uri + "/" + "member/login";
         const memberLoginHeaders = {
             "x-thinq-application-key": "wideq",
@@ -241,8 +245,8 @@ class LgThinq extends utils.Adapter {
             .then((res) => res.data)
             .then((data) => data.lgedmRoot.jsessionId);
         this.log.debug(this.jsessionId);
-        return token;
     }
+
     async pollMonitor(device) {
         if (device.platformType === "thinq1") {
             this.log.debug("start polling");
@@ -270,13 +274,6 @@ class LgThinq extends utils.Adapter {
     }
     async startMonitor(device) {
         try {
-            // if (!(device.deviceId in this.deviceModel)) {
-            //     this.deviceModel[device.deviceId] = await this.getDeviceModelInfo(device.data).then((modelInfo) => {
-            //         return new DeviceModel(modelInfo);
-            //     });
-            // }
-
-            // device.deviceModel = this.deviceModel[device.deviceId];
 
             if (device.platformType === "thinq1") {
                 this.workIds[device.deviceId] = await this.sendMonitorCommand(device.deviceId, "Start", uuid.v4()).then((data) => data.workId);
@@ -338,6 +335,7 @@ class LgThinq extends utils.Adapter {
             this.session.access_token = resp.access_token;
             this.defaultHeaders["x-emp-token"] = this.session.access_token;
         }
+        await this.loginOldGateway(this.session);
     }
 
     async getUserNumber() {

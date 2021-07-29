@@ -10,6 +10,7 @@
 const utils = require("@iobroker/adapter-core");
 const axios = require("axios");
 const crypto = require("crypto");
+const uuid = require("uuid");
 const qs = require("qs");
 const { DateTime } = require("luxon");
 const { extractKeys } = require("./lib/extractKeys");
@@ -42,9 +43,13 @@ class LgThinq extends utils.Adapter {
         this.requestClient = axios.create();
         this.updateInterval = null;
         this.session = {};
+        this.modelInfos = {};
+        this.auth = {};
+        this.workIds = [];
         this.deviceControls = {};
         this.extractKeys = extractKeys;
         this.subscribeStates("*");
+
         this.defaultHeaders = {
             "x-api-key": constants.API_KEY,
             "x-client-id": constants.API_CLIENT_ID,
@@ -99,8 +104,10 @@ class LgThinq extends utils.Adapter {
                         native: {},
                     });
                     this.extractKeys(this, element.deviceId, element, null, false, true);
-                    this.getDeviceModelInfo(element);
+                    this.modelInfos[element.deviceId] = await this.getDeviceModelInfo(element);
+                    this.pollMonitor(element);
                 });
+
                 this.log.debug(JSON.stringify(listDevices));
                 this.updateInterval = setInterval(async () => {
                     const listDevices = await this.getListDevices().catch((error) => {
@@ -109,6 +116,7 @@ class LgThinq extends utils.Adapter {
 
                     listDevices.forEach(async (element) => {
                         this.extractKeys(this, element.deviceId, element);
+                        this.pollMonitor(element);
                     });
                     this.log.debug(JSON.stringify(listDevices));
                 }, this.config.interval * 60 * 1000);
@@ -230,10 +238,77 @@ class LgThinq extends utils.Adapter {
             )
             .then((res) => res.data)
             .then((data) => data.lgedmRoot.jsessionId);
-
+        this.log.debug(this.jsessionId);
         return token;
     }
+    async pollMonitor(device) {
+        if (device.platformType === "thinq1") {
+            this.log.debug("start polling");
+            let result = new Uint8Array(1024);
+            try {
+                if (!(device.deviceId in this.workIds)) {
+                    this.log.debug(device.deviceId + " is connecting");
+                    await this.startMonitor(device);
+                }
+                result = await this.getMonitorResult(device.deviceId, this.workIds[device.deviceId]);
+                if (result && typeof result === "object") {
+                    const resultConverted = this.decodeMonitorBinary(result, this.modelInfos[device.deviceId].Monitoring.protocol);
+                    this.log.debug(JSON.stringify(resultConverted));
+                    extractKeys(this, device.deviceId + ".snapshot", resultConverted);
+                    return resultConverted;
+                } else {
+                    this.log.debug("No data:" + JSON.stringify(result));
+                }
+                await this.stopMonitor(device);
+            } catch (err) {
+                this.log.error(err);
+            }
+        }
+    }
+    async startMonitor(device) {
+        try {
+            // if (!(device.deviceId in this.deviceModel)) {
+            //     this.deviceModel[device.deviceId] = await this.getDeviceModelInfo(device.data).then((modelInfo) => {
+            //         return new DeviceModel(modelInfo);
+            //     });
+            // }
 
+            // device.deviceModel = this.deviceModel[device.deviceId];
+
+            if (device.platformType === "thinq1") {
+                this.workIds[device.deviceId] = await this.sendMonitorCommand(device.deviceId, "Start", uuid.v4()).then((data) => data.workId);
+            }
+        } catch (err) {
+            this.log.error(err);
+        }
+    }
+
+    async stopMonitor(device) {
+        if (device.platformType === "thinq1" && device.deviceId in this.workIds) {
+            try {
+                await this.sendMonitorCommand(device.deviceId, "Stop", this.workIds[device.deviceId]);
+                delete this.workIds[device.deviceId];
+            } catch (err) {
+                this.log.error(err);
+            }
+        }
+    }
+    decodeMonitorBinary(data, protocol) {
+        const decoded = {};
+
+        for (const item of protocol) {
+            const key = item.value;
+            let value = 0;
+
+            for (let i = item.startByte; i < item.startByte + item.length; i++) {
+                const v = data[i];
+                value = (value << 8) + v;
+                decoded[key] = String(value);
+            }
+        }
+
+        return decoded;
+    }
     async refreshNewToken() {
         this.log.debug("refreshToken");
         const tokenUrl = this.lgeapi_url + "oauth2/token";
@@ -298,6 +373,74 @@ class LgThinq extends utils.Adapter {
         };
 
         return this.gateway.empSpxUri + "/" + "login/signIn" + qs.stringify(params, { addQueryPrefix: true });
+    }
+
+    async sendMonitorCommand(deviceId, cmdOpt, workId) {
+        const headers = {
+            Accept: "application/json",
+            "x-thinq-token": this.session.access_token,
+            "x-thinq-jsessionId": this.jsessionId,
+            "x-thinq-application-key": "wideq",
+            "x-thinq-security-key": "nuts_securitykey",
+        };
+        const data = {
+            cmd: "Mon",
+            cmdOpt,
+            deviceId,
+            workId,
+        };
+        return await this.requestClient
+            .post(this.gateway.thinq1Uri + "/" + "rti/rtiMon", { lgedmRoot: data }, { headers })
+            .then((res) => res.data.lgedmRoot)
+            .then((data) => {
+                if ("returnCd" in data) {
+                    const code = data.returnCd;
+                    if (code === "0106") {
+                        this.log.error(data.returnMsg || "");
+                    } else if (code !== "0000") {
+                        this.log.error(code + " - " + data.returnMsg || "");
+                    }
+                }
+
+                return data;
+            });
+    }
+
+    async getMonitorResult(device_id, work_id) {
+        const headers = {
+            Accept: "application/json",
+            "x-thinq-token": this.session.access_token,
+            "x-thinq-jsessionId": this.jsessionId,
+            "x-thinq-application-key": "wideq",
+            "x-thinq-security-key": "nuts_securitykey",
+        };
+        const workList = [{ deviceId: device_id, workId: work_id }];
+        return await this.requestClient
+            .post(this.gateway.thinq1Uri + "/" + "rti/rtiResult", { lgedmRoot: { workList } }, { headers })
+            .then((resp) => resp.data.lgedmRoot)
+            .then((data) => {
+                if ("returnCd" in data) {
+                    const code = data.returnCd;
+                    if (code === "0106") {
+                        return code;
+                    } else if (code !== "0000") {
+                        this.log.error(code + " - " + data.returnMsg || "");
+                        return code;
+                    }
+                }
+                this.log.debug(JSON.stringify(data));
+                const workList = data.workList;
+                if (!workList || workList.returnCode !== "0000") {
+                    this.log.error(JSON.stringify(data));
+                    return data.returnCode;
+                }
+
+                if (!("returnData" in workList)) {
+                    return null;
+                }
+
+                return Buffer.from(workList.returnData, "base64");
+            });
     }
 
     signature(message, secret) {
@@ -389,7 +532,12 @@ class LgThinq extends utils.Adapter {
                 native: {},
             });
             if (deviceModel["ControlWifi"]) {
-                this.deviceControls[device.deviceId] = deviceModel["ControlWifi"];
+                let controlWifi = deviceModel["ControlWifi"];
+                if ((controlWifi.type = "BINARY(BYTE)")) {
+                    controlWifi = deviceModel["ControlWifi"].action;
+                }
+                this.deviceControls[device.deviceId] = controlWifi;
+
                 const controlId = deviceModel["Info"].productType + "Control";
                 await this.setObjectNotExistsAsync(device.deviceId + ".remote", {
                     type: "channel",
@@ -399,7 +547,7 @@ class LgThinq extends utils.Adapter {
                     },
                     native: {},
                 });
-                Object.keys(deviceModel["ControlWifi"]).forEach((control) => {
+                Object.keys(controlWifi).forEach((control) => {
                     this.setObjectNotExists(device.deviceId + ".remote." + control, {
                         type: "state",
                         common: {
@@ -414,48 +562,92 @@ class LgThinq extends utils.Adapter {
                 });
             }
 
-            if (deviceModel["MonitoringValue"]) {
+            if (deviceModel["MonitoringValue"] || deviceModel["Value"]) {
                 let type = "";
-                Object.keys(device["snapshot"]).forEach((subElement) => {
-                    if (subElement !== "meta" && subElement !== "static" && typeof device["snapshot"][subElement] === "object") {
-                        type = subElement;
-                    }
-                });
-                const path = device.deviceId + ".snapshot." + type + ".";
-                Object.keys(deviceModel["MonitoringValue"]).forEach((state) => {
-                    this.getObject(path + state, async (err, obj) => {
-                        if (obj) {
-                            const common = obj.common;
-                            common.states = {};
-                            if (deviceModel["MonitoringValue"][state]["valueMapping"]) {
-                                if (deviceModel["MonitoringValue"][state]["valueMapping"].max) {
-                                    common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
-                                    common.max = deviceModel["MonitoringValue"][state]["valueMapping"].max;
-                                } else {
-                                    const values = Object.keys(deviceModel["MonitoringValue"][state]["valueMapping"]);
-                                    values.forEach((value) => {
-                                        common.states[value] = value;
-                                    });
-                                }
-                            }
-                            // @ts-ignore
-                            await this.setObjectNotExistsAsync(path + state, {
-                                type: "state",
-                                common: common,
-                                native: {},
-                            }).catch((error) => {
-                                this.log.error(error);
-                            });
-
-                            // @ts-ignore
-                            this.extendObject(path + state, {
-                                common: common,
-                            });
+                if (device["snapshot"]) {
+                    Object.keys(device["snapshot"]).forEach((subElement) => {
+                        if (subElement !== "meta" && subElement !== "static" && typeof device["snapshot"][subElement] === "object") {
+                            type = subElement;
                         }
                     });
-                });
+                }
+                let path = device.deviceId + ".snapshot.";
+                if (type) {
+                    path = path + type + ".";
+                }
+
+                deviceModel["MonitoringValue"] &&
+                    Object.keys(deviceModel["MonitoringValue"]).forEach((state) => {
+                        this.getObject(path + state, async (err, obj) => {
+                            if (obj) {
+                                const common = obj.common;
+                                common.states = {};
+                                if (deviceModel["MonitoringValue"][state]["valueMapping"]) {
+                                    if (deviceModel["MonitoringValue"][state]["valueMapping"].max) {
+                                        common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
+                                        common.max = deviceModel["MonitoringValue"][state]["valueMapping"].max;
+                                    } else {
+                                        const values = Object.keys(deviceModel["MonitoringValue"][state]["valueMapping"]);
+                                        values.forEach((value) => {
+                                            common.states[value] = value;
+                                        });
+                                    }
+                                }
+                                // @ts-ignore
+                                await this.setObjectNotExistsAsync(path + state, {
+                                    type: "state",
+                                    common: common,
+                                    native: {},
+                                }).catch((error) => {
+                                    this.log.error(error);
+                                });
+
+                                // @ts-ignore
+                                this.extendObject(path + state, {
+                                    common: common,
+                                });
+                            }
+                        });
+                    });
+                deviceModel["Value"] &&
+                    Object.keys(deviceModel["Value"]).forEach((state) => {
+                        this.getObject(path + state, async (err, obj) => {
+                            if (obj) {
+                                const common = obj.common;
+                                common.states = {};
+                                if (deviceModel["Value"][state]["option"]) {
+                                    if (deviceModel["Value"][state]["option"].max) {
+                                        common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
+                                        common.max = deviceModel["Value"][state]["option"].max;
+                                    } else {
+                                        const values = Object.keys(deviceModel["Value"][state]["option"]);
+                                        values.forEach((value) => {
+                                            let content = deviceModel["Value"][state]["option"][value];
+                                            if (typeof content === "string") {
+                                                common.states[value] = content.replace("@", "");
+                                            }
+                                        });
+                                    }
+                                }
+                                // @ts-ignore
+                                await this.setObjectNotExistsAsync(path + state, {
+                                    type: "state",
+                                    common: common,
+                                    native: {},
+                                }).catch((error) => {
+                                    this.log.error(error);
+                                });
+
+                                // @ts-ignore
+                                this.extendObject(path + state, {
+                                    common: common,
+                                });
+                            }
+                        });
+                    });
             }
         }
+        return deviceModel;
     }
     async sendCommandToDevice(deviceId, values) {
         const headers = this.defaultHeaders;

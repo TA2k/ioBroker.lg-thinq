@@ -498,7 +498,7 @@ class LgThinq extends utils.Adapter {
             if (deviceModel["ControlWifi"]) {
                 this.log.debug(JSON.stringify(deviceModel["ControlWifi"]));
                 let controlWifi = deviceModel["ControlWifi"];
-                if ((controlWifi.type = "BINARY(BYTE)")) {
+                if (deviceModel["ControlWifi"].action) {
                     controlWifi = deviceModel["ControlWifi"].action;
                 }
                 this.deviceControls[device.deviceId] = controlWifi;

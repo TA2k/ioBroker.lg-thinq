@@ -584,14 +584,18 @@ class LgThinq extends utils.Adapter {
                         if (obj) {
                             const common = obj.common;
                             common.states = {};
-                            if (deviceModel["Value"][state]["option"]) {
-                                if (deviceModel["Value"][state]["option"].max) {
+                            let valueObject = deviceModel["Value"][state]["option"];
+                            if (deviceModel["Value"][state]["value_mapping"]) {
+                                valueObject = deviceModel["Value"][state]["value_mapping"];
+                            }
+                            if (valueObject) {
+                                if (valueObject.max) {
                                     common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
-                                    common.max = deviceModel["Value"][state]["option"].max;
+                                    common.max = valueObject.max;
                                 } else {
-                                    const values = Object.keys(deviceModel["Value"][state]["option"]);
+                                    const values = Object.keys(valueObject);
                                     values.forEach((value) => {
-                                        let content = deviceModel["Value"][state]["option"][value];
+                                        let content = valueObject[value];
                                         if (typeof content === "string") {
                                             common.states[value] = content.replace("@", "");
                                         }

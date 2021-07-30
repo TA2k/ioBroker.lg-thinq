@@ -496,6 +496,7 @@ class LgThinq extends utils.Adapter {
                 native: {},
             });
             if (deviceModel["ControlWifi"]) {
+                this.log.debug(JSON.stringify(deviceModel["ControlWifi"]));
                 let controlWifi = deviceModel["ControlWifi"];
                 if ((controlWifi.type = "BINARY(BYTE)")) {
                     controlWifi = deviceModel["ControlWifi"].action;
@@ -511,19 +512,20 @@ class LgThinq extends utils.Adapter {
                     },
                     native: {},
                 });
-                Object.keys(controlWifi).forEach((control) => {
-                    this.setObjectNotExists(device.deviceId + ".remote." + control, {
-                        type: "state",
-                        common: {
-                            name: control,
-                            type: "boolean",
-                            role: "boolean",
-                            write: true,
-                            read: true,
-                        },
-                        native: {},
+                controlWifi &&
+                    Object.keys(controlWifi).forEach((control) => {
+                        this.setObjectNotExists(device.deviceId + ".remote." + control, {
+                            type: "state",
+                            common: {
+                                name: control,
+                                type: "boolean",
+                                role: "boolean",
+                                write: true,
+                                read: true,
+                            },
+                            native: {},
+                        });
                     });
-                });
             }
         }
         return deviceModel;

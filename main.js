@@ -300,7 +300,12 @@ class LgThinq extends utils.Adapter {
             Accept: "application/json",
             "Content-Type": "application/x-www-form-urlencoded",
         };
-        const resp = await this.requestClient.post(tokenUrl, qs.stringify(data), { headers }).then((resp) => resp.data);
+        const resp = await this.requestClient
+            .post(tokenUrl, qs.stringify(data), { headers })
+            .then((resp) => resp.data)
+            .catch((error) => {
+                this.log.error(error);
+            });
         this.log.debug(JSON.stringify(resp));
         if (this.session) {
             this.session.access_token = resp.access_token;
@@ -325,7 +330,12 @@ class LgThinq extends utils.Adapter {
             "x-lge-oauth-signature": signature,
         };
 
-        const resp = await this.requestClient.get(profileUrl, { headers }).then((resp) => resp.data);
+        const resp = await this.requestClient
+            .get(profileUrl, { headers })
+            .then((resp) => resp.data)
+            .catch((error) => {
+                this.log.error(error);
+            });
         this.extractKeys(this, "general", resp);
         return resp.account.userNo;
     }
@@ -369,6 +379,9 @@ class LgThinq extends utils.Adapter {
                 }
                 this.log.debug(JSON.stringify(data));
                 return data;
+            })
+            .catch((error) => {
+                this.log.error(error);
             });
     }
 
@@ -401,6 +414,9 @@ class LgThinq extends utils.Adapter {
                 }
 
                 return Buffer.from(workList.returnData, "base64");
+            })
+            .catch((error) => {
+                this.log.error(error);
             });
     }
 
@@ -424,7 +440,12 @@ class LgThinq extends utils.Adapter {
         const headers = this.defaultHeaders;
         const deviceUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + deviceId);
 
-        return this.requestClient.get(deviceUrl, { headers }).then((res) => res.data.result);
+        return this.requestClient
+            .get(deviceUrl, { headers })
+            .then((res) => res.data.result)
+            .catch((error) => {
+                this.log.error(error);
+            });
     }
 
     async getListDevices() {
@@ -442,6 +463,7 @@ class LgThinq extends utils.Adapter {
                 .get(homeUrl, { headers })
                 .then((res) => res.data)
                 .catch((error) => {
+                    this.log.debug("Failed to get home");
                     this.log.error(error);
                     if (error.response && error.response.data) {
                         this.log.error(JSON.stringify(error.response.data));
@@ -470,7 +492,10 @@ class LgThinq extends utils.Adapter {
             this._homes = await this.requestClient
                 .get(homesUrl, { headers })
                 .then((res) => res.data)
-                .then((data) => data.result.item);
+                .then((data) => data.result.item)
+                .catch((error) => {
+                    this.log.error(error);
+                });
         }
 
         return this._homes;

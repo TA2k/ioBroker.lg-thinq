@@ -106,7 +106,7 @@ class LgThinq extends utils.Adapter {
                     this.extractKeys(this, element.deviceId, element, null, false, true);
                     this.modelInfos[element.deviceId] = await this.getDeviceModelInfo(element);
                     await this.pollMonitor(element);
-                    await this.sleep(2000)
+                    await this.sleep(2000);
                     this.extractValues(element);
                 });
 
@@ -216,35 +216,7 @@ class LgThinq extends utils.Adapter {
 
         this.lgeapi_url = token.oauth2_backend_url || this.lgeapi_url;
 
-        // login to old gateway also - thinq v1
-        await this.loginOldGateway(token);
         return token;
-    }
-    async loginOldGateway(token) {
-        const memberLoginUrl = this.gateway.thinq1Uri + "/" + "member/login";
-        const memberLoginHeaders = {
-            "x-thinq-application-key": "wideq",
-            "x-thinq-security-key": "nuts_securitykey",
-            Accept: "application/json",
-            "x-thinq-token": token.access_token,
-        };
-        const memberLoginData = {
-            countryCode: this.gateway.countryCode,
-            langCode: this.gateway.languageCode,
-            loginType: "EMP",
-            token: token.access_token,
-        };
-        this.jsessionId = await this.requestClient
-            .post(
-                memberLoginUrl,
-                { lgedmRoot: memberLoginData },
-                {
-                    headers: memberLoginHeaders,
-                }
-            )
-            .then((res) => res.data)
-            .then((data) => data.lgedmRoot.jsessionId);
-        this.log.debug(this.jsessionId);
     }
 
     async pollMonitor(device) {
@@ -255,7 +227,7 @@ class LgThinq extends utils.Adapter {
                 if (!(device.deviceId in this.workIds)) {
                     this.log.debug(device.deviceId + " is connecting");
                     await this.startMonitor(device);
-                    await this.sleep(2000)
+                    await this.sleep(2000);
                 }
                 result = await this.getMonitorResult(device.deviceId, this.workIds[device.deviceId]);
                 if (result && typeof result === "object") {
@@ -274,7 +246,6 @@ class LgThinq extends utils.Adapter {
     }
     async startMonitor(device) {
         try {
-
             if (device.platformType === "thinq1") {
                 this.workIds[device.deviceId] = await this.sendMonitorCommand(device.deviceId, "Start", uuid.v4()).then((data) => data.workId);
             }
@@ -335,7 +306,6 @@ class LgThinq extends utils.Adapter {
             this.session.access_token = resp.access_token;
             this.defaultHeaders["x-emp-token"] = this.session.access_token;
         }
-        await this.loginOldGateway(this.session);
     }
 
     async getUserNumber() {
@@ -377,13 +347,8 @@ class LgThinq extends utils.Adapter {
     }
 
     async sendMonitorCommand(deviceId, cmdOpt, workId) {
-        const headers = {
-            Accept: "application/json",
-            "x-thinq-token": this.session.access_token,
-            "x-thinq-jsessionId": this.jsessionId,
-            "x-thinq-application-key": "wideq",
-            "x-thinq-security-key": "nuts_securitykey",
-        };
+        const headers = Object.assign({}, this.defaultHeaders);
+        headers["x-client-id"] = constants.API1_CLIENT_ID;
         const data = {
             cmd: "Mon",
             cmdOpt,
@@ -402,19 +367,14 @@ class LgThinq extends utils.Adapter {
                         this.log.error(code + " - " + data.returnMsg || "");
                     }
                 }
-                this.log.debug(JSON.stringify(data))
+                this.log.debug(JSON.stringify(data));
                 return data;
             });
     }
 
     async getMonitorResult(device_id, work_id) {
-        const headers = {
-            Accept: "application/json",
-            "x-thinq-token": this.session.access_token,
-            "x-thinq-jsessionId": this.jsessionId,
-            "x-thinq-application-key": "wideq",
-            "x-thinq-security-key": "nuts_securitykey",
-        };
+        const headers = Object.assign({}, this.defaultHeaders);
+        headers["x-client-id"] = constants.API1_CLIENT_ID;
         const workList = [{ deviceId: device_id, workId: work_id }];
         return await this.requestClient
             .post(this.gateway.thinq1Uri + "/" + "rti/rtiResult", { lgedmRoot: { workList } }, { headers })
@@ -492,7 +452,10 @@ class LgThinq extends utils.Adapter {
                     }
                     return;
                 });
+
+            this.log.debug(JSON.stringify(resp));
             if (resp) {
+                this.log.debug(JSON.stringify(resp));
                 devices.push(...resp.result.devices);
             }
         }
@@ -562,15 +525,13 @@ class LgThinq extends utils.Adapter {
                     });
                 });
             }
-
-     
         }
         return deviceModel;
     }
     extractValues(device) {
-        const deviceModel = this.modelInfos[device.deviceId] 
+        const deviceModel = this.modelInfos[device.deviceId];
         if (deviceModel["MonitoringValue"] || deviceModel["Value"]) {
-            this.log.debug("extract values from model")
+            this.log.debug("extract values from model");
             let type = "";
             if (device["snapshot"]) {
                 Object.keys(device["snapshot"]).forEach((subElement) => {
@@ -675,8 +636,8 @@ class LgThinq extends utils.Adapter {
             });
     }
     sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-      }
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
     /**
      * Is called when adapter shuts down - callback has to be called under any circumstances!
      * @param {() => void} callback

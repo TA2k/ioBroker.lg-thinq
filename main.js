@@ -99,7 +99,7 @@ class LgThinq extends utils.Adapter {
                         type: "device",
                         common: {
                             name: element.alias,
-                            role: "indicator",
+                            role: "state",
                         },
                         native: {},
                     });
@@ -112,18 +112,22 @@ class LgThinq extends utils.Adapter {
 
                 this.log.debug(JSON.stringify(listDevices));
                 this.updateInterval = setInterval(async () => {
-                    const listDevices = await this.getListDevices().catch((error) => {
-                        this.log.error(error);
-                    });
-
-                    listDevices.forEach(async (element) => {
-                        this.extractKeys(this, element.deviceId, element);
-                        this.pollMonitor(element);
-                    });
-                    this.log.debug(JSON.stringify(listDevices));
+                    await this.updateDevices();
                 }, this.config.interval * 60 * 1000);
             }
         }
+    }
+
+    async updateDevices() {
+        const listDevices = await this.getListDevices().catch((error) => {
+            this.log.error(error);
+        });
+
+        listDevices.forEach(async (element) => {
+            this.extractKeys(this, element.deviceId, element);
+            this.pollMonitor(element);
+        });
+        this.log.debug(JSON.stringify(listDevices));
     }
 
     async login(username, password) {
@@ -516,7 +520,7 @@ class LgThinq extends utils.Adapter {
                 type: "channel",
                 common: {
                     name: "remote control device",
-                    role: "indicator",
+                    role: "state",
                 },
                 native: {},
             });
@@ -533,7 +537,7 @@ class LgThinq extends utils.Adapter {
                     type: "channel",
                     common: {
                         name: "remote control device",
-                        role: "indicator",
+                        role: "state",
                     },
                     native: {},
                 });
@@ -677,6 +681,7 @@ class LgThinq extends utils.Adapter {
         try {
             clearInterval(this.updateInterval);
             clearInterval(this.refreshTokenInterval);
+            clearTimeout(this.refreshTimeout);
 
             callback();
         } catch (e) {
@@ -701,7 +706,22 @@ class LgThinq extends utils.Adapter {
                     if (action === "WMStop" || action === "WMOff") {
                         data.ctrlKey = "WMControl";
                     }
+
                     this.log.debug(JSON.stringify(data));
+                    if (data.dataSetList) {
+                        const type = Object.keys(data.dataSetList)[0];
+                        if (type) {
+                            for (const dataElement of Object.keys(data.dataSetList[type])) {
+                                if (!dataElement.startsWith("control")) {
+                                    const dataState = await this.getStateAsync(deviceId + ".snapshot." + type + "." + dataElement);
+                                    if (dataState) {
+                                        data.dataSetList[dataElement] = dataState.val;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     const response = await this.sendCommandToDevice(deviceId, data);
                     this.log.debug(JSON.stringify(response));
                     if (response && response.resultCode !== "0000") {
@@ -723,6 +743,9 @@ class LgThinq extends utils.Adapter {
                         this.log.error(JSON.stringify(response));
                     }
                 }
+                this.refreshTimeout = setTimeout(async () => {
+                    await this.updateDevices();
+                }, 10 * 1000);
             }
         }
     }

@@ -231,16 +231,22 @@ class LgThinq extends utils.Adapter {
                 if (!(device.deviceId in this.workIds)) {
                     this.log.debug(device.deviceId + " is connecting");
                     await this.startMonitor(device);
-                    await this.sleep(2000);
+                    await this.sleep(5000);
                 }
                 result = await this.getMonitorResult(device.deviceId, this.workIds[device.deviceId]);
                 if (result && typeof result === "object") {
-                    const resultConverted = this.decodeMonitorBinary(result, this.modelInfos[device.deviceId].Monitoring.protocol);
+                    let resultConverted;
+                    if (this.modelInfos[device.deviceId].Monitoring.type === "BINARY(BYTE)") {
+                        resultConverted = this.decodeMonitorBinary(result, this.modelInfos[device.deviceId].Monitoring.protocol);
+                    }
+                    if (this.modelInfos[device.deviceId].Monitoring.type === "JSON") {
+                        resultConverted = JSON.parse(result.toString("utf-8"));
+                    }
                     this.log.debug(JSON.stringify(resultConverted));
                     await extractKeys(this, device.deviceId + ".snapshot", resultConverted);
                     return resultConverted;
                 } else {
-                    this.log.debug("No data:" + JSON.stringify(result));
+                    this.log.debug("No data:" + JSON.stringify(result) + " " + device.deviceId);
                 }
                 await this.stopMonitor(device);
             } catch (err) {

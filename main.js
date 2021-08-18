@@ -658,19 +658,20 @@ class LgThinq extends utils.Adapter {
         }
     }
 
-    async sendCommandToDevice(deviceId, values) {
+    async sendCommandToDevice(deviceId, values, thinq1) {
         const headers = this.defaultHeaders;
-        const controlUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + deviceId + "/control-sync");
+        let controlUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + deviceId + "/control-sync");
+        let data = {
+            ctrlKey: "basicCtrl",
+            command: "Set",
+            ...values,
+        };
+        if (thinq1) {
+            controlUrl = this.gateway.thinq1Uri + "/" + "rti/rtiControl";
+            data = values;
+        }
         return this.requestClient
-            .post(
-                controlUrl,
-                {
-                    ctrlKey: "basicCtrl",
-                    command: "Set",
-                    ...values,
-                },
-                { headers }
-            )
+            .post(controlUrl, data, { headers })
             .then((resp) => resp.data)
             .catch((error) => {
                 this.log.error(error);
@@ -704,10 +705,10 @@ class LgThinq extends utils.Adapter {
         if (state) {
             if (!state.ack) {
                 const deviceId = id.split(".")[2];
-                if (id.indexOf(".remote.") !== -1 && state.val) {
+                if (id.indexOf(".remote.") !== -1) {
                     const action = id.split(".")[4];
                     const rawData = this.deviceControls[deviceId][action];
-                    const data = { ctrlKey: action, command: rawData.command, dataSetList: rawData.data };
+                    let data = { ctrlKey: action, command: rawData.command, dataSetList: rawData.data };
 
                     if (action === "WMStop" || action === "WMOff") {
                         data.ctrlKey = "WMControl";
@@ -728,7 +729,25 @@ class LgThinq extends utils.Adapter {
                         }
                     }
 
-                    const response = await this.sendCommandToDevice(deviceId, data);
+                    this.log.debug(JSON.stringify(data));
+                    let response;
+                    if (data.command && data.dataSetList) {
+                        response = await this.sendCommandToDevice(deviceId, data);
+                    } else {
+                        rawData.value = rawData.value.replace("{Operation}", state.val ? "Start" : "Stop");
+                        data = {
+                            lgedmRoot: {
+                                deviceId: deviceId,
+                                workId: this.workIds[deviceId],
+                                cmd: rawData.cmd,
+                                cmdOpt: rawData.cmdOpt,
+                                value: rawData.value,
+                                data: "",
+                            },
+                        };
+                        response = await this.sendCommandToDevice(deviceId, data, true);
+                    }
+
                     this.log.debug(JSON.stringify(response));
                     if (response && response.resultCode !== "0000") {
                         this.log.error("Command not succesful");

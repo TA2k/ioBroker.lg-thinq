@@ -49,6 +49,7 @@ class LgThinq extends utils.Adapter {
         this.deviceControls = {};
         this.extractKeys = extractKeys;
         this.subscribeStates("*");
+        this.targetKeys = {};
 
         this.defaultHeaders = {
             "x-api-key": constants.API_KEY,
@@ -347,6 +348,7 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
             });
         this.extractKeys(this, "general", resp);
+        this.log.debug(JSON.stringify(resp));
         return resp.account.userNo;
     }
 
@@ -585,34 +587,53 @@ class LgThinq extends utils.Adapter {
             deviceModel["MonitoringValue"] &&
                 Object.keys(deviceModel["MonitoringValue"]).forEach((state) => {
                     this.getObject(path + state, async (err, obj) => {
+                        let common = {
+                            name: state,
+                            type: "mixed",
+                            write: false,
+                            read: true,
+                        };
                         if (obj) {
-                            const common = obj.common;
-                            common.states = {};
-                            if (deviceModel["MonitoringValue"][state]["valueMapping"]) {
-                                if (deviceModel["MonitoringValue"][state]["valueMapping"].max) {
-                                    common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
-                                    common.max = deviceModel["MonitoringValue"][state]["valueMapping"].max;
-                                } else {
-                                    const values = Object.keys(deviceModel["MonitoringValue"][state]["valueMapping"]);
-                                    values.forEach((value) => {
-                                        common.states[value] = value;
-                                    });
-                                }
-                            }
-                            // @ts-ignore
-                            await this.setObjectNotExistsAsync(path + state, {
-                                type: "state",
-                                common: common,
-                                native: {},
-                            }).catch((error) => {
-                                this.log.error(error);
-                            });
-
-                            // @ts-ignore
-                            this.extendObject(path + state, {
-                                common: common,
+                            common = obj.common;
+                        }
+                        common.states = {};
+                        if (deviceModel["MonitoringValue"][state]["targetKey"]) {
+                            this.targetKeys[state] = [];
+                            const firstKeyName = Object.keys(deviceModel["MonitoringValue"][state]["targetKey"])[0];
+                            const firstObject = deviceModel["MonitoringValue"][state]["targetKey"][firstKeyName];
+                            Object.keys(firstObject).forEach((targetKey) => {
+                                this.targetKeys[state].push(firstObject[targetKey]);
                             });
                         }
+                        if (deviceModel["MonitoringValue"][state]["valueMapping"]) {
+                            if (deviceModel["MonitoringValue"][state]["valueMapping"].max) {
+                                common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
+                                common.max = deviceModel["MonitoringValue"][state]["valueMapping"].max;
+                            } else {
+                                const values = Object.keys(deviceModel["MonitoringValue"][state]["valueMapping"]);
+                                values.forEach((value) => {
+                                    if (deviceModel["MonitoringValue"][state]["valueMapping"][value].label) {
+                                        const valueMap = deviceModel["MonitoringValue"][state]["valueMapping"][value];
+                                        common.states[valueMap.index] = valueMap.label;
+                                    } else {
+                                        common.states[value] = value;
+                                    }
+                                });
+                            }
+                        }
+                        // @ts-ignore
+                        await this.setObjectNotExistsAsync(path + state, {
+                            type: "state",
+                            common: common,
+                            native: {},
+                        }).catch((error) => {
+                            this.log.error(error);
+                        });
+
+                        // @ts-ignore
+                        this.extendObject(path + state, {
+                            common: common,
+                        });
                     });
                 });
             deviceModel["Value"] &&
@@ -771,6 +792,14 @@ class LgThinq extends utils.Adapter {
                 this.refreshTimeout = setTimeout(async () => {
                     await this.updateDevices();
                 }, 10 * 1000);
+            } else {
+                const idArray = id.split(".");
+                const lastElement = idArray.pop();
+                if (this.targetKeys[lastElement]) {
+                    this.targetKeys[lastElement].forEach((element) => {
+                        this.setState(idArray.join(".") + "." + element, state.val, true);
+                    });
+                }
             }
         }
     }

@@ -463,6 +463,10 @@ class LgThinq extends utils.Adapter {
     async getListDevices() {
         if (!this.homes) {
             this.homes = await this.getListHomes();
+            if (!this.homes) {
+                this.log.error("Could not receive homes");
+                return [];
+            }
             this.extractKeys(this, "homes", this.homes);
         }
         const headers = this.defaultHeaders;
@@ -507,6 +511,7 @@ class LgThinq extends utils.Adapter {
                 .then((data) => data.result.item)
                 .catch((error) => {
                     this.log.error(error);
+                    error.response && this.log.error(JSON.stringify(error.response.data));
                 });
         }
 
@@ -653,7 +658,7 @@ class LgThinq extends utils.Adapter {
                                 } else {
                                     const values = Object.keys(valueObject);
                                     values.forEach((value) => {
-                                        let content = valueObject[value];
+                                        const content = valueObject[value];
                                         if (typeof content === "string") {
                                             common.states[value] = content.replace("@", "");
                                         }

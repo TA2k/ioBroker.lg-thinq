@@ -464,7 +464,7 @@ class LgThinq extends utils.Adapter {
         if (!this.homes) {
             this.homes = await this.getListHomes();
             if (!this.homes) {
-                this.log.error("Could not receive homes");
+                this.log.error("Could not receive homes. Please check your app and accept new agreements");
                 return [];
             }
             this.extractKeys(this, "homes", this.homes);

@@ -1,9 +1,9 @@
 {
     "common": {
         "name": "lg-thinq",
-        "version": "0.0.1",
+        "version": "0.0.2",
         "news": {
-            "0.0.1": {
+            "0.0.2": {
                 "en": "initial release",
                 "de": "Erstveröffentlichung",
                 "ru": "Начальная версия",
@@ -62,6 +62,11 @@
         "connectionType": "cloud",
         "dataSource": "poll",
         "materialize": true,
+        "plugins": {
+            "sentry": {
+                "dsn": "https://414a0c2632d7439a81cdeaff30884373@sentry.iobroker.net/157"
+            }
+        },
         "dependencies": [
             {
                 "js-controller": ">=3.0.0"

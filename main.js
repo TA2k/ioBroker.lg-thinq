@@ -16,6 +16,7 @@ const { DateTime } = require("luxon");
 const { extractKeys } = require("./lib/extractKeys");
 const constants = require("./lib/constants");
 const { URL } = require("url");
+
 class LgThinq extends utils.Adapter {
     /**
      * @param {Partial<utils.AdapterOptions>} [options={}]
@@ -554,20 +555,111 @@ class LgThinq extends utils.Adapter {
                     },
                     native: {},
                 });
-                controlWifi &&
-                    Object.keys(controlWifi).forEach((control) => {
-                        this.setObjectNotExists(device.deviceId + ".remote." + control, {
-                            type: "state",
-                            common: {
-                                name: control,
-                                type: "boolean",
-                                role: "boolean",
-                                write: true,
-                                read: true,
-                            },
-                            native: {},
-                        });
+                if (deviceModel["Info"].productType === "REF") {
+                    await this.setObjectNotExists(device.deviceId + ".remote.fridgeTemp", {
+                        type: 'state',
+                        common: {
+                            name: "fridgeTemp_C",
+                            type: "number",
+                            write: true,
+                            read: true,
+                            role: 'level',
+                            desc: 'Nur Celsius',
+                            min: 1,
+                            max: 7,
+                            unit: "",
+                            def: 1,
+                            states: {
+                              "1": "7",
+                              "2": "6",
+                              "3": "5",
+                              "4": "4",
+                              "5": "3",
+                              "6": "2",
+                              "7": "1"
+                            }
+                        },
+                        native: {}
                     });
+                    await this.setObjectNotExists(device.deviceId + ".remote.freezerTemp", {
+                        type: 'state',
+                        common: {
+                            name: "freezerTemp_C",
+                            type: "number",
+                            write: true,
+                            read: true,
+                            role: 'level',
+                            desc: 'Nur Celsius',
+                            min: 1,
+                            max: 11,
+                            unit: "",
+                            def: 1,
+                            states: {
+                              "1": "-14",
+                              "2": "-15",
+                              "3": "-16",
+                              "4": "-17",
+                              "5": "-18",
+                              "6": "-19",
+                              "7": "-20",
+                              "8": "-21",
+                              "9": "-22",
+                              "10": "-23",
+                              "11": "-24"
+                            }
+                        },
+                        native: {}
+                    });
+                    await this.setObjectNotExists(device.deviceId + ".remote.expressMode", {
+                        type: 'state',
+                        common: {
+                            name: "expressMode",
+                            type: "boolean",
+                            write: true,
+                            read: true,
+                            role: 'state',
+                            desc: 'Expressmode',
+                            "def": false,
+                            states: {
+                              "true": "EXPRESS_ON",
+                              "false": "OFF"
+                            }
+                        },
+                        native: {}
+                    });
+                    await this.setObjectNotExists(device.deviceId + ".remote.ecoFriendly", {
+                        type: 'state',
+                        common: {
+                            name: "ecoFriendly",
+                            type: "boolean",
+                            write: true,
+                            read: true,
+                            role: 'state',
+                            desc: 'Umweltfreundlich. Nicht für alle verfügbar',
+                            "def": false,
+                            states: {
+                              "true": "ON",
+                              "false": "OFF"
+                            }
+                        },
+                        native: {}
+                    });
+                } else {
+                    controlWifi &&
+                        Object.keys(controlWifi).forEach((control) => {
+                            this.setObjectNotExists(device.deviceId + ".remote." + control, {
+                            vtype: "state",
+                                common: {
+                                    name: control,
+                                    type: "boolean",
+                                    role: "boolean",
+                                    write: true,
+                                    read: true,
+                                },
+                                native: {},
+                            });
+                        });
+                }
             }
         }
         return deviceModel;
@@ -658,7 +750,7 @@ class LgThinq extends utils.Adapter {
                                 } else {
                                     const values = Object.keys(valueObject);
                                     values.forEach((value) => {
-                                        const content = valueObject[value];
+                                        let content = valueObject[value];
                                         if (typeof content === "string") {
                                             common.states[value] = content.replace("@", "");
                                         }
@@ -687,11 +779,11 @@ class LgThinq extends utils.Adapter {
     async sendCommandToDevice(deviceId, values, thinq1) {
         const headers = this.defaultHeaders;
         let controlUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + deviceId + "/control-sync");
-        let data = {
-            ctrlKey: "basicCtrl",
-            command: "Set",
-            ...values,
-        };
+          let data = {
+              ctrlKey: "basicCtrl",
+              command: "Set",
+              ...values,
+          };
         if (thinq1) {
             controlUrl = this.gateway.thinq1Uri + "/" + "rti/rtiControl";
             data = values;
@@ -731,10 +823,42 @@ class LgThinq extends utils.Adapter {
         if (state) {
             if (!state.ack) {
                 const deviceId = id.split(".")[2];
+
                 if (id.indexOf(".remote.") !== -1) {
                     const action = id.split(".")[4];
+                    let data = "";
+                    let onoff = "";
+                    let response;
+
+                    if (['fridgeTemp', 'freezerTemp', 'expressMode', 'ecoFriendly'].includes(action)) {
+                        const dataTemp = await this.getStateAsync(deviceId + ".snapshot.refState.tempUnit");
+                        switch(action) {
+                            case "fridgeTemp":
+                                data = {"dataSetList": {"refState": {"fridgeTemp": state.val,"tempUnit": dataTemp.val}}};
+                                break;
+                            case "freezerTemp":
+                                data = {"dataSetList": {"refState": {"freezerTemp": state.val,"tempUnit": dataTemp.val}}};
+                                break;
+                            case "expressMode":
+                                onoff = state.val ? "EXPRESS_ON" : "OFF";
+                                data = {"dataSetList": {"refState": {"expressMode": onoff,"tempUnit": dataTemp.val}}};
+                                break;
+                            case "ecoFriendly":
+                                onoff = state.val ? "ON" : "OFF";
+                                data = {"dataSetList": {"refState": {"ecoFriendly": onoff,"tempUnit": dataTemp.val}}};
+                                break;
+                            default:
+                                this.log.info("Command " + action + " not found");
+                                return;
+                                break;
+                        }
+                        response = await this.sendCommandToDevice(deviceId, data);
+                        this.log.debug("ctrlKey: " + JSON.stringify(response));
+                        return;
+                    }
+
                     const rawData = this.deviceControls[deviceId][action];
-                    let data = { ctrlKey: action, command: rawData.command, dataSetList: rawData.data };
+                    data = { ctrlKey: action, command: rawData.command, dataSetList: rawData.data };
 
                     if (action === "WMStop" || action === "WMOff") {
                         data.ctrlKey = "WMControl";

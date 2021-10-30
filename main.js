@@ -557,98 +557,98 @@ class LgThinq extends utils.Adapter {
                 });
                 if (deviceModel["Info"].productType === "REF") {
                     await this.setObjectNotExists(device.deviceId + ".remote.fridgeTemp", {
-                        type: 'state',
+                        type: "state",
                         common: {
                             name: "fridgeTemp_C",
                             type: "number",
                             write: true,
                             read: true,
-                            role: 'level',
-                            desc: 'Nur Celsius',
+                            role: "level",
+                            desc: "Nur Celsius",
                             min: 1,
                             max: 7,
                             unit: "",
                             def: 1,
                             states: {
-                              "1": "7",
-                              "2": "6",
-                              "3": "5",
-                              "4": "4",
-                              "5": "3",
-                              "6": "2",
-                              "7": "1"
-                            }
+                                1: "7",
+                                2: "6",
+                                3: "5",
+                                4: "4",
+                                5: "3",
+                                6: "2",
+                                7: "1",
+                            },
                         },
-                        native: {}
+                        native: {},
                     });
                     await this.setObjectNotExists(device.deviceId + ".remote.freezerTemp", {
-                        type: 'state',
+                        type: "state",
                         common: {
                             name: "freezerTemp_C",
                             type: "number",
                             write: true,
                             read: true,
-                            role: 'level',
-                            desc: 'Nur Celsius',
+                            role: "level",
+                            desc: "Nur Celsius",
                             min: 1,
                             max: 11,
                             unit: "",
                             def: 1,
                             states: {
-                              "1": "-14",
-                              "2": "-15",
-                              "3": "-16",
-                              "4": "-17",
-                              "5": "-18",
-                              "6": "-19",
-                              "7": "-20",
-                              "8": "-21",
-                              "9": "-22",
-                              "10": "-23",
-                              "11": "-24"
-                            }
+                                1: "-14",
+                                2: "-15",
+                                3: "-16",
+                                4: "-17",
+                                5: "-18",
+                                6: "-19",
+                                7: "-20",
+                                8: "-21",
+                                9: "-22",
+                                10: "-23",
+                                11: "-24",
+                            },
                         },
-                        native: {}
+                        native: {},
                     });
                     await this.setObjectNotExists(device.deviceId + ".remote.expressMode", {
-                        type: 'state',
+                        type: "state",
                         common: {
                             name: "expressMode",
                             type: "boolean",
                             write: true,
                             read: true,
-                            role: 'state',
-                            desc: 'Expressmode',
-                            "def": false,
+                            role: "state",
+                            desc: "Expressmode",
+                            def: false,
                             states: {
-                              "true": "EXPRESS_ON",
-                              "false": "OFF"
-                            }
+                                true: "EXPRESS_ON",
+                                false: "OFF",
+                            },
                         },
-                        native: {}
+                        native: {},
                     });
                     await this.setObjectNotExists(device.deviceId + ".remote.ecoFriendly", {
-                        type: 'state',
+                        type: "state",
                         common: {
                             name: "ecoFriendly",
                             type: "boolean",
                             write: true,
                             read: true,
-                            role: 'state',
-                            desc: 'Umweltfreundlich. Nicht für alle verfügbar',
-                            "def": false,
+                            role: "state",
+                            desc: "Umweltfreundlich. Nicht fï¿½r alle verfï¿½gbar",
+                            def: false,
                             states: {
-                              "true": "ON",
-                              "false": "OFF"
-                            }
+                                true: "ON",
+                                false: "OFF",
+                            },
                         },
-                        native: {}
+                        native: {},
                     });
                 } else {
                     controlWifi &&
                         Object.keys(controlWifi).forEach((control) => {
                             this.setObjectNotExists(device.deviceId + ".remote." + control, {
-                            vtype: "state",
+                                vtype: "state",
                                 common: {
                                     name: control,
                                     type: "boolean",
@@ -750,7 +750,7 @@ class LgThinq extends utils.Adapter {
                                 } else {
                                     const values = Object.keys(valueObject);
                                     values.forEach((value) => {
-                                        let content = valueObject[value];
+                                        const content = valueObject[value];
                                         if (typeof content === "string") {
                                             common.states[value] = content.replace("@", "");
                                         }
@@ -779,11 +779,11 @@ class LgThinq extends utils.Adapter {
     async sendCommandToDevice(deviceId, values, thinq1) {
         const headers = this.defaultHeaders;
         let controlUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + deviceId + "/control-sync");
-          let data = {
-              ctrlKey: "basicCtrl",
-              command: "Set",
-              ...values,
-          };
+        let data = {
+            ctrlKey: "basicCtrl",
+            command: "Set",
+            ...values,
+        };
         if (thinq1) {
             controlUrl = this.gateway.thinq1Uri + "/" + "rti/rtiControl";
             data = values;
@@ -830,22 +830,22 @@ class LgThinq extends utils.Adapter {
                     let onoff = "";
                     let response;
 
-                    if (['fridgeTemp', 'freezerTemp', 'expressMode', 'ecoFriendly'].includes(action)) {
+                    if (["fridgeTemp", "freezerTemp", "expressMode", "ecoFriendly"].includes(action)) {
                         const dataTemp = await this.getStateAsync(deviceId + ".snapshot.refState.tempUnit");
-                        switch(action) {
+                        switch (action) {
                             case "fridgeTemp":
-                                data = {"dataSetList": {"refState": {"fridgeTemp": state.val,"tempUnit": dataTemp.val}}};
+                                data = { dataSetList: { refState: { fridgeTemp: state.val, tempUnit: dataTemp.val } } };
                                 break;
                             case "freezerTemp":
-                                data = {"dataSetList": {"refState": {"freezerTemp": state.val,"tempUnit": dataTemp.val}}};
+                                data = { dataSetList: { refState: { freezerTemp: state.val, tempUnit: dataTemp.val } } };
                                 break;
                             case "expressMode":
                                 onoff = state.val ? "EXPRESS_ON" : "OFF";
-                                data = {"dataSetList": {"refState": {"expressMode": onoff,"tempUnit": dataTemp.val}}};
+                                data = { dataSetList: { refState: { expressMode: onoff, tempUnit: dataTemp.val } } };
                                 break;
                             case "ecoFriendly":
                                 onoff = state.val ? "ON" : "OFF";
-                                data = {"dataSetList": {"refState": {"ecoFriendly": onoff,"tempUnit": dataTemp.val}}};
+                                data = { dataSetList: { refState: { ecoFriendly: onoff, tempUnit: dataTemp.val } } };
                                 break;
                             default:
                                 this.log.info("Command " + action + " not found");
@@ -880,7 +880,7 @@ class LgThinq extends utils.Adapter {
                     }
 
                     this.log.debug(JSON.stringify(data));
-                    let response;
+
                     if (data.command && data.dataSetList) {
                         response = await this.sendCommandToDevice(deviceId, data);
                     } else {

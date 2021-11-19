@@ -175,7 +175,9 @@ class LgThinq extends utils.Adapter {
                 }
                 return;
             });
-
+        if (!res) {
+            return;
+        }
         // dynamic get secret key for emp signature
         const empSearchKeyUrl = this.gateway.empSpxUri + "/" + "searchKey?key_name=OAUTH_SECRETKEY&sever_type=OP";
         const secretKey = await this.requestClient
@@ -259,7 +261,9 @@ class LgThinq extends utils.Adapter {
     async startMonitor(device) {
         try {
             if (device.platformType === "thinq1") {
-                this.workIds[device.deviceId] = await this.sendMonitorCommand(device.deviceId, "Start", uuid.v4()).then((data) => data.workId);
+                const sendId = uuid.v4();
+                const returnWorkId = await this.sendMonitorCommand(device.deviceId, "Start", sendId).then((data) => data.workId);
+                this.workIds[device.deviceId] = returnWorkId;
             }
         } catch (err) {
             this.log.error(err);
@@ -750,7 +754,7 @@ class LgThinq extends utils.Adapter {
                                 } else {
                                     const values = Object.keys(valueObject);
                                     values.forEach((value) => {
-                                        const content = valueObject[value];
+                                        let content = valueObject[value];
                                         if (typeof content === "string") {
                                             common.states[value] = content.replace("@", "");
                                         }
@@ -878,28 +882,29 @@ class LgThinq extends utils.Adapter {
                             }
                         }
                     }
-
-                    this.log.debug(JSON.stringify(data));
-
+                    let response;
                     if (data.command && data.dataSetList) {
+                        this.log.debug(JSON.stringify(data));
                         response = await this.sendCommandToDevice(deviceId, data);
                     } else {
                         rawData.value = rawData.value.replace("{Operation}", state.val ? "Start" : "Stop");
                         data = {
                             lgedmRoot: {
                                 deviceId: deviceId,
-                                workId: this.workIds[deviceId],
+                                workId: uuid.v4(),
                                 cmd: rawData.cmd,
                                 cmdOpt: rawData.cmdOpt,
                                 value: rawData.value,
                                 data: "",
                             },
                         };
+
+                        this.log.debug(JSON.stringify(data));
                         response = await this.sendCommandToDevice(deviceId, data, true);
                     }
 
                     this.log.debug(JSON.stringify(response));
-                    if (response && response.resultCode !== "0000") {
+                    if ((response && response.resultCode && response.resultCode !== "0000") || (response && response.lgedmRoot && response.lgedmRoot.returnCd !== "0000")) {
                         this.log.error("Command not succesful");
                         this.log.error(JSON.stringify(response));
                     }

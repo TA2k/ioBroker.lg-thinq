@@ -830,7 +830,7 @@ class LgThinq extends utils.Adapter {
 
                 if (id.indexOf(".remote.") !== -1) {
                     const action = id.split(".")[4];
-                    let data = "";
+                    let data;
                     let onoff = "";
                     let response;
 
@@ -882,7 +882,6 @@ class LgThinq extends utils.Adapter {
                             }
                         }
                     }
-                    let response;
                     if (data.command && data.dataSetList) {
                         this.log.debug(JSON.stringify(data));
                         response = await this.sendCommandToDevice(deviceId, data);

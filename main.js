@@ -652,7 +652,7 @@ class LgThinq extends utils.Adapter {
                     controlWifi &&
                         Object.keys(controlWifi).forEach((control) => {
                             this.setObjectNotExists(device.deviceId + ".remote." + control, {
-                                vtype: "state",
+                                type: "state",
                                 common: {
                                     name: control,
                                     type: "boolean",

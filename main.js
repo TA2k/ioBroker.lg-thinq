@@ -722,19 +722,21 @@ class LgThinq extends utils.Adapter {
                                 });
                             }
                         }
-                        // @ts-ignore
-                        await this.setObjectNotExistsAsync(path + state, {
-                            type: "state",
-                            common: common,
-                            native: {},
-                        }).catch((error) => {
-                            this.log.error(error);
-                        });
-
-                        // @ts-ignore
-                        this.extendObject(path + state, {
-                            common: common,
-                        });
+                        if (!obj) {
+                            // @ts-ignore
+                            await this.setObjectNotExistsAsync(path + state, {
+                                type: "state",
+                                common: common,
+                                native: {},
+                            }).catch((error) => {
+                                this.log.error(error);
+                            });
+                        } else {
+                            // @ts-ignore
+                            this.extendObject(path + state, {
+                                common: common,
+                            });
+                        }
                     });
                 });
             deviceModel["Value"] &&
@@ -754,26 +756,28 @@ class LgThinq extends utils.Adapter {
                                 } else {
                                     const values = Object.keys(valueObject);
                                     values.forEach((value) => {
-                                        let content = valueObject[value];
+                                        const content = valueObject[value];
                                         if (typeof content === "string") {
                                             common.states[value] = content.replace("@", "");
                                         }
                                     });
                                 }
                             }
-                            // @ts-ignore
-                            await this.setObjectNotExistsAsync(path + state, {
-                                type: "state",
-                                common: common,
-                                native: {},
-                            }).catch((error) => {
-                                this.log.error(error);
-                            });
-
-                            // @ts-ignore
-                            this.extendObject(path + state, {
-                                common: common,
-                            });
+                            if (!obj) {
+                                // @ts-ignore
+                                await this.setObjectNotExistsAsync(path + state, {
+                                    type: "state",
+                                    common: common,
+                                    native: {},
+                                }).catch((error) => {
+                                    this.log.error(error);
+                                });
+                            } else {
+                                // @ts-ignore
+                                this.extendObject(path + state, {
+                                    common: common,
+                                });
+                            }
                         }
                     });
                 });
@@ -800,7 +804,10 @@ class LgThinq extends utils.Adapter {
             });
     }
     sleep(ms) {
-        return new Promise((resolve) => setTimeout(resolve, ms));
+        return new Promise((resolve) => {
+            this.sleepTimer = setTimeout(resolve, ms);
+
+        });
     }
     /**
      * Is called when adapter shuts down - callback has to be called under any circumstances!
@@ -808,9 +815,10 @@ class LgThinq extends utils.Adapter {
      */
     onUnload(callback) {
         try {
-            clearInterval(this.updateInterval);
-            clearInterval(this.refreshTokenInterval);
-            clearTimeout(this.refreshTimeout);
+            this.updateInterval && clearInterval(this.updateInterval);
+            this.refreshTokenInterval && clearInterval(this.refreshTokenInterval);
+            this.refreshTimeout && clearTimeout(this.refreshTimeout);
+            this.sleepTimer && clearTimeout(this.sleepTimer);
 
             callback();
         } catch (e) {

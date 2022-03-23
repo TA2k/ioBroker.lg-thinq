@@ -394,7 +394,7 @@ class LgThinq extends utils.Adapter {
                     if (code === "0106") {
                         this.log.error(data.returnMsg || "");
                     } else if (code !== "0000") {
-                        this.log.error(code + " - " + data.returnMsg || "");
+                        this.log.debug(code + " - " + data.returnMsg || "");
                     }
                 }
                 this.log.debug(JSON.stringify(data));

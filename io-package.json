@@ -1,9 +1,9 @@
 {
     "common": {
         "name": "lg-thinq",
-        "version": "0.0.6",
+        "version": "0.0.7",
         "news": {
-            "0.0.6": {
+            "0.0.7": {
                 "en": "Bugfixes"
             },
             "0.0.2": {

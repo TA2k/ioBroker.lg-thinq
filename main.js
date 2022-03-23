@@ -392,7 +392,7 @@ class LgThinq extends utils.Adapter {
                 if ("returnCd" in data) {
                     const code = data.returnCd;
                     if (code === "0106") {
-                        this.log.error(data.returnMsg || "");
+                        this.log.debug(data.returnMsg || "");
                     } else if (code !== "0000") {
                         this.log.debug(code + " - " + data.returnMsg || "");
                     }
@@ -401,6 +401,7 @@ class LgThinq extends utils.Adapter {
                 return data;
             })
             .catch((error) => {
+                this.log.error("SendMonitorCommand");
                 this.log.error(error);
             });
     }
@@ -418,7 +419,7 @@ class LgThinq extends utils.Adapter {
                     if (code === "0106") {
                         return code;
                     } else if (code !== "0000") {
-                        this.log.error(code + " - " + data.returnMsg || "");
+                        this.log.debug(code + " - " + data.returnMsg || "");
                         return code;
                     }
                 }
@@ -436,6 +437,7 @@ class LgThinq extends utils.Adapter {
                 return Buffer.from(workList.returnData, "base64");
             })
             .catch((error) => {
+                this.log.error("GetMonitorResult");
                 this.log.error(error);
             });
     }
@@ -464,6 +466,7 @@ class LgThinq extends utils.Adapter {
             .get(deviceUrl, { headers })
             .then((res) => res.data.result)
             .catch((error) => {
+                this.log.error("GetDevicenfo");
                 this.log.error(error);
             });
     }
@@ -487,7 +490,7 @@ class LgThinq extends utils.Adapter {
                 .get(homeUrl, { headers })
                 .then((res) => res.data)
                 .catch((error) => {
-                    this.log.debug("Failed to get home");
+                    this.log.error("Failed to get home");
                     this.log.error(error);
                     if (error.response && error.response.data) {
                         this.log.error(JSON.stringify(error.response.data));
@@ -803,6 +806,7 @@ class LgThinq extends utils.Adapter {
             .post(controlUrl, data, { headers })
             .then((resp) => resp.data)
             .catch((error) => {
+                this.log.error("Send failed");
                 this.log.error(error);
             });
     }

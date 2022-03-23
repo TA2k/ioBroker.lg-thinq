@@ -38,6 +38,18 @@ class LgThinq extends utils.Adapter {
         this.deviceControls = {};
         this.extractKeys = extractKeys;
         this.targetKeys = {};
+    }
+
+    /**
+     * Is called when databases are connected and adapter received configuration.
+     */
+    async onReady() {
+        this.setState("info.connection", false, true);
+        if (this.config.interval < 0.5) {
+            this.log.info("Set interval to minimum 0.5");
+            this.config.interval = 0.5;
+        }
+        // @ts-ignore
         this.defaultHeaders = {
             "x-api-key": constants.API_KEY,
             "x-client-id": constants.API_CLIENT_ID,
@@ -56,19 +68,6 @@ class LgThinq extends utils.Adapter {
             "x-app-version": "3.5.1721",
             "x-message-id": this.random_string(22),
         };
-    }
-
-    /**
-     * Is called when databases are connected and adapter received configuration.
-     */
-    async onReady() {
-        this.setState("info.connection", false, true);
-        if (this.config.interval < 0.5) {
-            this.log.info("Set interval to minimum 0.5");
-            this.config.interval = 0.5;
-        }
-        // @ts-ignore
-
         this.subscribeStates("*");
 
         this.gateway = await this.requestClient

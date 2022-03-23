@@ -29,18 +29,6 @@ class LgThinq extends utils.Adapter {
         this.on("ready", this.onReady.bind(this));
         this.on("stateChange", this.onStateChange.bind(this));
         this.on("unload", this.onUnload.bind(this));
-    }
-
-    /**
-     * Is called when databases are connected and adapter received configuration.
-     */
-    async onReady() {
-        this.setState("info.connection", false, true);
-        if (this.config.interval < 0.5) {
-            this.log.info("Set interval to minimum 0.5");
-            this.config.interval = 0.5;
-        }
-        // @ts-ignore
         this.requestClient = axios.create();
         this.updateInterval = null;
         this.session = {};
@@ -49,9 +37,7 @@ class LgThinq extends utils.Adapter {
         this.workIds = [];
         this.deviceControls = {};
         this.extractKeys = extractKeys;
-        this.subscribeStates("*");
         this.targetKeys = {};
-
         this.defaultHeaders = {
             "x-api-key": constants.API_KEY,
             "x-client-id": constants.API_CLIENT_ID,
@@ -70,6 +56,20 @@ class LgThinq extends utils.Adapter {
             "x-app-version": "3.5.1721",
             "x-message-id": this.random_string(22),
         };
+    }
+
+    /**
+     * Is called when databases are connected and adapter received configuration.
+     */
+    async onReady() {
+        this.setState("info.connection", false, true);
+        if (this.config.interval < 0.5) {
+            this.log.info("Set interval to minimum 0.5");
+            this.config.interval = 0.5;
+        }
+        // @ts-ignore
+
+        this.subscribeStates("*");
 
         this.gateway = await this.requestClient
             .get(constants.GATEWAY_URL, { headers: this.defaultHeaders })
@@ -254,7 +254,7 @@ class LgThinq extends utils.Adapter {
                 }
                 await this.stopMonitor(device);
             } catch (err) {
-                this.log.error(err);
+                this.log.debug(err);
             }
         }
     }
@@ -266,7 +266,7 @@ class LgThinq extends utils.Adapter {
                 this.workIds[device.deviceId] = returnWorkId;
             }
         } catch (err) {
-            this.log.error(err);
+            this.log.debug(err);
         }
     }
 
@@ -276,7 +276,7 @@ class LgThinq extends utils.Adapter {
                 await this.sendMonitorCommand(device.deviceId, "Stop", this.workIds[device.deviceId]);
                 delete this.workIds[device.deviceId];
             } catch (err) {
-                this.log.error(err);
+                this.log.debug(err);
             }
         }
     }
@@ -321,9 +321,10 @@ class LgThinq extends utils.Adapter {
             .then((resp) => resp.data)
             .catch((error) => {
                 this.log.error(error);
+                return;
             });
         this.log.debug(JSON.stringify(resp));
-        if (this.session) {
+        if (this.session && resp && resp.access_token) {
             this.session.access_token = resp.access_token;
             this.defaultHeaders["x-emp-token"] = this.session.access_token;
         }
@@ -352,6 +353,9 @@ class LgThinq extends utils.Adapter {
             .catch((error) => {
                 this.log.error(error);
             });
+        if (!resp) {
+            return;
+        }
         this.extractKeys(this, "general", resp);
         this.log.debug(JSON.stringify(resp));
         return resp.account.userNo;
@@ -806,7 +810,6 @@ class LgThinq extends utils.Adapter {
     sleep(ms) {
         return new Promise((resolve) => {
             this.sleepTimer = setTimeout(resolve, ms);
-
         });
     }
     /**
@@ -843,7 +846,7 @@ class LgThinq extends utils.Adapter {
                     let response;
 
                     if (["fridgeTemp", "freezerTemp", "expressMode", "ecoFriendly"].includes(action)) {
-                        const dataTemp = await this.getStateAsync(deviceId + ".snapshot.refState.tempUnit");
+                        const dataTemp = (await this.getStateAsync(deviceId + ".snapshot.refState.tempUnit")) || { val: "" };
                         switch (action) {
                             case "fridgeTemp":
                                 data = { dataSetList: { refState: { fridgeTemp: state.val, tempUnit: dataTemp.val } } };

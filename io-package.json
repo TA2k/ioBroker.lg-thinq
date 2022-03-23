@@ -1,8 +1,11 @@
 {
     "common": {
         "name": "lg-thinq",
-        "version": "0.0.2",
+        "version": "0.0.3",
         "news": {
+            "0.0.3": {
+                "en": "Bugfixes"
+            },
             "0.0.2": {
                 "en": "initial release",
                 "de": "Erstveröffentlichung",

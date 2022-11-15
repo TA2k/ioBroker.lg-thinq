@@ -16,6 +16,9 @@ const { DateTime } = require("luxon");
 const { extractKeys } = require("./lib/extractKeys");
 const constants = require("./lib/constants");
 const { URL } = require("url");
+const helper = require(`./lib/helper`);
+const awsIot = require("aws-iot-device-sdk");
+const forge = require("node-forge");
 
 class LgThinq extends utils.Adapter {
     /**
@@ -38,6 +41,26 @@ class LgThinq extends utils.Adapter {
         this.deviceControls = {};
         this.extractKeys = extractKeys;
         this.targetKeys = {};
+        this.createDataPoint = helper.createDataPoint;
+        this.setDryerBlindStates = helper.setDryerBlindStates;
+        this.createFridge = helper.createFridge;
+        this.createStatistic = helper.createStatistic;
+        this.createremote = helper.createremote;
+        this.lastDeviceCourse = helper.lastDeviceCourse;
+        this.insertCourse = helper.insertCourse;
+        this.setCourse = helper.setCourse;
+        this.setFavoriteCourse = helper.setFavoriteCourse;
+        this.checkdate = helper.checkdate;
+        this.sendStaticRequest = helper.sendStaticRequest;
+        this.createCourse = helper.createCourse;
+        this.mqttdata = {};
+        this.mqttC = {};
+        this.lang = "de";
+        this.deviceJson = {};
+        this.courseJson = {};
+        this.courseactual = {};
+        this.coursetypes = {};
+        this.coursedownload = {};
     }
 
     /**
@@ -50,6 +73,12 @@ class LgThinq extends utils.Adapter {
             this.config.interval = 0.5;
         }
         // @ts-ignore
+        await this.getForeignObject("system.config", async (err, data) => {
+            if (data && data.common && data.common.language) {
+                this.lang = data.common.language === this.lang ? this.lang : "en";
+            }
+        });
+        this.log.debug(this.lang);
         this.defaultHeaders = {
             "x-api-key": constants.API_KEY,
             "x-client-id": constants.API_CLIENT_ID,
@@ -88,14 +117,22 @@ class LgThinq extends utils.Adapter {
                 this.log.info("Login successful");
                 this.refreshTokenInterval = setInterval(() => {
                     this.refreshNewToken();
-                }, this.session.expires_in * 1000);
+                }, (this.session.expires_in - 100) * 1000);
                 this.userNumber = await this.getUserNumber();
                 this.defaultHeaders["x-user-no"] = this.userNumber;
                 this.defaultHeaders["x-emp-token"] = this.session.access_token;
                 const listDevices = await this.getListDevices();
+                if (listDevices && listDevices === "TERMS") {
+                    this.setState("info.connection", false, true);
+                    //this.terms = await this.Term();
+                    return;
+                } else if (listDevices && listDevices === "TERMS") {
+                    return;
+                }
 
                 this.log.info("Found: " + listDevices.length + " devices");
-                listDevices.forEach(async (element) => {
+                let isThinq2 = false;
+                for (const element of listDevices) {
                     await this.setObjectNotExistsAsync(element.deviceId, {
                         type: "device",
                         common: {
@@ -105,13 +142,24 @@ class LgThinq extends utils.Adapter {
                         native: {},
                     });
                     this.extractKeys(this, element.deviceId, element, null, false, true);
+
                     this.modelInfos[element.deviceId] = await this.getDeviceModelInfo(element);
+                    if (element.platformType && element.platformType === "thinq2") {
+                        this.modelInfos[element.deviceId]["thinq2"] = element.platformType;
+                        isThinq2 = true;
+                    }
+                    if (element.deviceType) {
+                        this.modelInfos[element.deviceId]["deviceType"] = element.deviceType;
+                        isThinq2 = true;
+                    }
                     await this.pollMonitor(element);
                     await this.sleep(2000);
                     this.extractValues(element);
-                });
-
+                };
                 this.log.debug(JSON.stringify(listDevices));
+                if (isThinq2) {
+                    this.start_mqtt();
+                }
                 this.updateInterval = setInterval(async () => {
                     await this.updateDevices();
                 }, this.config.interval * 60 * 1000);
@@ -129,6 +177,18 @@ class LgThinq extends utils.Adapter {
             this.pollMonitor(element);
         });
         this.log.debug(JSON.stringify(listDevices));
+    }
+
+    async getDeviceEnergy(path) {
+        const headers = this.defaultHeaders;
+        const deviceUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", path);
+
+        return this.requestClient
+            .get(deviceUrl, { headers })
+            .then((res) => res.data.result)
+            .catch((error) => {
+                this.log.error("getDeviceEnergy: " + error);
+            });
     }
 
     async login(username, password) {
@@ -326,6 +386,10 @@ class LgThinq extends utils.Adapter {
         if (this.session && resp && resp.access_token) {
             this.session.access_token = resp.access_token;
             this.defaultHeaders["x-emp-token"] = this.session.access_token;
+            this.refreshTokenInterval && clearInterval(this.refreshTokenInterval);
+            this.refreshTokenInterval = setInterval(() => {
+                this.refreshNewToken();
+            }, (this.session.expires_in - 100) * 1000);
         }
     }
 
@@ -454,9 +518,14 @@ class LgThinq extends utils.Adapter {
         }
         return result.join("");
     }
-    resolveUrl(from, to) {
-        const url = new URL(to, from);
-        return url.href;
+    resolveUrl(from, to, home) {
+        if (home) {
+            const url = new URL(from);
+            return url.hostname;
+        } else {
+            const url = new URL(to, from);
+            return url.href;
+        }
     }
     async getDeviceInfo(deviceId) {
         const headers = this.defaultHeaders;
@@ -473,11 +542,21 @@ class LgThinq extends utils.Adapter {
 
     async getListDevices() {
         if (!this.homes) {
-            this.homes = await this.getListHomes();
-            if (!this.homes) {
+            const home_result = await this.getListHomes();
+            if (
+                home_result &&
+                home_result.resultCode &&
+                home_result.resultCode === "0000" &&
+                home_result.result &&
+                home_result.result.item == null
+            ) {
+                this.log.warn("LG does not provide any data! Maybe your account is blocked");
+                return "BLOCKED";
+            } else if (!home_result && home_result.result && home_result.resultCode === "0110") {
                 this.log.error("Could not receive homes. Please check your app and accept new agreements");
-                return [];
+                return "TERMS";
             }
+            this.homes = home_result.result.item;
             this.extractKeys(this, "homes", this.homes);
         }
         const headers = this.defaultHeaders;
@@ -519,7 +598,10 @@ class LgThinq extends utils.Adapter {
             this._homes = await this.requestClient
                 .get(homesUrl, { headers })
                 .then((res) => res.data)
-                .then((data) => data.result.item)
+                .then((data) => {
+                    this.log.debug(JSON.stringify(data));
+                    return data;
+                })
                 .catch((error) => {
                     this.log.error(error);
                     error.response && this.log.error(JSON.stringify(error.response.data));
@@ -528,6 +610,7 @@ class LgThinq extends utils.Adapter {
 
         return this._homes;
     }
+
     async getDeviceModelInfo(device) {
         if (!device.modelJsonUri) {
             return;
@@ -548,13 +631,36 @@ class LgThinq extends utils.Adapter {
                 },
                 native: {},
             });
+            this.coursetypes[device.deviceId] = {};
+            if (deviceModel["Config"]) {
+                this.coursetypes[device.deviceId]["smartCourseType"]
+                    = deviceModel.Config.smartCourseType
+                    ? deviceModel.Config.smartCourseType
+                    : "";
+                this.coursetypes[device.deviceId]["courseType"]
+                    = deviceModel.Config.courseType
+                    ? deviceModel.Config.courseType
+                    : "";
+                this.coursetypes[device.deviceId]["downloadedCourseType"]
+                    = deviceModel.Config.downloadedCourseType
+                    ? deviceModel.Config.downloadedCourseType
+                    : "";
+            }
             if (deviceModel["ControlWifi"]) {
                 this.log.debug(JSON.stringify(deviceModel["ControlWifi"]));
                 let controlWifi = deviceModel["ControlWifi"];
+                deviceModel["folder"] = "";
+                if (Object.keys(deviceModel["ControlWifi"])[0] != null) {
+                    const wifi = Object.keys(deviceModel["ControlWifi"])[0];
+                    if (Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0] != null) {
+                        deviceModel["folder"] = Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0];
+                    }
+                }
                 if (deviceModel["ControlWifi"].action) {
                     controlWifi = deviceModel["ControlWifi"].action;
                 }
                 this.deviceControls[device.deviceId] = controlWifi;
+                this.deviceJson[device.deviceId] = deviceModel;
 
                 const controlId = deviceModel["Info"].productType + "Control";
                 await this.setObjectNotExistsAsync(device.deviceId + ".remote", {
@@ -565,99 +671,16 @@ class LgThinq extends utils.Adapter {
                     },
                     native: {},
                 });
-                if (deviceModel["Info"].productType === "REF") {
-                    await this.setObjectNotExists(device.deviceId + ".remote.fridgeTemp", {
-                        type: "state",
-                        common: {
-                            name: "fridgeTemp_C",
-                            type: "number",
-                            write: true,
-                            read: true,
-                            role: "level",
-                            desc: "Nur Celsius",
-                            min: 1,
-                            max: 7,
-                            unit: "",
-                            def: 1,
-                            states: {
-                                1: "7",
-                                2: "6",
-                                3: "5",
-                                4: "4",
-                                5: "3",
-                                6: "2",
-                                7: "1",
-                            },
-                        },
-                        native: {},
-                    });
-                    await this.setObjectNotExists(device.deviceId + ".remote.freezerTemp", {
-                        type: "state",
-                        common: {
-                            name: "freezerTemp_C",
-                            type: "number",
-                            write: true,
-                            read: true,
-                            role: "level",
-                            desc: "Nur Celsius",
-                            min: 1,
-                            max: 11,
-                            unit: "",
-                            def: 1,
-                            states: {
-                                1: "-14",
-                                2: "-15",
-                                3: "-16",
-                                4: "-17",
-                                5: "-18",
-                                6: "-19",
-                                7: "-20",
-                                8: "-21",
-                                9: "-22",
-                                10: "-23",
-                                11: "-24",
-                            },
-                        },
-                        native: {},
-                    });
-                    await this.setObjectNotExists(device.deviceId + ".remote.expressMode", {
-                        type: "state",
-                        common: {
-                            name: "expressMode",
-                            type: "boolean",
-                            write: true,
-                            read: true,
-                            role: "state",
-                            desc: "Expressmode",
-                            def: false,
-                            states: {
-                                true: "EXPRESS_ON",
-                                false: "OFF",
-                            },
-                        },
-                        native: {},
-                    });
-                    await this.setObjectNotExists(device.deviceId + ".remote.ecoFriendly", {
-                        type: "state",
-                        common: {
-                            name: "ecoFriendly",
-                            type: "boolean",
-                            write: true,
-                            read: true,
-                            role: "state",
-                            desc: "Umweltfreundlich. Nicht f�r alle verf�gbar",
-                            def: false,
-                            states: {
-                                true: "ON",
-                                false: "OFF",
-                            },
-                        },
-                        native: {},
-                    });
+                if (deviceModel["Info"] && deviceModel["Info"].productType === "REF") {
+                    await this.createFridge(device);
+                    await this.createStatistic(device.deviceId, 101);
                 } else {
                     controlWifi &&
-                        Object.keys(controlWifi).forEach((control) => {
-                            this.setObjectNotExists(device.deviceId + ".remote." + control, {
+                        Object.keys(controlWifi).forEach( async (control) => {
+                            if (control === "WMDownload" && device.platformType === "thinq2") {
+                                await this.createremote(device.deviceId, control, deviceModel);
+                            }
+                            await this.setObjectNotExistsAsync(device.deviceId + ".remote." + control, {
                                 type: "state",
                                 common: {
                                     name: control,
@@ -674,25 +697,35 @@ class LgThinq extends utils.Adapter {
         }
         return deviceModel;
     }
-    extractValues(device) {
+    async extractValues(device) {
         const deviceModel = this.modelInfos[device.deviceId];
         if (deviceModel["MonitoringValue"] || deviceModel["Value"]) {
             this.log.debug("extract values from model");
             let type = "";
-            if (device["snapshot"]) {
-                Object.keys(device["snapshot"]).forEach((subElement) => {
-                    if (subElement !== "meta" && subElement !== "static" && typeof device["snapshot"][subElement] === "object") {
-                        type = subElement;
-                    }
-                });
+            if (device["snapshot"] && deviceModel["folder"]) {
+                type = deviceModel["folder"];
             }
+            const thinq2 = deviceModel["thinq2"] ? deviceModel["thinq2"] : "";
+            const deviceType = deviceModel["deviceType"] ? deviceModel["deviceType"] : 0;
             let path = device.deviceId + ".snapshot.";
             if (type) {
                 path = path + type + ".";
             }
-
+            if (deviceType === 202) {
+                await this.setDryerBlindStates(path);
+            }
+            const downloadedCourseType = this.coursetypes[device.deviceId].downloadedCourseType
+                ? this.coursetypes[device.deviceId].downloadedCourseType
+                : "WASHERANDDRYER";
+            const smartCourseType = this.coursetypes[device.deviceId].smartCourseType
+                ? this.coursetypes[device.deviceId].smartCourseType
+                : "WASHERANDDRYER";
+            const courseType = this.coursetypes[device.deviceId].courseType
+                ? this.coursetypes[device.deviceId].courseType
+                : "WASHERANDDRYER";
+            const onlynumber = /^-?[0-9]+$/;
             deviceModel["MonitoringValue"] &&
-                Object.keys(deviceModel["MonitoringValue"]).forEach((state) => {
+                Object.keys(deviceModel["MonitoringValue"]).forEach(async (state) => {
                     this.getObject(path + state, async (err, obj) => {
                         let common = {
                             name: state,
@@ -703,7 +736,7 @@ class LgThinq extends utils.Adapter {
                         if (obj) {
                             common = obj.common;
                         }
-                        common.states = {};
+                        let commons= {};
                         if (deviceModel["MonitoringValue"][state]["targetKey"]) {
                             this.targetKeys[state] = [];
                             const firstKeyName = Object.keys(deviceModel["MonitoringValue"][state]["targetKey"])[0];
@@ -712,22 +745,62 @@ class LgThinq extends utils.Adapter {
                                 this.targetKeys[state].push(firstObject[targetKey]);
                             });
                         }
+                        if (state === courseType) {
+                            Object.keys(deviceModel["Course"]).forEach( async (key) => {
+                                commons[key] = (constants[this.lang + "Translation"][key] != null)
+                                    ? constants[this.lang + "Translation"][key]
+                                    : key;
+                            });
+                            commons["NOT_SELECTED"] = (constants[this.lang + "Translation"]["NOT_SELECTED"] != null)
+                                ? constants[this.lang + "Translation"]["NOT_SELECTED"]
+                                : 0;
+                        }
+                        if (state === smartCourseType ||
+                            state === downloadedCourseType) {
+                                Object.keys(deviceModel["SmartCourse"]).forEach( async (key) => {
+                                    commons[key] = (constants[this.lang + "Translation"][key] != null)
+                                        ? constants[this.lang + "Translation"][key]
+                                        : key;
+                                });
+                                commons["NOT_SELECTED"] = (constants[this.lang + "Translation"]["NOT_SELECTED"] != null)
+                                    ? constants[this.lang + "Translation"]["NOT_SELECTED"]
+                                    : 0;
+                        }
                         if (deviceModel["MonitoringValue"][state]["valueMapping"]) {
                             if (deviceModel["MonitoringValue"][state]["valueMapping"].max) {
                                 common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
-                                common.max = deviceModel["MonitoringValue"][state]["valueMapping"].max;
+                                if (state === "moreLessTime") {
+                                    common.max = 200;
+                                } else if (state === "timeSetting") {
+                                    common.max = 360;
+                                } else {
+                                    common.max = deviceModel["MonitoringValue"][state]["valueMapping"].max;
+                                }
+                                common.def = 0;
                             } else {
                                 const values = Object.keys(deviceModel["MonitoringValue"][state]["valueMapping"]);
                                 values.forEach((value) => {
-                                    if (deviceModel["MonitoringValue"][state]["valueMapping"][value].label) {
+                                    if (deviceModel["MonitoringValue"][state]["valueMapping"][value].label != null) {
                                         const valueMap = deviceModel["MonitoringValue"][state]["valueMapping"][value];
-                                        common.states[valueMap.index] = valueMap.label;
+                                        if (onlynumber.test(value)) {
+                                            commons[valueMap.index] = valueMap.label;
+                                        } else {
+                                            commons[value] = valueMap.index;
+                                        }
+                                        if (value === "NO_ECOHYBRID") common.def = "NO_ECOHYBRID";
                                     } else {
-                                        common.states[value] = value;
+                                        if (value === "NO_ECOHYBRID") common.def = "NO_ECOHYBRID";
+                                        commons[value] = value;
                                     }
                                 });
                             }
                         }
+                        if (Object.keys(commons).length > 0) {
+                            if (common["states"] != null) {
+                                delete common.states
+                            }
+                            common.states = commons;
+                        };
                         if (!obj) {
                             // @ts-ignore
                             await this.setObjectNotExistsAsync(path + state, {
@@ -739,9 +812,8 @@ class LgThinq extends utils.Adapter {
                             });
                         } else {
                             // @ts-ignore
-                            this.extendObject(path + state, {
-                                common: common,
-                            });
+                            obj.common = common;
+                            const res = await this.setForeignObjectAsync(this.namespace + "." + path + state, obj);
                         }
                     });
                 });
@@ -750,7 +822,7 @@ class LgThinq extends utils.Adapter {
                     this.getObject(path + state, async (err, obj) => {
                         if (obj) {
                             const common = obj.common;
-                            common.states = {};
+                            let commons= {};
                             let valueObject = deviceModel["Value"][state]["option"];
                             if (deviceModel["Value"][state]["value_mapping"]) {
                                 valueObject = deviceModel["Value"][state]["value_mapping"];
@@ -758,17 +830,30 @@ class LgThinq extends utils.Adapter {
                             if (valueObject) {
                                 if (valueObject.max) {
                                     common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
-                                    common.max = valueObject.max;
+                                    if (state === "moreLessTime") {
+                                        common.max = 200;
+                                    } else if (state === "timeSetting") {
+                                        common.max = 360;
+                                    } else {
+                                        common.max = valueObject.max;
+                                    }
+                                    common.def = 0;
                                 } else {
                                     const values = Object.keys(valueObject);
                                     values.forEach((value) => {
                                         const content = valueObject[value];
                                         if (typeof content === "string") {
-                                            common.states[value] = content.replace("@", "");
+                                            commons[value] = content.replace("@", "");
                                         }
                                     });
                                 }
                             }
+                            if (Object.keys(commons).length > 0) {
+                                if (common["states"] != null) {
+                                    delete common.states
+                                }
+                                common.states = commons;
+                            };
                             if (!obj) {
                                 // @ts-ignore
                                 await this.setObjectNotExistsAsync(path + state, {
@@ -780,14 +865,187 @@ class LgThinq extends utils.Adapter {
                                 });
                             } else {
                                 // @ts-ignore
-                                this.extendObject(path + state, {
-                                    common: common,
-                                });
+                                obj.common = common;
+                                const res = await this.setForeignObjectAsync(this.namespace + "." + path + state, obj);
                             }
                         }
                     });
                 });
         }
+    }
+
+    async start_mqtt() {
+        try {
+            const mqttHost = await this.getMqttInfo(constants.MQTT_URL);
+            let mqttHostParts = [];
+            if (mqttHost && mqttHost.result && mqttHost.result.mqttServer) {
+                if (mqttHost.result.apiServer && !mqttHost.result.apiServer.includes("-ats.iot")) {
+    		    mqttHostParts = mqttHost.result.mqttServer.split(".iot.");
+                    this.mqttdata["apiServer"] = mqttHostParts[0] + "-ats.iot." + mqttHostParts[1];
+                }
+                if (!mqttHost.result.mqttServer.includes("-ats.iot")) {
+    		    mqttHostParts = mqttHost.result.mqttServer.split(".iot.");
+    		    this.mqttdata["mqttServer"] = mqttHostParts[0] + "-ats.iot." + mqttHostParts[1];
+                }
+            } else {
+                this.log.info("Cannot load MQTT Host");
+                return;
+            }
+            this.log.info("Found MQTT Host");
+            this.mqttdata.mqttServer = this.resolveUrl(this.mqttdata.mqttServer, "", true);
+            const mqttCer = await this.getMqttInfo(constants.MQTT_CER);
+            if (!mqttCer) {
+                this.log.info("Cannot load AWS CER");
+                return;
+            }
+            this.mqttdata.amazon = mqttCer;
+            this.log.info("Found AWS CER");
+            const certGenerator = await this.getMqttInfo(constants.MQTT_AZU);
+            if (certGenerator.privKey && certGenerator.csr) {
+                this.mqttdata.privateKey = certGenerator.privKey;
+                this.mqttdata.key = certGenerator.csr;
+            } else {
+                const key = forge.pki.rsa.generateKeyPair(2048);
+                const keys = {};
+                keys.privateKey = forge.pki.privateKeyToPem(key.privateKey);
+                this.mqttdata.privateKey = keys.privateKey;
+                keys.publicKey = forge.pki.publicKeyToPem(key.publicKey);
+                const csr = forge.pki.createCertificationRequest();
+                csr.publicKey = forge.pki.publicKeyFromPem(keys.publicKey);
+                csr.setSubject([
+                    {
+                        shortName: 'CN',
+                        value: 'AWS IoT Certificate',
+                    },
+                    {
+                        shortName: 'O',
+                        value: 'Amazon',
+                    },
+                ]);
+                csr.sign(forge.pki.privateKeyFromPem(keys.privateKey), forge.md.sha256.create());
+                this.mqttdata.key = forge.pki.certificationRequestToPem(csr);
+            }
+            this.log.info("Create certification done");
+            const client_request = await this.getUser("service/users/client",{});
+            const client_certificate = await this.getUser("service/users/client/certificate",{csr:this.mqttdata.key});
+            if (!client_certificate && !client_certificate.result && !client_certificate.result.certificatePem) {
+                this.log.info("Cannot load certificatePem");
+                return;
+            }
+            if (!client_certificate && !client_certificate.result && !client_certificate.result.subscriptions) {
+                this.log.info("Cannot load subscriptions");
+                return;
+            }
+            this.mqttdata.certificatePem = client_certificate.result.certificatePem;
+            this.mqttdata.subscriptions = client_certificate.result.subscriptions;
+            this.log.info("Start MQTT Connection");
+            this.connectMqtt();
+        } catch (error) {
+            this.log.error("Create CSR ERROR: " + error);
+            this.mqttC = {};
+        }
+    }
+
+    async connectMqtt() {
+        try {
+            let region = "eu-west-1";
+            const split_mqtt = this.mqttdata.mqttServer.split(".");
+            if (split_mqtt.length > 1) {
+                region = split_mqtt[2];
+            }
+            const connectData = {
+                caCert: Buffer.from(this.mqttdata.amazon, 'utf-8'),
+                privateKey: Buffer.from(this.mqttdata.privateKey, 'utf-8'),
+                clientCert: Buffer.from(this.mqttdata.certificatePem, 'utf-8'),
+                clientId: constants.API_CLIENT_ID,
+                host: this.mqttdata.mqttServer,
+                username: "iobroker",
+                region: region,
+                baseReconnectTimeMs: 5000,
+            };
+            this.mqttC = awsIot.device(connectData);
+
+            this.mqttC.on("offline", () => {
+                this.log.info("Thinq MQTT offline");
+            });
+
+            this.mqttC.on("end", () => {
+                this.log.info("mqtt end");
+            });
+
+            this.mqttC.on("close", () => {
+                this.log.info("mqtt closed");
+            });
+
+            this.mqttC.on("disconnect", (packet) => {
+                this.log.info("MQTT disconnect" + packet);
+            });
+
+            this.mqttC.on("connect", () => {
+                this.log.info("MQTT connected to: " + this.mqttdata.subscriptions);
+                for (const subscription of this.mqttdata.subscriptions) {
+                    this.mqttC.subscribe(subscription);
+                }
+            });
+
+            this.mqttC.on("reconnect", () => {
+                this.log.info("MQTT reconnect");
+            });
+
+            this.mqttC.on("message", async (topic, message) => {
+                try {
+                    const monitoring = JSON.parse(message);
+                    if (monitoring["data"]) {
+                        this.log.debug("Monitoring: " + JSON.stringify(monitoring));
+                    }
+                    this.log.debug("Monitoring: " + JSON.stringify(monitoring));
+                    if (
+                        monitoring &&
+                        monitoring.data &&
+                        monitoring.data.state &&
+                        monitoring.data.state.reported &&
+                        monitoring.type &&
+                        monitoring.deviceId &&
+                        monitoring.type === "monitoring"
+                    ) {
+                        this.extractKeys(this, monitoring.deviceId + ".snapshot", monitoring.data.state.reported);
+                    }
+                } catch (error) {
+                    this.log.info("message: " + error);
+                }
+            });
+
+            this.mqttC.on("error", (error) => {
+                this.log.error("MQTT ERROR: " + error);
+            });
+        } catch (error) {
+            this.log.error("MQTT ERROR: " + error);
+            this.mqttC = {};
+        }
+    }
+
+    async getMqttInfo(requestUrl) {
+        const headers = {
+            "x-country-code": "DE",
+            "x-service-phase": "OP"
+        };
+        return this.requestClient
+            .get(requestUrl, { headers })
+            .then((res) => res.data)
+            .catch((error) => {
+                this.log.error("getMqttInfo: " + error);
+            });
+    }
+
+    async getUser(uri_value, data) {
+        const userUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", uri_value);
+        const headers = this.defaultHeaders;
+        return this.requestClient
+            .post(userUrl, data, { headers })
+            .then((resp) => resp.data)
+            .catch((error) => {
+                this.log.error(error);
+            });
     }
 
     async sendCommandToDevice(deviceId, values, thinq1) {
@@ -802,6 +1060,9 @@ class LgThinq extends utils.Adapter {
             controlUrl = this.gateway.thinq1Uri + "/" + "rti/rtiControl";
             data = values;
         }
+
+        this.log.debug(JSON.stringify(data));
+
         return this.requestClient
             .post(controlUrl, data, { headers })
             .then((resp) => resp.data)
@@ -810,11 +1071,13 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
             });
     }
+
     sleep(ms) {
         return new Promise((resolve) => {
             this.sleepTimer = setTimeout(resolve, ms);
         });
     }
+
     /**
      * Is called when adapter shuts down - callback has to be called under any circumstances!
      * @param {() => void} callback
@@ -840,105 +1103,244 @@ class LgThinq extends utils.Adapter {
     async onStateChange(id, state) {
         if (state) {
             if (!state.ack) {
-                const deviceId = id.split(".")[2];
-
-                if (id.indexOf(".remote.") !== -1) {
-                    const action = id.split(".")[4];
-                    let data;
-                    let onoff = "";
-                    let response;
-
-                    if (["fridgeTemp", "freezerTemp", "expressMode", "ecoFriendly"].includes(action)) {
-                        const dataTemp = (await this.getStateAsync(deviceId + ".snapshot.refState.tempUnit")) || { val: "" };
-                        switch (action) {
-                            case "fridgeTemp":
-                                data = { dataSetList: { refState: { fridgeTemp: state.val, tempUnit: dataTemp.val } } };
-                                break;
-                            case "freezerTemp":
-                                data = { dataSetList: { refState: { freezerTemp: state.val, tempUnit: dataTemp.val } } };
-                                break;
-                            case "expressMode":
-                                onoff = state.val ? "EXPRESS_ON" : "OFF";
-                                data = { dataSetList: { refState: { expressMode: onoff, tempUnit: dataTemp.val } } };
-                                break;
-                            case "ecoFriendly":
-                                onoff = state.val ? "ON" : "OFF";
-                                data = { dataSetList: { refState: { ecoFriendly: onoff, tempUnit: dataTemp.val } } };
-                                break;
-                            default:
-                                this.log.info("Command " + action + " not found");
-                                return;
-                                break;
-                        }
-                        response = await this.sendCommandToDevice(deviceId, data);
-                        this.log.debug("ctrlKey: " + JSON.stringify(response));
+                try {
+                    const secsplit  = id.split('.')[id.split('.').length-2];
+                    const lastsplit = id.split('.')[id.split('.').length-1];
+                    const deviceId = id.split(".")[2];
+                    if (lastsplit === "sendJSON") {
+                        const headers = this.defaultHeaders;
+                        const controlUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + deviceId + "/control-sync");
+                        const sendData = JSON.parse(state.val);
+                        this.log.debug(JSON.stringify(sendData));
+                        const sendJ = await this.requestClient
+                            .post(controlUrl, sendData, { headers })
+                            .then((resp) => resp.data)
+                            .catch((error) => {
+                            this.log.error("Send failed");
+                            this.log.error(error);
+                        });
+                        this.log.info(JSON.stringify(sendJ));
                         return;
                     }
-
-                    const rawData = this.deviceControls[deviceId][action];
-                    data = { ctrlKey: action, command: rawData.command, dataSetList: rawData.data };
-
-                    if (action === "WMStop" || action === "WMOff") {
-                        data.ctrlKey = "WMControl";
+                    if (secsplit === "Course") {
+                        this.courseactual[deviceId][lastsplit] = state.val;
+                        this.log.debug(JSON.stringify(this.courseactual[deviceId]));
+                        return;
                     }
+                    let devType = {}
+                    if (this.modelInfos[deviceId] && this.modelInfos[deviceId]["deviceType"]) {
+                        devType["val"] = this.modelInfos[deviceId]["deviceType"];
+                    } else {
+                        devType = await this.getStateAsync(deviceId + ".deviceType");
+                    }
+                    if (secsplit === "Statistic" && lastsplit === "sendRequest" && state.val) {
+                        if (devType.val > 100 && devType.val < 104) {
+                            this.sendStaticRequest(deviceId, true);
+                        } else {
+                            this.sendStaticRequest(deviceId, false);
+                        }
+                        this.log.debug(JSON.stringify(this.courseactual[deviceId]));
+                        return;
+                    }
+                    let response  = null;
+                    if (id.indexOf(".remote.") !== -1) {
+                        let no_for    = true;
+                        let action    = id.split(".")[4];
+                        let data      = {};
+                        let onoff     = "";
+                        let rawData   = {};
+                        let dev       = "";
+                        if ([
+                            "LastCourse",
+                            "Favorite",
+                            "WMDownload_Select",
+                            "WMStart",
+                            "WMDownload",
+                            "fridgeTemp",
+                            "freezerTemp",
+                            "expressMode",
+                            "ecoFriendly"].includes(action))
+                        {
+                            const dataTemp = await this.getStateAsync(deviceId + ".snapshot.refState.tempUnit");
+                            switch (action) {
+                                case "fridgeTemp":
+                                    rawData.data = { refState: { fridgeTemp: state.val, tempUnit: dataTemp.val } };
+                                    action = "basicCtrl";
+                                    rawData.command = "Set";
+                                    break;
+                                case "freezerTemp":
+                                    rawData.data = { refState: { freezerTemp: state.val, tempUnit: dataTemp.val } };
+                                    action = "basicCtrl";
+                                    rawData.command = "Set";
+                                    break;
+                                case "expressMode":
+                                    noff = (state.val === "IGNORE") ? "OFF" : state.val;
+                                    rawData.data = { refState: { expressMode: noff, tempUnit: dataTemp.val } };
+                                    action = "basicCtrl";
+                                    rawData.command = "Set";
+                                    break;
+                                case "ecoFriendly":
+                                    onoff = state.val ? "ON" : "OFF";
+                                    rawData.data = { refState: { ecoFriendly: onoff, tempUnit: dataTemp.val } };
+                                    action = "basicCtrl";
+                                    rawData.command = "Set";
+                                    break;
+                                case "LastCourse":
+                                    if (state.val > 0) {
+                                        this.setCourse(id, deviceId, state);
+                                    }
+                                    return;
+                                    break;
+                                case "Favorite":
+                                    this.setFavoriteCourse(deviceId);
+                                    return;
+                                    break;
+                                case "WMDownload_Select":
+                                    if (state.val === "NOT_SELECTED") {
+                                        return;
+                                    }
+                                    if (
+                                        this.deviceJson &&
+                                        this.deviceJson[deviceId] &&
+                                        this.deviceJson[deviceId]["Course"] &&
+                                        this.deviceJson[deviceId]["Course"][state.val]
+                                    ) {
+                                        this.insertCourse(state.val, deviceId, "Course");
+                                        return;
+                                    } else if (
+                                        this.deviceJson &&
+                                        this.deviceJson[deviceId] &&
+                                        this.deviceJson[deviceId]["SmartCourse"] &&
+                                        this.deviceJson[deviceId]["SmartCourse"][state.val]
+                                    ) {
+                                        this.insertCourse(state.val, deviceId, "SmartCourse");
+                                        return;
+                                    } else {
+                                        this.log.warn("Command " + action + " and value " + state.val + " not found");
+                                        return;
+                                    }
+                                    break;
+                                case "WMDownload":
+                                    rawData = await this.createCourse(state, deviceId, action);
+                                    this.log.debug(JSON.stringify(this.courseactual[deviceId]));
+                                    this.log.debug(JSON.stringify(rawData));
+                                    if (rawData.data && Object.keys(rawData).length === 0) {
+                                        return;
+                                    }
+                                    if (
+                                        !this.coursedownload[deviceId] &&
+                                        this.deviceJson &&
+                                        rawData["current_course"] &&
+                                        this.deviceJson[deviceId] &&
+                                        this.deviceJson[deviceId]["Course"] &&
+                                        this.deviceJson[deviceId]["Course"][rawData["current_course"]]
+                                    ) {
+                                        return;
+                                    }
+                                    break;
+                                case "WMStart":
+                                    const WMStateDL = await this.getStateAsync(deviceId + ".remote.WMDownload_Select");
+                                    if (!WMStateDL) {
+                                        this.log.warn("Datapoint WMDownload_Select is not exists!");
+                                        return;
+                                    } else if (WMStateDL.val === "NOT_SELECTED") {
+                                        this.log.warn("Datapoint WMDownload_Select is empty!");
+                                        return;
+                                    }
+                                    rawData = await this.createCourse(state, deviceId, action);
+                                    this.log.debug(JSON.stringify(rawData));
+                                    await this.setStateAsync(deviceId + ".remote.WMDownload_Select", {
+                                        val: "NOT_SELECTED",
+                                        ack: true
+                                    });
+                                    if (Object.keys(rawData).length === 0) {
+                                        return;
+                                    }
+                                    break;
+                                default:
+                                    this.log.info("Command " + action + " not found");
+                                    return;
+                                    break;
+                            }
+                            no_for = false;
+                            response = "";
+                        } else {
+                            rawData = this.deviceControls[deviceId][action] ? this.deviceControls[deviceId][action] : {};
+                        }
+                        if (rawData && rawData.command && rawData.data) {
+                            data = { ctrlKey: action, command: rawData.command, dataSetList: rawData.data };
+                        }
 
-                    this.log.debug(JSON.stringify(data));
-                    if (data.dataSetList) {
-                        const type = Object.keys(data.dataSetList)[0];
-                        if (type) {
-                            for (const dataElement of Object.keys(data.dataSetList[type])) {
-                                if (!dataElement.startsWith("control")) {
-                                    const dataState = await this.getStateAsync(deviceId + ".snapshot." + type + "." + dataElement);
-                                    if (dataState) {
-                                        data.dataSetList[dataElement] = dataState.val;
+                        if (action === "WMStop" || action === "WMOff") {
+                            data.ctrlKey = "WMControl";
+                        }
+
+                        this.log.debug(JSON.stringify(data));
+
+                        if (data.dataSetList && no_for) {
+
+                            const type = Object.keys(data.dataSetList)[0];
+                            if (type) {
+                                for (const dataElement of Object.keys(data.dataSetList[type])) {
+                                    if (!dataElement.startsWith("control")) {
+                                        const dataState = await this.getStateAsync(deviceId + ".snapshot." + type + "." + dataElement);
+                                        if (dataState) {
+                                            data.dataSetList[dataElement] = dataState.val;
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                    if (data.command && data.dataSetList) {
-                        this.log.debug(JSON.stringify(data));
-                        response = await this.sendCommandToDevice(deviceId, data);
+                        if (data && data.command && data.dataSetList) {
+                            this.log.debug(JSON.stringify(data));
+                            response = await this.sendCommandToDevice(deviceId, data);
+                        } else {
+                            rawData.value = rawData.value.replace("{Operation}", state.val ? "Start" : "Stop");
+                            data = {
+                                lgedmRoot: {
+                                    deviceId: deviceId,
+                                    workId: uuid.v4(),
+                                    cmd: rawData.cmd,
+                                    cmdOpt: rawData.cmdOpt,
+                                    value: rawData.value,
+                                    data: "",
+                                },
+                            };
+
+                            this.log.debug(JSON.stringify(data));
+                            response = await this.sendCommandToDevice(deviceId, data, true);
+                        }
+
+                        this.log.debug(JSON.stringify(response));
+
+                        if (
+                            (response && response.resultCode && response.resultCode !== "0000") ||
+                            (response && response.lgedmRoot && response.lgedmRoot.returnCd !== "0000")
+                        ) {
+                            this.log.error("Command not succesful");
+                            this.log.error(JSON.stringify(response));
+                        }
                     } else {
-                        rawData.value = rawData.value.replace("{Operation}", state.val ? "Start" : "Stop");
-                        data = {
-                            lgedmRoot: {
-                                deviceId: deviceId,
-                                workId: uuid.v4(),
-                                cmd: rawData.cmd,
-                                cmdOpt: rawData.cmdOpt,
-                                value: rawData.value,
-                                data: "",
-                            },
-                        };
-
+                        const object = await this.getObjectAsync(id);
+                        const name = object.common.name;
+                        const data = { ctrlKey: "basicCtrl", command: "Set", dataKey: name, dataValue: state.val };
+                        if (name.indexOf(".operation") !== -1) {
+                            data.command = "Operation";
+                        }
                         this.log.debug(JSON.stringify(data));
-                        response = await this.sendCommandToDevice(deviceId, data, true);
+                        const response = await this.sendCommandToDevice(deviceId, data);
+                        this.log.debug(JSON.stringify(response));
+                        if (response && response.resultCode !== "0000") {
+                            this.log.error("Command not succesful");
+                            this.log.error(JSON.stringify(response));
+                        }
                     }
-
-                    this.log.debug(JSON.stringify(response));
-                    if ((response && response.resultCode && response.resultCode !== "0000") || (response && response.lgedmRoot && response.lgedmRoot.returnCd !== "0000")) {
-                        this.log.error("Command not succesful");
-                        this.log.error(JSON.stringify(response));
-                    }
-                } else {
-                    const object = await this.getObjectAsync(id);
-                    const name = object.common.name;
-                    const data = { ctrlKey: "basicCtrl", command: "Set", dataKey: name, dataValue: state.val };
-                    if (name.indexOf(".operation") !== -1) {
-                        data.command = "Operation";
-                    }
-                    this.log.debug(JSON.stringify(data));
-                    const response = await this.sendCommandToDevice(deviceId, data);
-                    this.log.debug(JSON.stringify(response));
-                    if (response && response.resultCode !== "0000") {
-                        this.log.error("Command not succesful");
-                        this.log.error(JSON.stringify(response));
-                    }
+                    this.refreshTimeout = setTimeout(async () => {
+                        await this.updateDevices();
+                    }, 10 * 1000);
+                } catch (e) {
+                    this.log.error("onStateChange: " + e);
                 }
-                this.refreshTimeout = setTimeout(async () => {
-                    await this.updateDevices();
-                }, 10 * 1000);
             } else {
                 const idArray = id.split(".");
                 const lastElement = idArray.pop();

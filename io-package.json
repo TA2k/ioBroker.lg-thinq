@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "lg-thinq",
-        "version": "0.0.7",
+        "version": "0.1.0",
         "news": {
+            "0.1.0": {
+                "en": "Added MQTT connection for live status updates",
+                "de": "MQTT Verbindung hinzugefügt für Live-Statusupdates"
+            },
             "0.0.7": {
                 "en": "Bugfixes"
             },
@@ -44,13 +48,8 @@
             "pl": "Adapter do LG ThinQ",
             "zh-cn": "LG ThinQ 适配器"
         },
-        "authors": [
-            "TA2k <tombox2020@gmail.com>"
-        ],
-        "keywords": [
-            "lg",
-            "thinq"
-        ],
+        "authors": ["TA2k <tombox2020@gmail.com>"],
+        "keywords": ["lg", "thinq"],
         "license": "MIT",
         "platform": "Javascript/Node.js",
         "main": "main.js",
@@ -81,12 +80,8 @@
             }
         ]
     },
-    "encryptedNative": [
-        "password"
-    ],
-    "protectedNative": [
-        "password"
-    ],
+    "encryptedNative": ["password"],
+    "protectedNative": ["password"],
     "native": {
         "user": "",
         "password": "",

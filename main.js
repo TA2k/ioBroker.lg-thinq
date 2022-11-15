@@ -421,6 +421,12 @@ class LgThinq extends utils.Adapter {
         }
         this.extractKeys(this, "general", resp);
         this.log.debug(JSON.stringify(resp));
+        if (!resp.account) {
+            this.log.error("No account found");
+            this.log.error(JSON.stringify(resp));
+            return;
+            deviceModel["MonitoringValue"];
+        }
         return resp.account.userNo;
     }
 
@@ -686,6 +692,10 @@ class LgThinq extends utils.Adapter {
     }
     async extractValues(device) {
         const deviceModel = this.modelInfos[device.deviceId];
+        if (!deviceModel) {
+            this.log.warn(`No model info for ${device.deviceId}`);
+            return;
+        }
         if (deviceModel["MonitoringValue"] || deviceModel["Value"]) {
             this.log.debug("extract values from model");
             let type = "";

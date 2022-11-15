@@ -966,7 +966,7 @@ class LgThinq extends utils.Adapter {
             this.mqttC = awsIot.device(connectData);
 
             this.mqttC.on("offline", () => {
-                this.log.info("Worxcloud MQTT offline");
+                this.log.info("Thinq MQTT offline");
             });
 
             this.mqttC.on("end", () => {

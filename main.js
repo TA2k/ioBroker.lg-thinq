@@ -130,7 +130,7 @@ class LgThinq extends utils.Adapter {
                     this.setState("info.connection", false, true);
                     //this.terms = await this.Term();
                     return;
-                } else if (listDevices && listDevices === "TERMS") {
+                } else if (listDevices && listDevices === "BLOCKED") {
                     return;
                 }
 
@@ -191,7 +191,11 @@ class LgThinq extends utils.Adapter {
             .get(deviceUrl, { headers })
             .then((res) => res.data.result)
             .catch((error) => {
-                this.log.error("getDeviceEnergy: " + error);
+                if (error.message && error.message === "Request failed with status code 400") {
+                    return 400;
+                }
+                this.log.debug("getDeviceEnergy: " + error);
+                return 500;
             });
     }
 

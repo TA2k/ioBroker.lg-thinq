@@ -645,8 +645,10 @@ class LgThinq extends utils.Adapter {
                 deviceModel["folder"] = "";
                 if (Object.keys(deviceModel["ControlWifi"])[0] != null) {
                     const wifi = Object.keys(deviceModel["ControlWifi"])[0];
-                    if (Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0] != null) {
-                        deviceModel["folder"] = Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0];
+                    if (deviceModel["ControlWifi"][wifi]["data"]) {
+                        if (Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0] != null) {
+                            deviceModel["folder"] = Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0];
+                        }
                     }
                 }
                 if (deviceModel["ControlWifi"].action) {

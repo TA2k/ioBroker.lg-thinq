@@ -1125,13 +1125,15 @@ class LgThinq extends utils.Adapter {
                     } else {
                         devType = await this.getStateAsync(deviceId + ".deviceType");
                     }
-                    if (secsplit === "Statistic" && lastsplit === "sendRequest" && state.val) {
+                    if (secsplit === "Statistic" && lastsplit === "sendRequest") {
                         if (devType.val > 100 && devType.val < 104) {
                             this.sendStaticRequest(deviceId, true);
                         } else {
                             this.sendStaticRequest(deviceId, false);
                         }
                         this.log.debug(JSON.stringify(this.courseactual[deviceId]));
+                        return;
+                    } else if (secsplit === "Statistic") {
                         return;
                     }
                     let response = null;

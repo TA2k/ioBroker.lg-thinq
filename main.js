@@ -561,7 +561,10 @@ class LgThinq extends utils.Adapter {
         }
         const headers = this.defaultHeaders;
         const devices = [];
-
+        if (!this.homes) {
+            this.log.error("No homes found");
+            return [];
+        }
         // get all devices in home
         for (let i = 0; i < this.homes.length; i++) {
             const homeUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/homes/" + this.homes[i].homeId);

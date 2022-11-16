@@ -61,6 +61,7 @@ class LgThinq extends utils.Adapter {
         this.courseactual = {};
         this.coursetypes = {};
         this.coursedownload = {};
+        this.mqtt_userID = "";
     }
 
     /**
@@ -119,6 +120,9 @@ class LgThinq extends utils.Adapter {
                     this.refreshNewToken();
                 }, (this.session.expires_in - 100) * 1000);
                 this.userNumber = await this.getUserNumber();
+                const hash = crypto.createHash('sha256');
+                const clientID = this.userNumber ? this.userNumber : constants.API_CLIENT_ID;
+                this.mqtt_userID = hash.update(clientID + (new Date()).getTime()).digest('hex');
                 this.defaultHeaders["x-user-no"] = this.userNumber;
                 this.defaultHeaders["x-emp-token"] = this.session.access_token;
                 const listDevices = await this.getListDevices();
@@ -945,13 +949,14 @@ class LgThinq extends utils.Adapter {
             if (split_mqtt.length > 1) {
                 region = split_mqtt[2];
             }
+            this.log.debug("userid: " + this.mqtt_userID);
             const connectData = {
                 caCert: Buffer.from(this.mqttdata.amazon, "utf-8"),
                 privateKey: Buffer.from(this.mqttdata.privateKey, "utf-8"),
                 clientCert: Buffer.from(this.mqttdata.certificatePem, "utf-8"),
-                clientId: constants.API_CLIENT_ID,
+                clientId: this.mqtt_userID,
                 host: this.mqttdata.mqttServer,
-                username: "iobroker",
+                username: this.userNumber,
                 region: region,
                 baseReconnectTimeMs: 5000,
             };
@@ -1032,6 +1037,7 @@ class LgThinq extends utils.Adapter {
     async getUser(uri_value, data) {
         const userUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", uri_value);
         const headers = this.defaultHeaders;
+        headers['x-client-id'] = this.mqtt_userID;
         return this.requestClient
             .post(userUrl, data, { headers })
             .then((resp) => resp.data)

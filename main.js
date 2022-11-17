@@ -982,6 +982,11 @@ class LgThinq extends utils.Adapter {
 
             this.mqttC.on("offline", () => {
                 this.log.info("Thinq MQTT offline");
+                //this.mqttC.end();
+                //this.log.debug('MQTT offline! Reconnection in 60 seconds!');
+                //setTimeout(async () => {
+                //    this.start_mqtt();
+                //}, 60000);
             });
 
             this.mqttC.on("end", () => {

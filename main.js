@@ -61,6 +61,7 @@ class LgThinq extends utils.Adapter {
         this.courseactual = {};
         this.coursetypes = {};
         this.coursedownload = {};
+        this.mqtt_userID = "";
     }
 
     /**
@@ -119,6 +120,9 @@ class LgThinq extends utils.Adapter {
                     this.refreshNewToken();
                 }, (this.session.expires_in - 100) * 1000);
                 this.userNumber = await this.getUserNumber();
+                const hash = crypto.createHash('sha256');
+                const clientID = this.userNumber ? this.userNumber : constants.API_CLIENT_ID;
+                this.mqtt_userID = hash.update(clientID + (new Date()).getTime()).digest('hex');
                 this.defaultHeaders["x-user-no"] = this.userNumber;
                 this.defaultHeaders["x-emp-token"] = this.session.access_token;
                 const listDevices = await this.getListDevices();
@@ -126,7 +130,7 @@ class LgThinq extends utils.Adapter {
                     this.setState("info.connection", false, true);
                     //this.terms = await this.Term();
                     return;
-                } else if (listDevices && listDevices === "TERMS") {
+                } else if (listDevices && listDevices === "BLOCKED") {
                     return;
                 }
 
@@ -187,7 +191,11 @@ class LgThinq extends utils.Adapter {
             .get(deviceUrl, { headers })
             .then((res) => res.data.result)
             .catch((error) => {
-                this.log.error("getDeviceEnergy: " + error);
+                if (error.message && error.message === "Request failed with status code 400") {
+                    return 400;
+                }
+                this.log.debug("getDeviceEnergy: " + error);
+                return 500;
             });
     }
 
@@ -555,6 +563,12 @@ class LgThinq extends utils.Adapter {
             } else if (home_result && home_result.result && home_result.resultCode === "0110") {
                 this.log.error("Could not receive homes. Please check your app and accept new agreements");
                 return "TERMS";
+            } else if (
+                !home_result ||
+                !home_result.result ||
+                !home_result.result.item
+            ) {
+                return "BLOCKED";
             }
             if (!home_result || !home_result.result || !home_result.result.item) {
                 this.log.error("Could not receive homes");
@@ -649,14 +663,22 @@ class LgThinq extends utils.Adapter {
             if (deviceModel["ControlWifi"]) {
                 this.log.debug(JSON.stringify(deviceModel["ControlWifi"]));
                 let controlWifi = deviceModel["ControlWifi"];
-                deviceModel["folder"] = "";
-                if (Object.keys(deviceModel["ControlWifi"])[0] != null) {
-                    const wifi = Object.keys(deviceModel["ControlWifi"])[0];
-                    if (deviceModel["ControlWifi"][wifi]["data"]) {
-                        if (Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0] != null) {
+
+                try {
+                    deviceModel["folder"] = "";
+                    if (Object.keys(deviceModel["ControlWifi"])[0] != null) {
+                        const wifi = Object.keys(deviceModel["ControlWifi"])[0];
+                        if (
+                            deviceModel["ControlWifi"][wifi] &&
+                            deviceModel["ControlWifi"][wifi]["data"] &&
+                            Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0] != null
+                        ) {
+
                             deviceModel["folder"] = Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0];
                         }
                     }
+                } catch (error) {
+                    this.log.debug("Cannot find the folder!");
                 }
                 if (deviceModel["ControlWifi"].action) {
                     controlWifi = deviceModel["ControlWifi"].action;
@@ -954,13 +976,14 @@ class LgThinq extends utils.Adapter {
             if (split_mqtt.length > 1) {
                 region = split_mqtt[2];
             }
+            this.log.debug("userid: " + this.mqtt_userID);
             const connectData = {
                 caCert: Buffer.from(this.mqttdata.amazon, "utf-8"),
                 privateKey: Buffer.from(this.mqttdata.privateKey, "utf-8"),
                 clientCert: Buffer.from(this.mqttdata.certificatePem, "utf-8"),
-                clientId: constants.API_CLIENT_ID,
+                clientId: this.mqtt_userID,
                 host: this.mqttdata.mqttServer,
-                username: "iobroker",
+                username: this.userNumber,
                 region: region,
                 baseReconnectTimeMs: 5000,
             };
@@ -968,6 +991,11 @@ class LgThinq extends utils.Adapter {
 
             this.mqttC.on("offline", () => {
                 this.log.info("Thinq MQTT offline");
+                //this.mqttC.end();
+                //this.log.debug('MQTT offline! Reconnection in 60 seconds!');
+                //setTimeout(async () => {
+                //    this.start_mqtt();
+                //}, 60000);
             });
 
             this.mqttC.on("end", () => {
@@ -1041,6 +1069,7 @@ class LgThinq extends utils.Adapter {
     async getUser(uri_value, data) {
         const userUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", uri_value);
         const headers = this.defaultHeaders;
+        headers['x-client-id'] = this.mqtt_userID;
         return this.requestClient
             .post(userUrl, data, { headers })
             .then((resp) => resp.data)
@@ -1134,13 +1163,15 @@ class LgThinq extends utils.Adapter {
                     } else {
                         devType = await this.getStateAsync(deviceId + ".deviceType");
                     }
-                    if (secsplit === "Statistic" && lastsplit === "sendRequest" && state.val) {
+                    if (secsplit === "Statistic" && lastsplit === "sendRequest") {
                         if (devType.val > 100 && devType.val < 104) {
                             this.sendStaticRequest(deviceId, true);
                         } else {
                             this.sendStaticRequest(deviceId, false);
                         }
                         this.log.debug(JSON.stringify(this.courseactual[deviceId]));
+                        return;
+                    } else if (secsplit === "Statistic") {
                         return;
                     }
                     let response = null;

@@ -656,12 +656,20 @@ class LgThinq extends utils.Adapter {
             if (deviceModel["ControlWifi"]) {
                 this.log.debug(JSON.stringify(deviceModel["ControlWifi"]));
                 let controlWifi = deviceModel["ControlWifi"];
-                deviceModel["folder"] = "";
-                if (Object.keys(deviceModel["ControlWifi"])[0] != null) {
-                    const wifi = Object.keys(deviceModel["ControlWifi"])[0];
-                    if (Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0] != null) {
-                        deviceModel["folder"] = Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0];
+                try {
+                    deviceModel["folder"] = "";
+                    if (Object.keys(deviceModel["ControlWifi"])[0] != null) {
+                        const wifi = Object.keys(deviceModel["ControlWifi"])[0];
+                        if (
+                            deviceModel["ControlWifi"][wifi] &&
+                            deviceModel["ControlWifi"][wifi]["data"] &&
+                            Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0] != null
+                        ) {
+                            deviceModel["folder"] = Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0];
+                        }
                     }
+                } catch (error) {
+                    this.log.debug("Cannot find the folder!");
                 }
                 if (deviceModel["ControlWifi"].action) {
                     controlWifi = deviceModel["ControlWifi"].action;

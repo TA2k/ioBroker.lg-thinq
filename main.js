@@ -560,7 +560,7 @@ class LgThinq extends utils.Adapter {
             if (home_result && home_result.resultCode && home_result.resultCode === "0000" && home_result.result && home_result.result.item == null) {
                 this.log.warn("LG does not provide any data! Maybe your account is blocked");
                 return "BLOCKED";
-            } else if (!home_result && home_result.result && home_result.resultCode === "0110") {
+            } else if (home_result && home_result.result && home_result.resultCode === "0110") {
                 this.log.error("Could not receive homes. Please check your app and accept new agreements");
                 return "TERMS";
             } else if (
@@ -570,12 +570,19 @@ class LgThinq extends utils.Adapter {
             ) {
                 return "BLOCKED";
             }
+            if (!home_result || !home_result.result || !home_result.result.item) {
+                this.log.error("Could not receive homes");
+                return;
+            }
             this.homes = home_result.result.item;
             this.extractKeys(this, "homes", this.homes);
         }
         const headers = this.defaultHeaders;
         const devices = [];
-
+        if (!this.homes) {
+            this.log.error("No homes found");
+            return [];
+        }
         // get all devices in home
         for (let i = 0; i < this.homes.length; i++) {
             const homeUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/homes/" + this.homes[i].homeId);
@@ -656,6 +663,7 @@ class LgThinq extends utils.Adapter {
             if (deviceModel["ControlWifi"]) {
                 this.log.debug(JSON.stringify(deviceModel["ControlWifi"]));
                 let controlWifi = deviceModel["ControlWifi"];
+
                 try {
                     deviceModel["folder"] = "";
                     if (Object.keys(deviceModel["ControlWifi"])[0] != null) {
@@ -665,6 +673,7 @@ class LgThinq extends utils.Adapter {
                             deviceModel["ControlWifi"][wifi]["data"] &&
                             Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0] != null
                         ) {
+
                             deviceModel["folder"] = Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0];
                         }
                     }

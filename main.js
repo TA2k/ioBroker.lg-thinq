@@ -563,6 +563,12 @@ class LgThinq extends utils.Adapter {
             } else if (!home_result && home_result.result && home_result.resultCode === "0110") {
                 this.log.error("Could not receive homes. Please check your app and accept new agreements");
                 return "TERMS";
+            } else if (
+                !home_result ||
+                !home_result.result ||
+                !home_result.result.item
+            ) {
+                return "BLOCKED";
             }
             this.homes = home_result.result.item;
             this.extractKeys(this, "homes", this.homes);

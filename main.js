@@ -552,9 +552,13 @@ class LgThinq extends utils.Adapter {
             if (home_result && home_result.resultCode && home_result.resultCode === "0000" && home_result.result && home_result.result.item == null) {
                 this.log.warn("LG does not provide any data! Maybe your account is blocked");
                 return "BLOCKED";
-            } else if (!home_result && home_result.result && home_result.resultCode === "0110") {
+            } else if (home_result && home_result.result && home_result.resultCode === "0110") {
                 this.log.error("Could not receive homes. Please check your app and accept new agreements");
                 return "TERMS";
+            }
+            if (!home_result || !home_result.result || !home_result.result.item) {
+                this.log.error("Could not receive homes");
+                return;
             }
             this.homes = home_result.result.item;
             this.extractKeys(this, "homes", this.homes);

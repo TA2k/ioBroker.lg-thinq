@@ -736,11 +736,31 @@ class LgThinq extends utils.Adapter {
         }
         return deviceModel;
     }
+
     async extractValues(device) {
         const deviceModel = this.modelInfos[device.deviceId];
         if (!deviceModel) {
             this.log.warn(`No model info for ${device.deviceId}`);
             return;
+        }
+        let langPack = null;
+        let langPath = null;
+        if (device.langPackProductTypeUri) {
+            langPath = "langPackProductTypeUri";
+        } else if (device.langPackModelUri) {
+            langPath = "langPackModelUri";
+        }
+        if (langPath != null) {
+            langPack = await this.requestClient
+                .get(device[langPath])
+                .then((res) => res.data)
+                .catch((error) => {
+                    this.log.info("langPackProductTypeUri: " + error);
+                    return null;
+                });
+        }
+        if (langPack != null && langPack.pack) {
+            langPack = langPack.pack;
         }
         if (deviceModel["MonitoringValue"] || deviceModel["Value"]) {
             this.log.debug("extract values from model");
@@ -821,9 +841,13 @@ class LgThinq extends utils.Adapter {
                                     if (deviceModel["MonitoringValue"][state]["valueMapping"][value].label != null) {
                                         const valueMap = deviceModel["MonitoringValue"][state]["valueMapping"][value];
                                         if (onlynumber.test(value)) {
-                                            commons[valueMap.index] = valueMap.label;
+                                            commons[valueMap.index] = (langPack != null && langPack[valueMap.label])
+                                                                        ? langPack[valueMap.label].toString("utf-8")
+                                                                        : valueMap.label;
                                         } else {
-                                            commons[value] = valueMap.index;
+                                            commons[value] = (langPack != null && langPack[valueMap.label])
+                                                                ? langPack[valueMap.label].toString("utf-8")
+                                                                : valueMap.index;
                                         }
                                         if (value === "NO_ECOHYBRID") common.def = "NO_ECOHYBRID";
                                     } else {
@@ -885,7 +909,9 @@ class LgThinq extends utils.Adapter {
                                     values.forEach((value) => {
                                         const content = valueObject[value];
                                         if (typeof content === "string") {
-                                            commons[value] = content.replace("@", "");
+                                            commons[value] = (langPack != null && langPack[content])
+                                                                ? langPack[content].toString("utf-8")
+                                                                : content.replace("@", "");
                                         }
                                     });
                                 }

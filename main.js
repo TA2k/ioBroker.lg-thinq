@@ -16,7 +16,8 @@ const { DateTime } = require("luxon");
 const { extractKeys } = require("./lib/extractKeys");
 const constants = require("./lib/constants");
 const { URL } = require("url");
-const helper = require(`./lib/helper`);
+const helper = require("./lib/helper");
+const air = require("./lib/air_conditioning");
 const awsIot = require("aws-iot-device-sdk");
 const forge = require("node-forge");
 
@@ -53,6 +54,8 @@ class LgThinq extends utils.Adapter {
         this.checkdate = helper.checkdate;
         this.sendStaticRequest = helper.sendStaticRequest;
         this.createCourse = helper.createCourse;
+        this.createAirRemoteStates = air.createAirRemoteStates;
+        this.updateHoliday = air.updateHoliday;
         this.mqttdata = {};
         this.mqttC = {};
         this.lang = "de";
@@ -660,10 +663,22 @@ class LgThinq extends utils.Adapter {
                     ? deviceModel.Config.downloadedCourseType
                     : "";
             }
+            if (device.deviceType === 401) {
+                await this.createAirRemoteStates(device, deviceModel);
+                await this.createStatistic(device.deviceId);
+                const dataKeys = deviceModel["ControlDevice"];
+                if (deviceModel && dataKeys[0] && dataKeys[0].dataKey) {
+                    try {
+                        const arr_dataKey = dataKeys[0].dataKey.split("|").pop();
+                        deviceModel["folder"] = arr_dataKey.split(".")[0];
+                    } catch (error) {
+                        this.log.info("Cannot find the snapshot folder!");
+                    }
+                }
+            }
             if (deviceModel["ControlWifi"]) {
                 this.log.debug(JSON.stringify(deviceModel["ControlWifi"]));
                 let controlWifi = deviceModel["ControlWifi"];
-
                 try {
                     deviceModel["folder"] = "";
                     if (Object.keys(deviceModel["ControlWifi"])[0] != null) {
@@ -846,9 +861,13 @@ class LgThinq extends utils.Adapter {
                         if (obj) {
                             const common = obj.common;
                             const commons = {};
-                            let valueObject = deviceModel["Value"][state]["option"];
+                            let valueObject = deviceModel["Value"][state]["option"] ? deviceModel["Value"][state]["option"] : null;
+                            let valueDefault = deviceModel["Value"][state]["default"] ? deviceModel["Value"][state]["default"] : null;
                             if (deviceModel["Value"][state]["value_mapping"]) {
                                 valueObject = deviceModel["Value"][state]["value_mapping"];
+                            }
+                            if (deviceModel["Value"][state]["value_validation"]) {
+                                valueObject = deviceModel["Value"][state]["value_validation"];
                             }
                             if (valueObject) {
                                 if (valueObject.max) {
@@ -860,7 +879,7 @@ class LgThinq extends utils.Adapter {
                                     } else {
                                         common.max = valueObject.max;
                                     }
-                                    common.def = 0;
+                                    common.def = valueDefault ? parseFloat(valueDefault) : 0;
                                 } else {
                                     const values = Object.keys(valueObject);
                                     values.forEach((value) => {
@@ -991,11 +1010,11 @@ class LgThinq extends utils.Adapter {
 
             this.mqttC.on("offline", () => {
                 this.log.info("Thinq MQTT offline");
-                //this.mqttC.end();
-                //this.log.debug('MQTT offline! Reconnection in 60 seconds!');
-                //setTimeout(async () => {
-                //    this.start_mqtt();
-                //}, 60000);
+                this.mqttC.end();
+                this.log.debug('MQTT offline! Reconnection in 60 seconds!');
+                setTimeout(async () => {
+                    this.start_mqtt();
+                }, 60000);
             });
 
             this.mqttC.on("end", () => {
@@ -1165,9 +1184,11 @@ class LgThinq extends utils.Adapter {
                     }
                     if (secsplit === "Statistic" && lastsplit === "sendRequest") {
                         if (devType.val > 100 && devType.val < 104) {
-                            this.sendStaticRequest(deviceId, true);
+                            this.sendStaticRequest(deviceId, "");
+                        } else if (devType.val === 401) {
+                            this.sendStaticRequest(deviceId, "air");
                         } else {
-                            this.sendStaticRequest(deviceId, false);
+                            this.sendStaticRequest(deviceId, "fridge");
                         }
                         this.log.debug(JSON.stringify(this.courseactual[deviceId]));
                         return;
@@ -1181,8 +1202,43 @@ class LgThinq extends utils.Adapter {
                         let data = {};
                         let onoff = "";
                         let rawData = {};
-                        const dev = "";
-                        if (
+                        let dev = "";
+                        if (devType.val === 401) {
+                            if (lastsplit === "holiday_data_download") {
+                                this.updateHoliday(deviceId, "update", devType, id, state);
+                                return;
+                            } else if (!this.modelInfos[deviceId] || !this.modelInfos[deviceId]["ControlDevice"]) {
+                                this.log.info("Cannot found modelInfos = action: " + action);
+                                return;
+                            }
+                            let checkRemote = {};
+                            const obj = await this.getObjectAsync(id);
+                            if (!obj || !obj.native || !obj.native.dataKey) {
+                                this.log.info("Cannot found dataKey!");
+                                return;
+                            }
+                            for (const dataRemote of this.modelInfos[deviceId].ControlDevice) {
+                                if (dataRemote.ctrlKey === secsplit) {
+                                    action = secsplit;
+                                    checkRemote = dataRemote;
+                                    break;
+                                }
+                            }
+                            if (checkRemote && checkRemote.dataKey) {
+                                action = secsplit;
+                                rawData["command"] = lastsplit === "operation" ? "Operation" : "Set";
+                                rawData["dataKey"] = obj.native.dataKey;
+                                rawData["dataValue"] = state.val;
+                                rawData["dataSetList"] = null;
+                                rawData["dataGetList"] = null;
+                            } else if (checkRemote && checkRemote.dataSetList) {
+                                this.log.info("The command is not implemented: " + secsplit);
+                                return;
+                            } else {
+                                this.log.info("The command is not implemented");
+                                return;
+                            }
+                        } else if (
                             [
                                 "LastCourse",
                                 "Favorite",
@@ -1301,6 +1357,17 @@ class LgThinq extends utils.Adapter {
                             data = { ctrlKey: action, command: rawData.command, dataSetList: rawData.data };
                         }
 
+                        if (rawData && rawData.command && (rawData.dataKey || rawData.dataGetList)) {
+                            data = {
+                                ctrlKey: action,
+                                command: rawData.command,
+                                dataKey: rawData.dataKey,
+                                dataValue: rawData.dataValue,
+                                dataSetList: rawData.dataSetList,
+                                dataGetList: rawData.dataGetList
+                            };
+                        }
+
                         if (action === "WMStop" || action === "WMOff") {
                             data.ctrlKey = "WMControl";
                         }
@@ -1320,7 +1387,11 @@ class LgThinq extends utils.Adapter {
                                 }
                             }
                         }
-                        if (data && data.command && data.dataSetList) {
+
+                        if (data && data.command && (rawData.dataKey || rawData.dataGetList)) {
+                            this.log.debug(JSON.stringify(data));
+                            response = await this.sendCommandToDevice(deviceId, data);
+                        } else if (data && data.command && data.dataSetList) {
                             this.log.debug(JSON.stringify(data));
                             response = await this.sendCommandToDevice(deviceId, data);
                         } else {

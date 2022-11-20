@@ -1123,9 +1123,13 @@ class LgThinq extends utils.Adapter {
             });
     }
 
-    async sendCommandToDevice(deviceId, values, thinq1) {
+    async sendCommandToDevice(deviceId, values, thinq1, get_sync) {
         const headers = this.defaultHeaders;
-        let controlUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + deviceId + "/control-sync");
+        let sync = "control-sync";
+        if (get_sync) {
+            sync = "control";
+        }
+        let controlUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + deviceId + "/" + sync);
         let data = {
             ctrlKey: "basicCtrl",
             command: "Set",

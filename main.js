@@ -1226,6 +1226,7 @@ class LgThinq extends utils.Adapter {
                         return;
                     }
                     let response = null;
+                    let sync = false;
                     if (id.indexOf(".remote.") !== -1) {
                         let no_for = true;
                         let action = id.split(".")[4];
@@ -1255,6 +1256,9 @@ class LgThinq extends utils.Adapter {
                                 }
                             }
                             if (checkRemote && checkRemote.dataKey) {
+                                if (secsplit === "allEventEnable") {
+                                    sync = true;
+                                }
                                 action = secsplit;
                                 rawData["command"] = lastsplit === "operation" ? "Operation" : "Set";
                                 rawData["dataKey"] = obj.native.dataKey;
@@ -1420,7 +1424,7 @@ class LgThinq extends utils.Adapter {
 
                         if (data && data.command && (rawData.dataKey || rawData.dataGetList)) {
                             this.log.debug(JSON.stringify(data));
-                            response = await this.sendCommandToDevice(deviceId, data);
+                            response = await this.sendCommandToDevice(deviceId, data, false, sync);
                         } else if (data && data.command && data.dataSetList) {
                             this.log.debug(JSON.stringify(data));
                             response = await this.sendCommandToDevice(deviceId, data);

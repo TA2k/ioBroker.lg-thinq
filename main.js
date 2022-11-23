@@ -56,6 +56,7 @@ class LgThinq extends utils.Adapter {
         this.createCourse = helper.createCourse;
         this.createAirRemoteStates = air.createAirRemoteStates;
         this.updateHoliday = air.updateHoliday;
+        this.checkHolidayDate = air.checkHolidayDate;
         this.mqttdata = {};
         this.mqttC = {};
         this.lang = "de";
@@ -1072,7 +1073,7 @@ class LgThinq extends utils.Adapter {
                     if (monitoring["data"]) {
                         this.log.debug("Monitoring: " + JSON.stringify(monitoring));
                     }
-                    this.log.debug("Monitoring: " + JSON.stringify(monitoring));
+                    this.log.debug("Monitoring Other: " + JSON.stringify(monitoring));
                     if (
                         monitoring &&
                         monitoring.data &&
@@ -1214,11 +1215,11 @@ class LgThinq extends utils.Adapter {
                     }
                     if (secsplit === "Statistic" && lastsplit === "sendRequest") {
                         if (devType.val > 100 && devType.val < 104) {
-                            this.sendStaticRequest(deviceId, "");
+                            this.sendStaticRequest(deviceId, "fridge");
                         } else if (devType.val === 401) {
                             this.sendStaticRequest(deviceId, "air");
                         } else {
-                            this.sendStaticRequest(deviceId, "fridge");
+                            this.sendStaticRequest(deviceId, "other");
                         }
                         this.log.debug(JSON.stringify(this.courseactual[deviceId]));
                         return;
@@ -1235,8 +1236,9 @@ class LgThinq extends utils.Adapter {
                         let rawData = {};
                         let dev = "";
                         if (devType.val === 401) {
-                            if (lastsplit === "holiday_data_download") {
-                                this.updateHoliday(deviceId, "update", devType, id, state);
+                            if (secsplit === "break") {
+                                this.log.info("onStateChange");
+                                this.updateHoliday(deviceId, devType, id, state);
                                 return;
                             } else if (!this.modelInfos[deviceId] || !this.modelInfos[deviceId]["ControlDevice"]) {
                                 this.log.info("Cannot found modelInfos = action: " + action);

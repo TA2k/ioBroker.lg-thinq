@@ -1,6 +1,6 @@
 {
     "name": "iobroker.lg-thinq",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Adapter for LG ThinQ",
     "author": {
         "name": "TA2k",

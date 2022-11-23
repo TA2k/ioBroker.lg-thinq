@@ -1237,7 +1237,6 @@ class LgThinq extends utils.Adapter {
                         let dev = "";
                         if (devType.val === 401) {
                             if (secsplit === "break") {
-                                this.log.info("onStateChange");
                                 this.updateHoliday(deviceId, devType, id, state);
                                 return;
                             } else if (!this.modelInfos[deviceId] || !this.modelInfos[deviceId]["ControlDevice"]) {

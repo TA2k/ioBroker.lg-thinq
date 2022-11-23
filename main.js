@@ -56,6 +56,7 @@ class LgThinq extends utils.Adapter {
         this.createCourse = helper.createCourse;
         this.createAirRemoteStates = air.createAirRemoteStates;
         this.updateHoliday = air.updateHoliday;
+        this.checkHolidayDate = air.checkHolidayDate;
         this.mqttdata = {};
         this.mqttC = {};
         this.lang = "de";
@@ -1072,7 +1073,7 @@ class LgThinq extends utils.Adapter {
                     if (monitoring["data"]) {
                         this.log.debug("Monitoring: " + JSON.stringify(monitoring));
                     }
-                    this.log.debug("Monitoring: " + JSON.stringify(monitoring));
+                    this.log.debug("Monitoring Other: " + JSON.stringify(monitoring));
                     if (
                         monitoring &&
                         monitoring.data &&
@@ -1123,9 +1124,13 @@ class LgThinq extends utils.Adapter {
             });
     }
 
-    async sendCommandToDevice(deviceId, values, thinq1) {
+    async sendCommandToDevice(deviceId, values, thinq1, get_sync) {
         const headers = this.defaultHeaders;
-        let controlUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + deviceId + "/control-sync");
+        let sync = "control-sync";
+        if (get_sync) {
+            sync = "control";
+        }
+        let controlUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + deviceId + "/" + sync);
         let data = {
             ctrlKey: "basicCtrl",
             command: "Set",
@@ -1210,11 +1215,11 @@ class LgThinq extends utils.Adapter {
                     }
                     if (secsplit === "Statistic" && lastsplit === "sendRequest") {
                         if (devType.val > 100 && devType.val < 104) {
-                            this.sendStaticRequest(deviceId, "");
+                            this.sendStaticRequest(deviceId, "fridge");
                         } else if (devType.val === 401) {
                             this.sendStaticRequest(deviceId, "air");
                         } else {
-                            this.sendStaticRequest(deviceId, "fridge");
+                            this.sendStaticRequest(deviceId, "other");
                         }
                         this.log.debug(JSON.stringify(this.courseactual[deviceId]));
                         return;
@@ -1222,6 +1227,7 @@ class LgThinq extends utils.Adapter {
                         return;
                     }
                     let response = null;
+                    let sync = false;
                     if (id.indexOf(".remote.") !== -1) {
                         let no_for = true;
                         let action = id.split(".")[4];
@@ -1230,8 +1236,9 @@ class LgThinq extends utils.Adapter {
                         let rawData = {};
                         let dev = "";
                         if (devType.val === 401) {
-                            if (lastsplit === "holiday_data_download") {
-                                this.updateHoliday(deviceId, "update", devType, id, state);
+                            if (secsplit === "break") {
+                                this.log.info("onStateChange");
+                                this.updateHoliday(deviceId, devType, id, state);
                                 return;
                             } else if (!this.modelInfos[deviceId] || !this.modelInfos[deviceId]["ControlDevice"]) {
                                 this.log.info("Cannot found modelInfos = action: " + action);
@@ -1251,6 +1258,9 @@ class LgThinq extends utils.Adapter {
                                 }
                             }
                             if (checkRemote && checkRemote.dataKey) {
+                                if (secsplit === "allEventEnable") {
+                                    sync = true;
+                                }
                                 action = secsplit;
                                 rawData["command"] = lastsplit === "operation" ? "Operation" : "Set";
                                 rawData["dataKey"] = obj.native.dataKey;
@@ -1416,7 +1426,7 @@ class LgThinq extends utils.Adapter {
 
                         if (data && data.command && (rawData.dataKey || rawData.dataGetList)) {
                             this.log.debug(JSON.stringify(data));
-                            response = await this.sendCommandToDevice(deviceId, data);
+                            response = await this.sendCommandToDevice(deviceId, data, false, sync);
                         } else if (data && data.command && data.dataSetList) {
                             this.log.debug(JSON.stringify(data));
                             response = await this.sendCommandToDevice(deviceId, data);

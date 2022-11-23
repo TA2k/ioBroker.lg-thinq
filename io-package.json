@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "lg-thinq",
-        "version": "0.1.0",
+        "version": "0.1.1",
         "news": {
+            "0.1.1": {
+                "en": "Added Device 401",
+                "de": "Geräte 401 hinzugefügt"
+            },
             "0.1.0": {
                 "en": "Added MQTT connection for live status updates",
                 "de": "MQTT Verbindung hinzugefügt für Live-Statusupdates"

@@ -765,12 +765,12 @@ class LgThinq extends utils.Adapter {
         }
         if (deviceModel["MonitoringValue"] || deviceModel["Value"]) {
             this.log.debug("extract values from model");
+            const deviceType = deviceModel["deviceType"] ? deviceModel["deviceType"] : 0;
             let type = "";
-            if (device["snapshot"] && deviceModel["folder"]) {
+            if (device["snapshot"] && deviceModel["folder"] && deviceType != 401) {
                 type = deviceModel["folder"];
             }
             const thinq2 = deviceModel["thinq2"] ? deviceModel["thinq2"] : "";
-            const deviceType = deviceModel["deviceType"] ? deviceModel["deviceType"] : 0;
             let path = device.deviceId + ".snapshot.";
             if (type) {
                 path = path + type + ".";
@@ -882,6 +882,7 @@ class LgThinq extends utils.Adapter {
                 });
             deviceModel["Value"] &&
                 Object.keys(deviceModel["Value"]).forEach((state) => {
+                    this.log.debug(path + state); //Problem with 401 device
                     this.getObject(path + state, async (err, obj) => {
                         if (obj) {
                             const common = obj.common;
@@ -910,9 +911,14 @@ class LgThinq extends utils.Adapter {
                                     values.forEach((value) => {
                                         const content = valueObject[value];
                                         if (typeof content === "string") {
-                                            commons[value] = (langPack != null && langPack[content])
-                                                                ? langPack[content].toString("utf-8")
-                                                                : content.replace("@", "");
+                                            const new_content = content.replace("@", "");
+                                            if (langPack != null && langPack[content]) {
+                                                commons[value] = langPack[content].toString("utf-8");
+                                            } else if (constants[this.lang + "Translation"][new_content] != null) {
+                                                commons[value] = constants[this.lang + "Translation"][new_content];
+                                            } else {
+                                                commons[value] = new_content;
+                                            }
                                         }
                                     });
                                 }

@@ -647,6 +647,7 @@ class LgThinq extends utils.Adapter {
         if (!device.modelJsonUri) {
             return;
         }
+        this.log.debug("Get Device Model Info");
         this.log.debug(JSON.stringify(device));
         const deviceModel = await this.requestClient
             .get(device.modelJsonUri)

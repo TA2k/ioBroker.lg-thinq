@@ -124,9 +124,9 @@ class LgThinq extends utils.Adapter {
                     this.refreshNewToken();
                 }, (this.session.expires_in - 100) * 1000);
                 this.userNumber = await this.getUserNumber();
-                const hash = crypto.createHash('sha256');
+                const hash = crypto.createHash("sha256");
                 const clientID = this.userNumber ? this.userNumber : constants.API_CLIENT_ID;
-                this.mqtt_userID = hash.update(clientID + (new Date()).getTime()).digest('hex');
+                this.mqtt_userID = hash.update(clientID + new Date().getTime()).digest("hex");
                 this.defaultHeaders["x-user-no"] = this.userNumber;
                 this.defaultHeaders["x-emp-token"] = this.session.access_token;
                 const listDevices = await this.getListDevices();
@@ -312,7 +312,10 @@ class LgThinq extends utils.Adapter {
                 if (result && typeof result === "object") {
                     let resultConverted;
                     if (this.modelInfos[device.deviceId].Monitoring.type === "BINARY(BYTE)") {
-                        resultConverted = this.decodeMonitorBinary(result, this.modelInfos[device.deviceId].Monitoring.protocol);
+                        resultConverted = this.decodeMonitorBinary(
+                            result,
+                            this.modelInfos[device.deviceId].Monitoring.protocol,
+                        );
                     }
                     if (this.modelInfos[device.deviceId].Monitoring.type === "JSON") {
                         resultConverted = JSON.parse(result.toString("utf-8"));
@@ -333,7 +336,9 @@ class LgThinq extends utils.Adapter {
         try {
             if (device.platformType === "thinq1") {
                 const sendId = uuid.v4();
-                const returnWorkId = await this.sendMonitorCommand(device.deviceId, "Start", sendId).then((data) => data.workId);
+                const returnWorkId = await this.sendMonitorCommand(device.deviceId, "Start", sendId).then(
+                    (data) => data.workId,
+                );
                 this.workIds[device.deviceId] = returnWorkId;
             }
         } catch (err) {
@@ -561,17 +566,19 @@ class LgThinq extends utils.Adapter {
     async getListDevices() {
         if (!this.homes) {
             const home_result = await this.getListHomes();
-            if (home_result && home_result.resultCode && home_result.resultCode === "0000" && home_result.result && home_result.result.item == null) {
+            if (
+                home_result &&
+                home_result.resultCode &&
+                home_result.resultCode === "0000" &&
+                home_result.result &&
+                home_result.result.item == null
+            ) {
                 this.log.warn("LG does not provide any data! Maybe your account is blocked");
                 return "BLOCKED";
             } else if (home_result && home_result.result && home_result.resultCode === "0110") {
                 this.log.error("Could not receive homes. Please check your app and accept new agreements");
                 return "TERMS";
-            } else if (
-                !home_result ||
-                !home_result.result ||
-                !home_result.result.item
-            ) {
+            } else if (!home_result || !home_result.result || !home_result.result.item) {
                 return "BLOCKED";
             }
             if (!home_result || !home_result.result || !home_result.result.item) {
@@ -640,6 +647,7 @@ class LgThinq extends utils.Adapter {
         if (!device.modelJsonUri) {
             return;
         }
+        this.log.debug(JSON.stringify(device));
         const deviceModel = await this.requestClient
             .get(device.modelJsonUri)
             .then((res) => res.data)
@@ -658,8 +666,12 @@ class LgThinq extends utils.Adapter {
             });
             this.coursetypes[device.deviceId] = {};
             if (deviceModel["Config"]) {
-                this.coursetypes[device.deviceId]["smartCourseType"] = deviceModel.Config.smartCourseType ? deviceModel.Config.smartCourseType : "";
-                this.coursetypes[device.deviceId]["courseType"] = deviceModel.Config.courseType ? deviceModel.Config.courseType : "";
+                this.coursetypes[device.deviceId]["smartCourseType"] = deviceModel.Config.smartCourseType
+                    ? deviceModel.Config.smartCourseType
+                    : "";
+                this.coursetypes[device.deviceId]["courseType"] = deviceModel.Config.courseType
+                    ? deviceModel.Config.courseType
+                    : "";
                 this.coursetypes[device.deviceId]["downloadedCourseType"] = deviceModel.Config.downloadedCourseType
                     ? deviceModel.Config.downloadedCourseType
                     : "";
@@ -689,7 +701,6 @@ class LgThinq extends utils.Adapter {
                             deviceModel["ControlWifi"][wifi]["data"] &&
                             Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0] != null
                         ) {
-
                             deviceModel["folder"] = Object.keys(deviceModel["ControlWifi"][wifi]["data"])[0];
                         }
                     }
@@ -784,7 +795,9 @@ class LgThinq extends utils.Adapter {
             const smartCourseType = this.coursetypes[device.deviceId].smartCourseType
                 ? this.coursetypes[device.deviceId].smartCourseType
                 : "WASHERANDDRYER";
-            const courseType = this.coursetypes[device.deviceId].courseType ? this.coursetypes[device.deviceId].courseType : "WASHERANDDRYER";
+            const courseType = this.coursetypes[device.deviceId].courseType
+                ? this.coursetypes[device.deviceId].courseType
+                : "WASHERANDDRYER";
             const onlynumber = /^-?[0-9]+$/;
             deviceModel["MonitoringValue"] &&
                 Object.keys(deviceModel["MonitoringValue"]).forEach(async (state) => {
@@ -809,7 +822,10 @@ class LgThinq extends utils.Adapter {
                         }
                         if (state === courseType) {
                             Object.keys(deviceModel["Course"]).forEach(async (key) => {
-                                commons[key] = constants[this.lang + "Translation"][key] != null ? constants[this.lang + "Translation"][key] : key;
+                                commons[key] =
+                                    constants[this.lang + "Translation"][key] != null
+                                        ? constants[this.lang + "Translation"][key]
+                                        : key;
                             });
                             commons["NOT_SELECTED"] =
                                 constants[this.lang + "Translation"]["NOT_SELECTED"] != null
@@ -818,7 +834,10 @@ class LgThinq extends utils.Adapter {
                         }
                         if (state === smartCourseType || state === downloadedCourseType) {
                             Object.keys(deviceModel["SmartCourse"]).forEach(async (key) => {
-                                commons[key] = constants[this.lang + "Translation"][key] != null ? constants[this.lang + "Translation"][key] : key;
+                                commons[key] =
+                                    constants[this.lang + "Translation"][key] != null
+                                        ? constants[this.lang + "Translation"][key]
+                                        : key;
                             });
                             commons["NOT_SELECTED"] =
                                 constants[this.lang + "Translation"]["NOT_SELECTED"] != null
@@ -842,13 +861,15 @@ class LgThinq extends utils.Adapter {
                                     if (deviceModel["MonitoringValue"][state]["valueMapping"][value].label != null) {
                                         const valueMap = deviceModel["MonitoringValue"][state]["valueMapping"][value];
                                         if (onlynumber.test(value)) {
-                                            commons[valueMap.index] = (langPack != null && langPack[valueMap.label])
-                                                                        ? langPack[valueMap.label].toString("utf-8")
-                                                                        : valueMap.label;
+                                            commons[valueMap.index] =
+                                                langPack != null && langPack[valueMap.label]
+                                                    ? langPack[valueMap.label].toString("utf-8")
+                                                    : valueMap.label;
                                         } else {
-                                            commons[value] = (langPack != null && langPack[valueMap.label])
-                                                                ? langPack[valueMap.label].toString("utf-8")
-                                                                : valueMap.index;
+                                            commons[value] =
+                                                langPack != null && langPack[valueMap.label]
+                                                    ? langPack[valueMap.label].toString("utf-8")
+                                                    : valueMap.index;
                                         }
                                         if (value === "NO_ECOHYBRID") common.def = "NO_ECOHYBRID";
                                     } else {
@@ -887,8 +908,12 @@ class LgThinq extends utils.Adapter {
                         if (obj) {
                             const common = obj.common;
                             const commons = {};
-                            let valueObject = deviceModel["Value"][state]["option"] ? deviceModel["Value"][state]["option"] : null;
-                            let valueDefault = deviceModel["Value"][state]["default"] ? deviceModel["Value"][state]["default"] : null;
+                            let valueObject = deviceModel["Value"][state]["option"]
+                                ? deviceModel["Value"][state]["option"]
+                                : null;
+                            let valueDefault = deviceModel["Value"][state]["default"]
+                                ? deviceModel["Value"][state]["default"]
+                                : null;
                             if (deviceModel["Value"][state]["value_mapping"]) {
                                 valueObject = deviceModel["Value"][state]["value_mapping"];
                             }
@@ -1002,7 +1027,9 @@ class LgThinq extends utils.Adapter {
             }
             this.log.info("Create certification done");
             const client_request = await this.getUser("service/users/client", {});
-            const client_certificate = await this.getUser("service/users/client/certificate", { csr: this.mqttdata.key });
+            const client_certificate = await this.getUser("service/users/client/certificate", {
+                csr: this.mqttdata.key,
+            });
             if (!client_certificate && !client_certificate.result && !client_certificate.result.certificatePem) {
                 this.log.info("Cannot load certificatePem");
                 return;
@@ -1044,7 +1071,7 @@ class LgThinq extends utils.Adapter {
             this.mqttC.on("offline", () => {
                 this.log.info("Thinq MQTT offline");
                 this.mqttC.end();
-                this.log.debug('MQTT offline! Reconnection in 60 seconds!');
+                this.log.debug("MQTT offline! Reconnection in 60 seconds!");
                 setTimeout(async () => {
                     this.start_mqtt();
                 }, 60000);
@@ -1121,7 +1148,7 @@ class LgThinq extends utils.Adapter {
     async getUser(uri_value, data) {
         const userUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", uri_value);
         const headers = this.defaultHeaders;
-        headers['x-client-id'] = this.mqtt_userID;
+        headers["x-client-id"] = this.mqtt_userID;
         return this.requestClient
             .post(userUrl, data, { headers })
             .then((resp) => resp.data)
@@ -1195,7 +1222,10 @@ class LgThinq extends utils.Adapter {
                     const deviceId = id.split(".")[2];
                     if (lastsplit === "sendJSON") {
                         const headers = this.defaultHeaders;
-                        const controlUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", "service/devices/" + deviceId + "/control-sync");
+                        const controlUrl = this.resolveUrl(
+                            this.gateway.thinq2Uri + "/",
+                            "service/devices/" + deviceId + "/control-sync",
+                        );
                         const sendData = JSON.parse(state.val);
                         this.log.debug(JSON.stringify(sendData));
                         const sendJ = await this.requestClient
@@ -1392,7 +1422,9 @@ class LgThinq extends utils.Adapter {
                             no_for = false;
                             response = "";
                         } else {
-                            rawData = this.deviceControls[deviceId][action] ? this.deviceControls[deviceId][action] : {};
+                            rawData = this.deviceControls[deviceId][action]
+                                ? this.deviceControls[deviceId][action]
+                                : {};
                         }
                         if (rawData && rawData.command && rawData.data) {
                             data = { ctrlKey: action, command: rawData.command, dataSetList: rawData.data };
@@ -1405,7 +1437,7 @@ class LgThinq extends utils.Adapter {
                                 dataKey: rawData.dataKey,
                                 dataValue: rawData.dataValue,
                                 dataSetList: rawData.dataSetList,
-                                dataGetList: rawData.dataGetList
+                                dataGetList: rawData.dataGetList,
                             };
                         }
 
@@ -1420,7 +1452,9 @@ class LgThinq extends utils.Adapter {
                             if (type) {
                                 for (const dataElement of Object.keys(data.dataSetList[type])) {
                                     if (!dataElement.startsWith("control")) {
-                                        const dataState = await this.getStateAsync(deviceId + ".snapshot." + type + "." + dataElement);
+                                        const dataState = await this.getStateAsync(
+                                            deviceId + ".snapshot." + type + "." + dataElement,
+                                        );
                                         if (dataState) {
                                             data.dataSetList[dataElement] = dataState.val;
                                         }

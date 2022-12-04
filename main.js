@@ -677,7 +677,7 @@ class LgThinq extends utils.Adapter {
                     ? deviceModel.Config.downloadedCourseType
                     : "";
             }
-            if (device.deviceType === 401) {
+            if (device.deviceType === 401 && device.platformType == "thinq2") {
                 await this.createAirRemoteStates(device, deviceModel);
                 await this.createStatistic(device.deviceId);
                 const dataKeys = deviceModel["ControlDevice"];

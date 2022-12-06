@@ -677,17 +677,22 @@ class LgThinq extends utils.Adapter {
                     ? deviceModel.Config.downloadedCourseType
                     : "";
             }
-            if (device.deviceType === 401 && device.platformType == "thinq2") {
-                await this.createAirRemoteStates(device, deviceModel);
-                await this.createStatistic(device.deviceId);
-                const dataKeys = deviceModel["ControlDevice"];
-                if (deviceModel && dataKeys[0] && dataKeys[0].dataKey) {
-                    try {
-                        const arr_dataKey = dataKeys[0].dataKey.split("|").pop();
-                        deviceModel["folder"] = arr_dataKey.split(".")[0];
-                    } catch (error) {
-                        this.log.info("Cannot find the snapshot folder!");
+            if (device.deviceType === 401) {
+                if (device.platformType == "thinq2") {
+                    await this.createAirRemoteStates(device, deviceModel);
+                    await this.createStatistic(device.deviceId);
+                    const dataKeys = deviceModel["ControlDevice"];
+                    if (deviceModel && dataKeys[0] && dataKeys[0].dataKey) {
+                        try {
+                            const arr_dataKey = dataKeys[0].dataKey.split("|").pop();
+                            deviceModel["folder"] = arr_dataKey.split(".")[0];
+                        } catch (error) {
+                            this.log.info("Cannot find the snapshot folder!");
+                        }
                     }
+                } else {
+                    this.log.warn(`DeviceType 401 with platformType ${device.platformType} is not supported yet`);
+                    this.log.info(JSON.stringify(device));
                 }
             }
             if (deviceModel["ControlWifi"]) {

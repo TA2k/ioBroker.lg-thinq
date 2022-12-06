@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "lg-thinq",
-        "version": "0.1.3",
+        "version": "0.1.4",
         "news": {
+            "0.1.4": {
+                "en": "Add warning for not supported devices",
+                "de": "Warnung für nicht unterstützte Geräte hinzugefügt"
+            },
             "0.1.3": {
                 "en": "Added missing remote translation for device 201",
                 "de": "Fehlende Remote Übersetzung für Gerät 201 hinzugefügt"
@@ -60,7 +64,7 @@
             "pl": "Adapter do LG ThinQ",
             "zh-cn": "LG ThinQ 适配器"
         },
-        "authors": ["TA2k <tombox2020@gmail.com>"],
+        "authors": ["TA2k <tombox2020@gmail.com>", "Lucky-ESA <github@luckyskills.de>"],
         "keywords": ["lg", "thinq"],
         "license": "MIT",
         "platform": "Javascript/Node.js",

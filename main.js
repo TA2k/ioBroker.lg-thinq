@@ -857,6 +857,8 @@ class LgThinq extends utils.Adapter {
                                     common.max = 200;
                                 } else if (state === "timeSetting") {
                                     common.max = 360;
+                                } else if (state === "ActiveSavingStatus") {
+                                    common.max = 255;
                                 } else {
                                     common.max = deviceModel["MonitoringValue"][state]["valueMapping"].max;
                                 }
@@ -933,6 +935,8 @@ class LgThinq extends utils.Adapter {
                                         common.max = 200;
                                     } else if (state === "timeSetting") {
                                         common.max = 360;
+                                    } else if (state === "ActiveSavingStatus") {
+                                        common.max = 255;
                                     } else {
                                         common.max = valueObject.max;
                                     }

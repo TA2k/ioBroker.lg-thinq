@@ -8,7 +8,7 @@
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
-const axios = require("axios");
+const axios = require("axios").default;
 const crypto = require("crypto");
 const uuid = require("uuid");
 const qs = require("qs");
@@ -18,7 +18,7 @@ const constants = require("./lib/constants");
 const { URL } = require("url");
 const helper = require("./lib/helper");
 const air = require("./lib/air_conditioning");
-const awsIot = require("aws-iot-device-sdk");
+const awsIot = require("aws-iot-device-sdk").device;
 const forge = require("node-forge");
 
 class LgThinq extends utils.Adapter {
@@ -58,7 +58,7 @@ class LgThinq extends utils.Adapter {
         this.updateHoliday = air.updateHoliday;
         this.checkHolidayDate = air.checkHolidayDate;
         this.mqttdata = {};
-        this.mqttC = {};
+        this.mqttC = null;
         this.lang = "de";
         this.deviceJson = {};
         this.courseJson = {};
@@ -66,6 +66,8 @@ class LgThinq extends utils.Adapter {
         this.coursetypes = {};
         this.coursedownload = {};
         this.mqtt_userID = "";
+        this.isThinq2 = false;
+        this.isRestart = true;
     }
 
     /**
@@ -137,9 +139,11 @@ class LgThinq extends utils.Adapter {
                 } else if (listDevices && listDevices === "BLOCKED") {
                     return;
                 }
-
+                if (!listDevices) {
+                    this.log.info("Cannot find device!");
+                    return;
+                }
                 this.log.info("Found: " + listDevices.length + " devices");
-                let isThinq2 = false;
                 for (const element of listDevices) {
                     await this.setObjectNotExistsAsync(element.deviceId, {
                         type: "device",
@@ -154,18 +158,18 @@ class LgThinq extends utils.Adapter {
                     this.modelInfos[element.deviceId] = await this.getDeviceModelInfo(element);
                     if (element.platformType && element.platformType === "thinq2") {
                         this.modelInfos[element.deviceId]["thinq2"] = element.platformType;
-                        isThinq2 = true;
+                        this.isThinq2 = true;
                     }
                     if (element.deviceType) {
                         this.modelInfos[element.deviceId]["deviceType"] = element.deviceType;
-                        isThinq2 = true;
+                        this.isThinq2 = true;
                     }
                     await this.pollMonitor(element);
                     await this.sleep(2000);
                     this.extractValues(element);
                 }
                 this.log.debug(JSON.stringify(listDevices));
-                if (isThinq2) {
+                if (this.isThinq2) {
                     this.start_mqtt();
                 }
                 this.updateInterval = setInterval(async () => {
@@ -173,6 +177,17 @@ class LgThinq extends utils.Adapter {
                 }, this.config.interval * 60 * 1000);
             }
         }
+    }
+
+    async restartMqtt() {
+        this.log.debug("Restart MQTT Connection");
+        if (this.mqttC) {
+            this.mqttC.end();
+            this.mqttC = null;
+        }
+        this.isRestart = false;
+        await this.sleep(2000);
+        this.start_mqtt();
     }
 
     async updateDevices() {
@@ -403,6 +418,9 @@ class LgThinq extends utils.Adapter {
         if (this.session && resp && resp.access_token) {
             this.session.access_token = resp.access_token;
             this.defaultHeaders["x-emp-token"] = this.session.access_token;
+            if (this.isThinq2) {
+                this.restartMqtt();
+            }
             this.refreshTokenInterval && clearInterval(this.refreshTokenInterval);
             this.refreshTokenInterval = setInterval(() => {
                 this.refreshNewToken();
@@ -852,17 +870,25 @@ class LgThinq extends utils.Adapter {
                         }
                         if (deviceModel["MonitoringValue"][state]["valueMapping"]) {
                             if (deviceModel["MonitoringValue"][state]["valueMapping"].max) {
+                                const valueDefault = deviceModel["MonitoringValue"][state]["default"]
+                                    ? deviceModel["MonitoringValue"][state]["default"]
+                                    : null;
                                 common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
                                 if (state === "moreLessTime") {
                                     common.max = 200;
                                 } else if (state === "timeSetting") {
                                     common.max = 360;
-                                } else if (state === "ActiveSavingStatus") {
-                                    common.max = 255;
                                 } else {
-                                    common.max = deviceModel["MonitoringValue"][state]["valueMapping"].max;
+                                    if (
+                                        valueDefault != null &&
+                                        valueDefault > deviceModel["MonitoringValue"][state]["valueMapping"].max
+                                    ) {
+                                        common.max = valueDefault;
+                                    } else {
+                                        common.max = deviceModel["MonitoringValue"][state]["valueMapping"].max;
+                                    }
                                 }
-                                common.def = 0;
+                                common.def = valueDefault;
                             } else {
                                 const values = Object.keys(deviceModel["MonitoringValue"][state]["valueMapping"]);
                                 values.forEach((value) => {
@@ -905,7 +931,7 @@ class LgThinq extends utils.Adapter {
                         } else {
                             // @ts-ignore
                             obj.common = common;
-                            const res = await this.setForeignObjectAsync(this.namespace + "." + path + state, obj);
+                            await this.setForeignObjectAsync(this.namespace + "." + path + state, obj);
                         }
                     });
                 });
@@ -919,7 +945,7 @@ class LgThinq extends utils.Adapter {
                             let valueObject = deviceModel["Value"][state]["option"]
                                 ? deviceModel["Value"][state]["option"]
                                 : null;
-                            let valueDefault = deviceModel["Value"][state]["default"]
+                            const valueDefault = deviceModel["Value"][state]["default"]
                                 ? deviceModel["Value"][state]["default"]
                                 : null;
                             if (deviceModel["Value"][state]["value_mapping"]) {
@@ -935,10 +961,12 @@ class LgThinq extends utils.Adapter {
                                         common.max = 200;
                                     } else if (state === "timeSetting") {
                                         common.max = 360;
-                                    } else if (state === "ActiveSavingStatus") {
-                                        common.max = 255;
                                     } else {
-                                        common.max = valueObject.max;
+                                        if (valueDefault != null && valueDefault > valueObject.max) {
+                                            common.max = valueDefault;
+                                        } else {
+                                            common.max = valueObject.max;
+                                        }
                                     }
                                     common.def = valueDefault ? parseFloat(valueDefault) : 0;
                                 } else {
@@ -986,57 +1014,59 @@ class LgThinq extends utils.Adapter {
 
     async start_mqtt() {
         try {
-            const mqttHost = await this.getMqttInfo(constants.MQTT_URL);
-            let mqttHostParts = [];
-            if (mqttHost && mqttHost.result && mqttHost.result.mqttServer) {
-                if (mqttHost.result.apiServer && !mqttHost.result.apiServer.includes("-ats.iot")) {
-                    mqttHostParts = mqttHost.result.mqttServer.split(".iot.");
-                    this.mqttdata["apiServer"] = mqttHostParts[0] + "-ats.iot." + mqttHostParts[1];
+            if (this.mqttdata.privateKey == null) {
+                const mqttHost = await this.getMqttInfo(constants.MQTT_URL);
+                let mqttHostParts = [];
+                if (mqttHost && mqttHost.result && mqttHost.result.mqttServer) {
+                    if (mqttHost.result.apiServer && !mqttHost.result.apiServer.includes("-ats.iot")) {
+                        mqttHostParts = mqttHost.result.mqttServer.split(".iot.");
+                        this.mqttdata["apiServer"] = mqttHostParts[0] + "-ats.iot." + mqttHostParts[1];
+                    }
+                    if (!mqttHost.result.mqttServer.includes("-ats.iot")) {
+                        mqttHostParts = mqttHost.result.mqttServer.split(".iot.");
+                        this.mqttdata["mqttServer"] = mqttHostParts[0] + "-ats.iot." + mqttHostParts[1];
+                    }
+                } else {
+                    this.log.info("Cannot load MQTT Host");
+                    return;
                 }
-                if (!mqttHost.result.mqttServer.includes("-ats.iot")) {
-                    mqttHostParts = mqttHost.result.mqttServer.split(".iot.");
-                    this.mqttdata["mqttServer"] = mqttHostParts[0] + "-ats.iot." + mqttHostParts[1];
+                this.log.info("Found MQTT Host");
+                this.mqttdata.mqttServer = this.resolveUrl(this.mqttdata.mqttServer, "", true);
+                const mqttCer = await this.getMqttInfo(constants.MQTT_CER);
+                if (!mqttCer) {
+                    this.log.info("Cannot load AWS CER");
+                    return;
                 }
-            } else {
-                this.log.info("Cannot load MQTT Host");
-                return;
+                this.mqttdata.amazon = mqttCer;
+                this.log.info("Found AWS CER");
+                const certGenerator = await this.getMqttInfo(constants.MQTT_AZU);
+                if (certGenerator.privKey && certGenerator.csr) {
+                    this.mqttdata.privateKey = certGenerator.privKey;
+                    this.mqttdata.key = certGenerator.csr;
+                } else {
+                    const key = forge.pki.rsa.generateKeyPair(2048);
+                    const keys = {};
+                    keys.privateKey = forge.pki.privateKeyToPem(key.privateKey);
+                    this.mqttdata.privateKey = keys.privateKey;
+                    keys.publicKey = forge.pki.publicKeyToPem(key.publicKey);
+                    const csr = forge.pki.createCertificationRequest();
+                    csr.publicKey = forge.pki.publicKeyFromPem(keys.publicKey);
+                    csr.setSubject([
+                        {
+                            shortName: "CN",
+                            value: "AWS IoT Certificate",
+                        },
+                        {
+                            shortName: "O",
+                            value: "Amazon",
+                        },
+                    ]);
+                    csr.sign(forge.pki.privateKeyFromPem(keys.privateKey), forge.md.sha256.create());
+                    this.mqttdata.key = forge.pki.certificationRequestToPem(csr);
+                }
+                this.log.info("Create certification done");
             }
-            this.log.info("Found MQTT Host");
-            this.mqttdata.mqttServer = this.resolveUrl(this.mqttdata.mqttServer, "", true);
-            const mqttCer = await this.getMqttInfo(constants.MQTT_CER);
-            if (!mqttCer) {
-                this.log.info("Cannot load AWS CER");
-                return;
-            }
-            this.mqttdata.amazon = mqttCer;
-            this.log.info("Found AWS CER");
-            const certGenerator = await this.getMqttInfo(constants.MQTT_AZU);
-            if (certGenerator.privKey && certGenerator.csr) {
-                this.mqttdata.privateKey = certGenerator.privKey;
-                this.mqttdata.key = certGenerator.csr;
-            } else {
-                const key = forge.pki.rsa.generateKeyPair(2048);
-                const keys = {};
-                keys.privateKey = forge.pki.privateKeyToPem(key.privateKey);
-                this.mqttdata.privateKey = keys.privateKey;
-                keys.publicKey = forge.pki.publicKeyToPem(key.publicKey);
-                const csr = forge.pki.createCertificationRequest();
-                csr.publicKey = forge.pki.publicKeyFromPem(keys.publicKey);
-                csr.setSubject([
-                    {
-                        shortName: "CN",
-                        value: "AWS IoT Certificate",
-                    },
-                    {
-                        shortName: "O",
-                        value: "Amazon",
-                    },
-                ]);
-                csr.sign(forge.pki.privateKeyFromPem(keys.privateKey), forge.md.sha256.create());
-                this.mqttdata.key = forge.pki.certificationRequestToPem(csr);
-            }
-            this.log.info("Create certification done");
-            const client_request = await this.getUser("service/users/client", {});
+            await this.getUser("service/users/client", {});
             const client_certificate = await this.getUser("service/users/client/certificate", {
                 csr: this.mqttdata.key,
             });
@@ -1050,11 +1080,14 @@ class LgThinq extends utils.Adapter {
             }
             this.mqttdata.certificatePem = client_certificate.result.certificatePem;
             this.mqttdata.subscriptions = client_certificate.result.subscriptions;
-            this.log.info("Start MQTT Connection");
+            if (this.isRestart) {
+                this.log.info("Start MQTT Connection");
+            }
             this.connectMqtt();
         } catch (error) {
             this.log.error("Create CSR ERROR: " + error);
-            this.mqttC = {};
+            this.mqttC = null;
+            this.isRestart = true;
         }
     }
 
@@ -1074,49 +1107,39 @@ class LgThinq extends utils.Adapter {
                 host: this.mqttdata.mqttServer,
                 username: this.userNumber,
                 region: region,
-                baseReconnectTimeMs: 5000,
+                debug: !!this.log.debug,
+                baseReconnectTimeMs: 10000,
+                keepalive:  60
             };
-            this.mqttC = awsIot.device(connectData);
+            this.mqttC = new awsIot(connectData);
 
-            this.mqttC.on("offline", () => {
-                this.log.info("Thinq MQTT offline");
-                this.mqttC.end();
-                this.log.debug("MQTT offline! Reconnection in 60 seconds!");
-                setTimeout(async () => {
-                    this.start_mqtt();
-                }, 60000);
-            });
+            this.mqttC.on("offline", () => this.log.debug("Thinq MQTT offline"));
 
-            this.mqttC.on("end", () => {
-                this.log.info("mqtt end");
-            });
+            this.mqttC.on("end", () => this.log.debug("Thinq MQTT end"));
 
-            this.mqttC.on("close", () => {
-                this.log.info("mqtt closed");
-            });
+            this.mqttC.on("close", () => this.log.debug("Thinq MQTT closed"));
 
             this.mqttC.on("disconnect", (packet) => {
                 this.log.info("MQTT disconnect" + packet);
             });
 
-            this.mqttC.on("connect", () => {
-                this.log.info("MQTT connected to: " + this.mqttdata.subscriptions);
+            this.mqttC.on("connect", (packet) => {
+                if (this.isRestart) {
+                    this.log.info("MQTT connected to: " + this.mqttdata.subscriptions);
+                }
+                this.isRestart = true;
+                this.log.debug("packet: " + JSON.stringify(packet));
                 for (const subscription of this.mqttdata.subscriptions) {
                     this.mqttC.subscribe(subscription);
                 }
             });
 
-            this.mqttC.on("reconnect", () => {
-                this.log.info("MQTT reconnect");
-            });
+            this.mqttC.on("reconnect", () => this.log.info("Thinq MQTT reconnect"));
 
             this.mqttC.on("message", async (topic, message) => {
                 try {
                     const monitoring = JSON.parse(message);
-                    if (monitoring["data"]) {
-                        this.log.debug("Monitoring: " + JSON.stringify(monitoring));
-                    }
-                    this.log.debug("Monitoring Other: " + JSON.stringify(monitoring));
+                    this.log.debug("Monitoring: " + JSON.stringify(monitoring));
                     if (
                         monitoring &&
                         monitoring.data &&
@@ -1138,7 +1161,7 @@ class LgThinq extends utils.Adapter {
             });
         } catch (error) {
             this.log.error("MQTT ERROR: " + error);
-            this.mqttC = {};
+            this.mqttC = null;
         }
     }
 
@@ -1280,7 +1303,6 @@ class LgThinq extends utils.Adapter {
                         let data = {};
                         let onoff = "";
                         let rawData = {};
-                        let dev = "";
                         if (devType.val === 401) {
                             if (secsplit === "break") {
                                 this.updateHoliday(deviceId, devType, id, state);
@@ -1507,7 +1529,7 @@ class LgThinq extends utils.Adapter {
                         }
                     } else {
                         const object = await this.getObjectAsync(id);
-                        const name = object.common.name;
+                        const name = object ? object.common.name : "";
                         const data = { ctrlKey: "basicCtrl", command: "Set", dataKey: name, dataValue: state.val };
                         if (name.indexOf(".operation") !== -1) {
                             data.command = "Operation";

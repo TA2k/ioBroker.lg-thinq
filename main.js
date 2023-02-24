@@ -154,11 +154,21 @@ class LgThinq extends utils.Adapter {
                         native: {},
                     });
                     this.extractKeys(this, element.deviceId, element, null, false, true);
-
                     this.modelInfos[element.deviceId] = await this.getDeviceModelInfo(element);
+                    this.modelInfos[element.deviceId]["signature"] = false;
                     if (element.platformType && element.platformType === "thinq2") {
                         this.modelInfos[element.deviceId]["thinq2"] = element.platformType;
                         this.isThinq2 = true;
+                        if (
+                            element.deviceType &&
+                            element.deviceType == 201 &&
+                            element.snapshot &&
+                            element.snapshot.washerDryer &&
+                            element.snapshot.washerDryer.initialTimeHour == null
+                        ) {
+                            this.modelInfos[element.deviceId]["signature"] = true;
+                            //LG Signature without reserveTimeHour, remainTimeHour and initialTimeHour
+                        }
                     }
                     if (element.deviceType) {
                         this.modelInfos[element.deviceId]["deviceType"] = element.deviceType;
@@ -805,7 +815,7 @@ class LgThinq extends utils.Adapter {
             if (device["snapshot"] && deviceModel["folder"] && deviceType != 401) {
                 type = deviceModel["folder"];
             }
-            const thinq2 = deviceModel["thinq2"] ? deviceModel["thinq2"] : "";
+            //const thinq2 = deviceModel["thinq2"] ? deviceModel["thinq2"] : "";
             let path = device.deviceId + ".snapshot.";
             if (type) {
                 path = path + type + ".";
@@ -873,11 +883,19 @@ class LgThinq extends utils.Adapter {
                                 const valueDefault = deviceModel["MonitoringValue"][state]["default"]
                                     ? deviceModel["MonitoringValue"][state]["default"]
                                     : null;
-                                common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
+                                common.min = 0;
                                 if (state === "moreLessTime") {
                                     common.max = 200;
                                 } else if (state === "timeSetting") {
                                     common.max = 360;
+                                } else if (this.modelInfos[device.deviceId]["signature"] &&
+                                    (
+                                        state === "reserveTimeMinute" ||
+                                        state === "remainTimeMinute" ||
+                                        state === "initialTimeMinute"
+                                    )
+                                ) {
+                                    common.max = 1000;
                                 } else {
                                     if (
                                         valueDefault != null &&
@@ -956,7 +974,8 @@ class LgThinq extends utils.Adapter {
                             }
                             if (valueObject) {
                                 if (valueObject.max) {
-                                    common.min = 0; // deviceModel["MonitoringValue"][state]["valueMapping"].min; //reseverdhour has wrong value
+                                    //LG Signature 201 thinq1????
+                                    common.min = 0;
                                     if (state === "moreLessTime") {
                                         common.max = 200;
                                     } else if (state === "timeSetting") {

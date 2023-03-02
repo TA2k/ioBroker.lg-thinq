@@ -703,7 +703,7 @@ class LgThinq extends utils.Adapter {
                     : "";
                 this.coursetypes[device.deviceId]["downloadedCourseType"] = deviceModel.Config.downloadedCourseType
                     ? deviceModel.Config.downloadedCourseType
-                    : "courseMiniGplusBest";
+                    : "courseType";
             }
             if (device.deviceType === 401) {
                 if (device.platformType == "thinq2") {
@@ -1325,6 +1325,8 @@ class LgThinq extends utils.Adapter {
                         let data = {};
                         let onoff = "";
                         let rawData = {};
+                        let WMStateDL;
+                        let noff = "";
                         if (devType.val === 401) {
                             if (secsplit === "break") {
                                 this.updateHoliday(deviceId, devType, id, state);
@@ -1389,7 +1391,7 @@ class LgThinq extends utils.Adapter {
                                     rawData.command = "Set";
                                     break;
                                 case "expressMode":
-                                    const noff = state.val === "IGNORE" ? "OFF" : state.val;
+                                    noff = state.val === "IGNORE" ? "OFF" : state.val;
                                     rawData.data = { refState: { expressMode: noff, tempUnit: dataTemp.val } };
                                     action = "basicCtrl";
                                     rawData.command = "Set";
@@ -1401,7 +1403,7 @@ class LgThinq extends utils.Adapter {
                                     rawData.command = "Set";
                                     break;
                                 case "LastCourse":
-                                    if (state.val > 0) {
+                                    if (state.val != null && state.val > 0) {
                                         this.setCourse(id, deviceId, state);
                                     }
                                     return;
@@ -1449,9 +1451,12 @@ class LgThinq extends utils.Adapter {
                                     ) {
                                         return;
                                     }
+                                    if (this.modelInfos[deviceId]["signature"]) {
+                                        return;
+                                    }
                                     break;
                                 case "WMStart":
-                                    const WMStateDL = await this.getStateAsync(deviceId + ".remote.WMDownload_Select");
+                                    WMStateDL = await this.getStateAsync(deviceId + ".remote.WMDownload_Select");
                                     if (!WMStateDL) {
                                         this.log.warn("Datapoint WMDownload_Select is not exists!");
                                         return;

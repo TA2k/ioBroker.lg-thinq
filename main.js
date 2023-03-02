@@ -703,7 +703,7 @@ class LgThinq extends utils.Adapter {
                     : "";
                 this.coursetypes[device.deviceId]["downloadedCourseType"] = deviceModel.Config.downloadedCourseType
                     ? deviceModel.Config.downloadedCourseType
-                    : "";
+                    : "courseMiniGplusBest";
             }
             if (device.deviceType === 401) {
                 if (device.platformType == "thinq2") {
@@ -825,7 +825,7 @@ class LgThinq extends utils.Adapter {
             }
             const downloadedCourseType = this.coursetypes[device.deviceId].downloadedCourseType
                 ? this.coursetypes[device.deviceId].downloadedCourseType
-                : "WASHERANDDRYER";
+                : "courseMiniGplusBest";
             const smartCourseType = this.coursetypes[device.deviceId].smartCourseType
                 ? this.coursetypes[device.deviceId].smartCourseType
                 : "WASHERANDDRYER";
@@ -888,6 +888,8 @@ class LgThinq extends utils.Adapter {
                                     common.max = 200;
                                 } else if (state === "timeSetting") {
                                     common.max = 360;
+                                } else if (state === "airState.quality.odor") {
+                                    common.max = 20000;
                                 } else if (this.modelInfos[device.deviceId]["signature"] &&
                                     (
                                         state === "reserveTimeMinute" ||
@@ -980,6 +982,8 @@ class LgThinq extends utils.Adapter {
                                         common.max = 200;
                                     } else if (state === "timeSetting") {
                                         common.max = 360;
+                                    } else if (state === "airState.quality.odor") {
+                                        common.max = 20000;
                                     } else {
                                         if (valueDefault != null && valueDefault > valueObject.max) {
                                             common.max = valueDefault;
@@ -1227,7 +1231,6 @@ class LgThinq extends utils.Adapter {
         }
 
         this.log.debug(JSON.stringify(data));
-
         return this.requestClient
             .post(controlUrl, data, { headers })
             .then((resp) => resp.data)

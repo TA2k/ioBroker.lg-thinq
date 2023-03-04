@@ -1326,7 +1326,7 @@ class LgThinq extends utils.Adapter {
                         let onoff = "";
                         let rawData = {};
                         let WMStateDL;
-                        let noff = "";
+                        let noff;
                         if (devType.val === 401) {
                             if (secsplit === "break") {
                                 this.updateHoliday(deviceId, devType, id, state);

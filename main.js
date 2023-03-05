@@ -35,6 +35,9 @@ class LgThinq extends utils.Adapter {
         this.on("unload", this.onUnload.bind(this));
         this.requestClient = axios.create();
         this.updateInterval = null;
+        this.qualityInterval = null;
+        this.refreshTokenInterval = null;
+        this.refreshTimeout = null;
         this.session = {};
         this.modelInfos = {};
         this.auth = {};
@@ -122,7 +125,7 @@ class LgThinq extends utils.Adapter {
                 this.log.debug(JSON.stringify(this.session));
                 this.setState("info.connection", true, true);
                 this.log.info("Login successful");
-                this.refreshTokenInterval = setInterval(() => {
+                this.refreshTokenInterval = this.setInterval(() => {
                     this.refreshNewToken();
                 }, (this.session.expires_in - 100) * 1000);
                 this.userNumber = await this.getUserNumber();
@@ -150,6 +153,31 @@ class LgThinq extends utils.Adapter {
                         common: {
                             name: element.alias,
                             role: "state",
+                        },
+                        native: {},
+                    });
+                    await this.setObjectNotExistsAsync(`${element.deviceId}.quality`, {
+                        type: "state",
+                        common: {
+                            name: {
+                                "en": "Datapoint quality",
+                                "de": "Datenpunktqualität",
+                                "ru": "Качество Datapoint",
+                                "pt": "Qualidade de Datapoint",
+                                "nl": "Datapunt kwaliteit",
+                                "fr": "Qualité du Datapoint",
+                                "it": "Qualità dei dati",
+                                "es": "Calidad del punto de datos",
+                                "pl": "Jakości danych",
+                                "uk": "Якість даних",
+                                "zh-cn": "数据点"
+                            },
+                            type: "string",
+                            role: "json",
+                            desc: "Datapoints Quality",
+                            read: true,
+                            write: false,
+                            def: "",
                         },
                         native: {},
                     });
@@ -182,9 +210,12 @@ class LgThinq extends utils.Adapter {
                 if (this.isThinq2) {
                     this.start_mqtt();
                 }
-                this.updateInterval = setInterval(async () => {
+                this.updateInterval = this.setInterval(async () => {
                     await this.updateDevices();
                 }, this.config.interval * 60 * 1000);
+                this.qualityInterval = this.setInterval(() => {
+                    this.cleanupQuality();
+                }, 60 * 1000); // * 60 * 24
             }
         }
     }
@@ -204,11 +235,19 @@ class LgThinq extends utils.Adapter {
         const listDevices = await this.getListDevices().catch((error) => {
             this.log.error(error);
         });
-
-        listDevices.forEach(async (element) => {
-            this.extractKeys(this, element.deviceId, element);
-            this.pollMonitor(element);
-        });
+        if (listDevices && listDevices === "TERMS") {
+            this.setState("info.connection", false, true);
+            return;
+        } else if (listDevices && listDevices === "BLOCKED") {
+            this.setState("info.connection", false, true);
+            return;
+        }
+        if (typeof listDevices == "object") {
+            listDevices.forEach(async (element) => {
+                this.extractKeys(this, element.deviceId, element);
+                this.pollMonitor(element);
+            });
+        }
         this.log.debug(JSON.stringify(listDevices));
     }
 
@@ -431,8 +470,9 @@ class LgThinq extends utils.Adapter {
             if (this.isThinq2) {
                 this.restartMqtt();
             }
-            this.refreshTokenInterval && clearInterval(this.refreshTokenInterval);
-            this.refreshTokenInterval = setInterval(() => {
+            this.refreshTokenInterval && this.clearInterval(this.refreshTokenInterval);
+            this.refreshTokenInterval = null;
+            this.refreshTokenInterval = this.setInterval(() => {
                 this.refreshNewToken();
             }, (this.session.expires_in - 100) * 1000);
         }
@@ -908,7 +948,7 @@ class LgThinq extends utils.Adapter {
                                         common.max = deviceModel["MonitoringValue"][state]["valueMapping"].max;
                                     }
                                 }
-                                common.def = valueDefault;
+                                common.def = valueDefault ? parseFloat(valueDefault) : 0;
                             } else {
                                 const values = Object.keys(deviceModel["MonitoringValue"][state]["valueMapping"]);
                                 values.forEach((value) => {
@@ -951,7 +991,7 @@ class LgThinq extends utils.Adapter {
                         } else {
                             // @ts-ignore
                             obj.common = common;
-                            await this.setForeignObjectAsync(this.namespace + "." + path + state, obj);
+                            await this.setObjectAsync(path + state, obj);
                         }
                     });
                 });
@@ -1027,7 +1067,7 @@ class LgThinq extends utils.Adapter {
                             } else {
                                 // @ts-ignore
                                 obj.common = common;
-                                const res = await this.setForeignObjectAsync(this.namespace + "." + path + state, obj);
+                                await this.setObjectAsync(path + state, obj);
                             }
                         }
                     });
@@ -1252,14 +1292,27 @@ class LgThinq extends utils.Adapter {
      */
     onUnload(callback) {
         try {
-            this.updateInterval && clearInterval(this.updateInterval);
-            this.refreshTokenInterval && clearInterval(this.refreshTokenInterval);
-            this.refreshTimeout && clearTimeout(this.refreshTimeout);
+            this.updateInterval && this.clearInterval(this.updateInterval);
+            this.qualityInterval && this.clearInterval(this.qualityInterval);
+            this.refreshTokenInterval && this.clearInterval(this.refreshTokenInterval);
+            this.refreshTimeout && this.clearTimeout(this.refreshTimeout);
             this.sleepTimer && clearTimeout(this.sleepTimer);
-
             callback();
         } catch (e) {
             callback();
+        }
+    }
+
+    async setAckFlag(id, value) {
+        try {
+            if (id) {
+                this.setState(id, {
+                    ack: true,
+                    ...value,
+                });
+            }
+        } catch (e) {
+            this.log.warn("setAckFlag: " + e);
         }
     }
 
@@ -1291,11 +1344,13 @@ class LgThinq extends utils.Adapter {
                                 this.log.error(error);
                             });
                         this.log.info(JSON.stringify(sendJ));
+                        this.setAckFlag(id);
                         return;
                     }
                     if (secsplit === "Course") {
                         this.courseactual[deviceId][lastsplit] = state.val;
                         this.log.debug(JSON.stringify(this.courseactual[deviceId]));
+                        this.setAckFlag(id);
                         return;
                     }
                     let devType = {};
@@ -1313,8 +1368,10 @@ class LgThinq extends utils.Adapter {
                             this.sendStaticRequest(deviceId, "other");
                         }
                         this.log.debug(JSON.stringify(this.courseactual[deviceId]));
+                        this.setAckFlag(id, {val: false});
                         return;
                     } else if (secsplit === "Statistic") {
+                        this.setAckFlag(id);
                         return;
                     }
                     let response = null;
@@ -1330,6 +1387,7 @@ class LgThinq extends utils.Adapter {
                         if (devType.val === 401) {
                             if (secsplit === "break") {
                                 this.updateHoliday(deviceId, devType, id, state);
+                                this.setAckFlag(id);
                                 return;
                             } else if (!this.modelInfos[deviceId] || !this.modelInfos[deviceId]["ControlDevice"]) {
                                 this.log.info("Cannot found modelInfos = action: " + action);
@@ -1358,6 +1416,7 @@ class LgThinq extends utils.Adapter {
                                 rawData["dataValue"] = state.val;
                                 rawData["dataSetList"] = null;
                                 rawData["dataGetList"] = null;
+                                this.setAckFlag(id);
                             } else if (checkRemote && checkRemote.dataSetList) {
                                 this.log.info("The command is not implemented: " + secsplit);
                                 return;
@@ -1405,12 +1464,15 @@ class LgThinq extends utils.Adapter {
                                 case "LastCourse":
                                     if (state.val != null && state.val > 0) {
                                         this.setCourse(id, deviceId, state);
+                                        this.setAckFlag(id);
                                     }
                                     return;
                                 case "Favorite":
                                     this.setFavoriteCourse(deviceId);
+                                    this.setAckFlag(id, {val: false});
                                     return;
                                 case "WMDownload_Select":
+                                    this.setAckFlag(id);
                                     if (state.val === "NOT_SELECTED") {
                                         return;
                                     }
@@ -1441,6 +1503,7 @@ class LgThinq extends utils.Adapter {
                                     if (rawData.data && Object.keys(rawData).length === 0) {
                                         return;
                                     }
+                                    this.setAckFlag(id);
                                     if (
                                         !this.coursedownload[deviceId] &&
                                         this.deviceJson &&
@@ -1456,6 +1519,7 @@ class LgThinq extends utils.Adapter {
                                     }
                                     break;
                                 case "WMStart":
+                                    this.setAckFlag(id);
                                     WMStateDL = await this.getStateAsync(deviceId + ".remote.WMDownload_Select");
                                     if (!WMStateDL) {
                                         this.log.warn("Datapoint WMDownload_Select is not exists!");
@@ -1521,7 +1585,7 @@ class LgThinq extends utils.Adapter {
                                 }
                             }
                         }
-
+                        this.setAckFlag(id);
                         if (data && data.command && (rawData.dataKey || rawData.dataGetList)) {
                             this.log.debug(JSON.stringify(data));
                             response = await this.sendCommandToDevice(deviceId, data, false, sync);
@@ -1569,7 +1633,7 @@ class LgThinq extends utils.Adapter {
                             this.log.error(JSON.stringify(response));
                         }
                     }
-                    this.refreshTimeout = setTimeout(async () => {
+                    this.refreshTimeout = this.setTimeout(async () => {
                         await this.updateDevices();
                     }, 10 * 1000);
                 } catch (e) {
@@ -1584,6 +1648,93 @@ class LgThinq extends utils.Adapter {
                     });
                 }
             }
+        }
+    }
+
+    async cleanupQuality() {
+        this.log.debug("Start check quality");
+        const quality = {
+            0: "0x00 - good",
+            1: "0x01 - general problem",
+            2: "0x02 - no connection problem",
+            16: "0x10 - substitute value from controller",
+            17: "0x11 - general problem by instance",
+            18: "0x12 - instance not connected",
+            32: "0x20 - substitute initial value",
+            64: "0x40 - substitute value from device or instance",
+            65: "0x41 - general problem by device",
+            66: "0x42 - device not connected",
+            68: "0x44 - device reports error",
+            128: "0x80 - substitute value from sensor",
+            129: "0x81 - general problem by sensor",
+            130: "0x82 - sensor not connected",
+            132: "0x84 - sensor reports error",
+        };
+        try {
+            const devices = await this.getDevicesAsync();
+            for (const device of devices) {
+                const deviceId = device._id.split(".").pop();
+                const all_dp = await this.getObjectListAsync({
+                    startkey: `${this.namespace}.${deviceId}.`,
+                    endkey: `${this.namespace}.${deviceId}.\u9999`,
+                });
+                const dp_array = [];
+                if (all_dp && all_dp.rows) {
+                    let role;
+                    for (const dp of all_dp.rows) {
+                        if (dp.value.type === "state") {
+                            const states = await this.getStateAsync(dp.id);
+                            if (states && states.q != null && states.q != 0) {
+                                this.log.debug(`Datapoint: ${dp.id} - ${JSON.stringify(states)}`);
+                                if (quality[states.q]) {
+                                    const isfind = dp_array.find((mes) => mes.message === quality[states.q]);
+                                    if (isfind) {
+                                        this.log.debug(`Found: ${JSON.stringify(isfind)}`);
+                                        ++isfind.counter;
+                                        isfind.dp[isfind.counter] = dp.id;
+                                    } else {
+                                        this.log.debug(`Not Found`);
+                                        const new_array = {
+                                            message: quality[states.q],
+                                            quality: states.q,
+                                            counter: 1,
+                                            dp: { 1: dp.id },
+                                        };
+                                        dp_array.push(new_array);
+                                    }
+                                    if (
+                                        dp.value &&
+                                        dp.value.common &&
+                                        dp.value.common.role != null &&
+                                        dp.value.common.role.toString().match(/button/gi) != null
+                                    ) {
+                                        role = { val: false };
+                                    } else {
+                                        role = null;
+                                    }
+                                    if (quality[states.q] === "0x20 - substitute initial value") {
+                                        await this.setStateAsync(`${dp.id}`, {
+                                            ack: true,
+                                            ...role,
+                                        });
+                                    }
+                                } else {
+                                    this.log.debug(`Missing quality: ${states.q}`);
+                                }
+                            }
+                        }
+                    }
+                }
+                await this.setStateAsync(`${deviceId}.quality`, {
+                    val:
+                        Object.keys(dp_array).length > 0
+                            ? JSON.stringify(dp_array)
+                            : JSON.stringify({ message: "No Message" }),
+                    ack: true,
+                });
+            }
+        } catch (e) {
+            this.log.info(`cleanupQuality: ${e}`);
         }
     }
 }

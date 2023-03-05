@@ -13,7 +13,7 @@ const crypto = require("crypto");
 const uuid = require("uuid");
 const qs = require("qs");
 const { DateTime } = require("luxon");
-const { extractKeys } = require("./lib/extractKeys");
+const Json2iob = require("./lib/extractKeys");
 const constants = require("./lib/constants");
 const { URL } = require("url");
 const helper = require("./lib/helper");
@@ -43,7 +43,7 @@ class LgThinq extends utils.Adapter {
         this.auth = {};
         this.workIds = [];
         this.deviceControls = {};
-        this.extractKeys = extractKeys;
+        this.json2iob = new Json2iob(this);
         this.targetKeys = {};
         this.createDataPoint = helper.createDataPoint;
         this.setDryerBlindStates = helper.setDryerBlindStates;
@@ -181,7 +181,15 @@ class LgThinq extends utils.Adapter {
                         },
                         native: {},
                     });
-                    this.extractKeys(this, element.deviceId, element, null, false, true);
+                    await this.json2iob.parse(element.deviceId, element, {
+                        forceIndex: true,
+                        preferedArrayName: null,
+                        channelName: null,
+                        autoCast: true,
+                        checkvalue: false,
+                        checkType: true,
+                        firstload: true,
+                    });
                     this.modelInfos[element.deviceId] = await this.getDeviceModelInfo(element);
                     this.modelInfos[element.deviceId]["signature"] = false;
                     if (element.platformType && element.platformType === "thinq2") {
@@ -244,7 +252,14 @@ class LgThinq extends utils.Adapter {
         }
         if (typeof listDevices == "object") {
             listDevices.forEach(async (element) => {
-                this.extractKeys(this, element.deviceId, element);
+                await this.json2iob.parse(element.deviceId, element, {
+                    forceIndex: true,
+                    preferedArrayName: null,
+                    channelName: null,
+                    autoCast: true,
+                    checkvalue: true,
+                    checkType: true,
+                });
                 this.pollMonitor(element);
             });
         }
@@ -385,7 +400,14 @@ class LgThinq extends utils.Adapter {
                         resultConverted = JSON.parse(result.toString("utf-8"));
                     }
                     this.log.debug(JSON.stringify(resultConverted));
-                    await extractKeys(this, device.deviceId + ".snapshot", resultConverted);
+                    await this.json2iob.parse(`${device.deviceId}.snapshot`, resultConverted, {
+                        forceIndex: true,
+                        preferedArrayName: null,
+                        channelName: null,
+                        autoCast: true,
+                        checkvalue: true,
+                        checkType: true,
+                    });
                     return resultConverted;
                 } else {
                     this.log.debug("No data:" + JSON.stringify(result) + " " + device.deviceId);
@@ -504,7 +526,15 @@ class LgThinq extends utils.Adapter {
         if (!resp) {
             return;
         }
-        this.extractKeys(this, "general", resp);
+        await this.json2iob.parse("general", resp, {
+            forceIndex: true,
+            preferedArrayName: null,
+            channelName: null,
+            autoCast: true,
+            checkvalue: false,
+            checkType: true,
+            firstload: true,
+        });
         this.log.debug(JSON.stringify(resp));
         if (!resp.account) {
             this.log.error("No account found");
@@ -654,7 +684,15 @@ class LgThinq extends utils.Adapter {
                 return;
             }
             this.homes = home_result.result.item;
-            this.extractKeys(this, "homes", this.homes);
+            this.json2iob.parse("homes", this.homes, {
+                forceIndex: true,
+                preferedArrayName: null,
+                channelName: null,
+                autoCast: true,
+                checkvalue: false,
+                checkType: true,
+                firstload: true,
+            });
         }
         const headers = this.defaultHeaders;
         const devices = [];
@@ -1212,7 +1250,15 @@ class LgThinq extends utils.Adapter {
                         monitoring.deviceId &&
                         monitoring.type === "monitoring"
                     ) {
-                        this.extractKeys(this, monitoring.deviceId + ".snapshot", monitoring.data.state.reported);
+                        this.json2iob.parse(`${monitoring.deviceId}.snapshot`, monitoring.data.state.reported, {
+                            forceIndex: true,
+                            preferedArrayName: null,
+                            channelName: null,
+                            autoCast: true,
+                            checkvalue: false,
+                            checkType: true,
+                            firstload: true,
+                        });
                     }
                 } catch (error) {
                     this.log.info("message: " + error);

@@ -57,6 +57,7 @@ class LgThinq extends utils.Adapter {
         this.checkdate = helper.checkdate;
         this.sendStaticRequest = helper.sendStaticRequest;
         this.createCourse = helper.createCourse;
+        this.refreshRemote = helper.refreshRemote;
         this.createAirRemoteStates = air.createAirRemoteStates;
         this.updateHoliday = air.updateHoliday;
         this.checkHolidayDate = air.checkHolidayDate;
@@ -68,26 +69,28 @@ class LgThinq extends utils.Adapter {
         this.courseactual = {};
         this.coursetypes = {};
         this.coursedownload = {};
+        this.remoteValue = {};
         this.mqtt_userID = "";
         this.isThinq2 = false;
         this.isRestart = true;
+        this.firstupdate = false;
+        this.isFinished = false;
     }
 
     /**
      * Is called when databases are connected and adapter received configuration.
      */
     async onReady() {
-        this.setState("info.connection", false, true);
+        await this.setStateAsync("info.connection", false, true);
+        await this.cleanOldVersion();
         if (this.config.interval < 0.5) {
             this.log.info("Set interval to minimum 0.5");
             this.config.interval = 0.5;
         }
-        // @ts-ignore
-        await this.getForeignObject("system.config", async (err, data) => {
-            if (data && data.common && data.common.language) {
-                this.lang = data.common.language === this.lang ? this.lang : "en";
-            }
-        });
+        const data = await this.getForeignObjectAsync("system.config");
+        if (data && data.common && data.common.language) {
+            this.lang = data.common.language === this.lang ? this.lang : "en";
+        }
         this.log.debug(this.lang);
         this.defaultHeaders = {
             "x-api-key": constants.API_KEY,
@@ -107,7 +110,6 @@ class LgThinq extends utils.Adapter {
             "x-app-version": "3.5.1721",
             "x-message-id": this.random_string(22),
         };
-        this.subscribeStates("*");
 
         this.gateway = await this.requestClient
             .get(constants.GATEWAY_URL, { headers: this.defaultHeaders })
@@ -148,6 +150,9 @@ class LgThinq extends utils.Adapter {
                 }
                 this.log.info("Found: " + listDevices.length + " devices");
                 for (const element of listDevices) {
+                    this.log.info(`Create or update datapoints for ${element.deviceId}`);
+                    this.subscribeStates(`${element.deviceId}.remote.*`);
+                    this.subscribeStates(`${element.deviceId}.snapshot.*`);
                     await this.setObjectNotExistsAsync(element.deviceId, {
                         type: "device",
                         common: {
@@ -211,9 +216,11 @@ class LgThinq extends utils.Adapter {
                         this.isThinq2 = true;
                     }
                     await this.pollMonitor(element);
-                    await this.sleep(2000);
-                    this.extractValues(element);
+                    //await this.sleep(2000);
+                    this.log.info(`Update raw datapoints for ${element.deviceId}`);
+                    await this.extractValues(element);
                 }
+                this.isFinished = true;
                 this.log.debug(JSON.stringify(listDevices));
                 if (this.isThinq2) {
                     this.start_mqtt();
@@ -223,7 +230,7 @@ class LgThinq extends utils.Adapter {
                 }, this.config.interval * 60 * 1000);
                 this.qualityInterval = this.setInterval(() => {
                     this.cleanupQuality();
-                }, 60 * 1000); // * 60 * 24
+                }, 60 * 60 * 24 * 1000);
             }
         }
     }
@@ -252,16 +259,18 @@ class LgThinq extends utils.Adapter {
         }
         if (typeof listDevices == "object") {
             listDevices.forEach(async (element) => {
-                await this.json2iob.parse(element.deviceId, element, {
+                this.json2iob.parse(element.deviceId, element, {
                     forceIndex: true,
                     preferedArrayName: null,
                     channelName: null,
                     autoCast: true,
-                    checkvalue: true,
+                    checkvalue: this.firstupdate,
                     checkType: true,
                 });
                 this.pollMonitor(element);
+                this.refreshRemote(element);
             });
+            this.firstupdate = true;
         }
         this.log.debug(JSON.stringify(listDevices));
     }
@@ -540,7 +549,6 @@ class LgThinq extends utils.Adapter {
             this.log.error("No account found");
             this.log.error(JSON.stringify(resp));
             return;
-            deviceModel["MonitoringValue"];
         }
         return resp.account.userNo;
     }
@@ -824,8 +832,6 @@ class LgThinq extends utils.Adapter {
                 }
                 this.deviceControls[device.deviceId] = controlWifi;
                 this.deviceJson[device.deviceId] = deviceModel;
-
-                const controlId = deviceModel["Info"].productType + "Control";
                 await this.setObjectNotExistsAsync(device.deviceId + ".remote", {
                     type: "channel",
                     common: {
@@ -911,205 +917,210 @@ class LgThinq extends utils.Adapter {
                 ? this.coursetypes[device.deviceId].courseType
                 : "WASHERANDDRYER";
             const onlynumber = /^-?[0-9]+$/;
-            deviceModel["MonitoringValue"] &&
-                Object.keys(deviceModel["MonitoringValue"]).forEach(async (state) => {
-                    this.getObject(path + state, async (err, obj) => {
-                        let common = {
-                            name: state,
-                            type: "mixed",
-                            write: false,
-                            read: true,
-                        };
-                        if (obj) {
-                            common = obj.common;
+            if (deviceModel["MonitoringValue"]) {
+                const dp_targetkey = [];
+                for (const state in deviceModel["MonitoringValue"]) {
+                    const obj = await this.getObjectAsync(path + state);
+                    let common = {
+                        name: state,
+                        type: "mixed",
+                        role: "state",
+                        write: false,
+                        read: true,
+                    };
+                    if (obj && obj.common) {
+                        common = obj.common;
+                    }
+                    const commons = {};
+                    if (deviceModel["MonitoringValue"][state]["targetKey"] && obj) {
+                        this.targetKeys[state] = [];
+                        const firstKeyName = Object.keys(deviceModel["MonitoringValue"][state]["targetKey"])[0];
+                        const firstObject = deviceModel["MonitoringValue"][state]["targetKey"][firstKeyName];
+                        for (const targetKey in firstObject) {
+                            dp_targetkey.push(firstObject[targetKey]);
+                            this.targetKeys[state].push(firstObject[targetKey]);
                         }
-                        const commons = {};
-                        if (deviceModel["MonitoringValue"][state]["targetKey"]) {
-                            this.targetKeys[state] = [];
-                            const firstKeyName = Object.keys(deviceModel["MonitoringValue"][state]["targetKey"])[0];
-                            const firstObject = deviceModel["MonitoringValue"][state]["targetKey"][firstKeyName];
-                            Object.keys(firstObject).forEach((targetKey) => {
-                                this.targetKeys[state].push(firstObject[targetKey]);
-                            });
+                    } else if (!obj && !dp_targetkey.includes(state)) {
+                        continue;
+                    }
+                    if (state === courseType) {
+                        for (const key in deviceModel["Course"]) {
+                            commons[key] =
+                                constants[this.lang + "Translation"][key] != null
+                                    ? constants[this.lang + "Translation"][key]
+                                    : key;
                         }
-                        if (state === courseType) {
-                            Object.keys(deviceModel["Course"]).forEach(async (key) => {
-                                commons[key] =
-                                    constants[this.lang + "Translation"][key] != null
-                                        ? constants[this.lang + "Translation"][key]
-                                        : key;
-                            });
-                            commons["NOT_SELECTED"] =
+                        commons["NOT_SELECTED"] =
                                 constants[this.lang + "Translation"]["NOT_SELECTED"] != null
                                     ? constants[this.lang + "Translation"]["NOT_SELECTED"]
                                     : 0;
-                        }
-                        if (state === smartCourseType || state === downloadedCourseType) {
-                            Object.keys(deviceModel["SmartCourse"]).forEach(async (key) => {
-                                commons[key] =
+                    }
+                    if (state === smartCourseType || state === downloadedCourseType) {
+                        for (const key in deviceModel["SmartCourse"]) {
+                            commons[key] =
                                     constants[this.lang + "Translation"][key] != null
                                         ? constants[this.lang + "Translation"][key]
                                         : key;
-                            });
-                            commons["NOT_SELECTED"] =
+                        }
+                        commons["NOT_SELECTED"] =
                                 constants[this.lang + "Translation"]["NOT_SELECTED"] != null
                                     ? constants[this.lang + "Translation"]["NOT_SELECTED"]
                                     : 0;
-                        }
-                        if (deviceModel["MonitoringValue"][state]["valueMapping"]) {
-                            if (deviceModel["MonitoringValue"][state]["valueMapping"].max) {
-                                const valueDefault = deviceModel["MonitoringValue"][state]["default"]
-                                    ? deviceModel["MonitoringValue"][state]["default"]
-                                    : null;
-                                common.min = 0;
-                                if (state === "moreLessTime") {
-                                    common.max = 200;
-                                } else if (state === "timeSetting") {
-                                    common.max = 360;
-                                } else if (state === "airState.quality.odor") {
-                                    common.max = 20000;
-                                } else if (this.modelInfos[device.deviceId]["signature"] &&
+                    }
+                    if (deviceModel["MonitoringValue"][state]["valueMapping"]) {
+                        if (deviceModel["MonitoringValue"][state]["valueMapping"].max) {
+                            const valueDefault = deviceModel["MonitoringValue"][state]["default"]
+                                ? deviceModel["MonitoringValue"][state]["default"]
+                                : null;
+                            common.min = 0;
+                            if (state === "moreLessTime") {
+                                common.max = 200;
+                            } else if (state === "timeSetting") {
+                                common.max = 360;
+                            } else if (state === "airState.quality.odor") {
+                                common.max = 20000;
+                            } else if (this.modelInfos[device.deviceId]["signature"] &&
                                     (
                                         state === "reserveTimeMinute" ||
                                         state === "remainTimeMinute" ||
                                         state === "initialTimeMinute"
                                     )
-                                ) {
-                                    common.max = 1000;
-                                } else {
-                                    if (
-                                        valueDefault != null &&
-                                        valueDefault > deviceModel["MonitoringValue"][state]["valueMapping"].max
-                                    ) {
-                                        common.max = valueDefault;
-                                    } else {
-                                        common.max = deviceModel["MonitoringValue"][state]["valueMapping"].max;
-                                    }
-                                }
-                                common.def = valueDefault ? parseFloat(valueDefault) : 0;
+                            ) {
+                                common.max = 1000;
                             } else {
-                                const values = Object.keys(deviceModel["MonitoringValue"][state]["valueMapping"]);
-                                values.forEach((value) => {
-                                    if (deviceModel["MonitoringValue"][state]["valueMapping"][value].label != null) {
-                                        const valueMap = deviceModel["MonitoringValue"][state]["valueMapping"][value];
-                                        if (onlynumber.test(value)) {
-                                            commons[valueMap.index] =
+                                if (
+                                    valueDefault != null &&
+                                        valueDefault > deviceModel["MonitoringValue"][state]["valueMapping"].max
+                                ) {
+                                    common.max = valueDefault;
+                                } else {
+                                    common.max = deviceModel["MonitoringValue"][state]["valueMapping"].max;
+                                }
+                            }
+                            common.def = valueDefault ? parseFloat(valueDefault) : 0;
+                        } else {
+                            const values = Object.keys(deviceModel["MonitoringValue"][state]["valueMapping"]);
+                            for (const value of values) {
+                                if (deviceModel["MonitoringValue"][state]["valueMapping"][value].label != null) {
+                                    const valueMap = deviceModel["MonitoringValue"][state]["valueMapping"][value];
+                                    if (onlynumber.test(value)) {
+                                        commons[valueMap.index] =
                                                 langPack != null && langPack[valueMap.label]
                                                     ? langPack[valueMap.label].toString("utf-8")
                                                     : valueMap.label;
-                                        } else {
-                                            commons[value] =
+                                    } else {
+                                        commons[value] =
                                                 langPack != null && langPack[valueMap.label]
                                                     ? langPack[valueMap.label].toString("utf-8")
                                                     : valueMap.index;
-                                        }
-                                        if (value === "NO_ECOHYBRID") common.def = "NO_ECOHYBRID";
-                                    } else {
-                                        if (value === "NO_ECOHYBRID") common.def = "NO_ECOHYBRID";
-                                        commons[value] = value;
                                     }
-                                });
-                            }
-                        }
-                        if (Object.keys(commons).length > 0) {
-                            if (common["states"] != null) {
-                                delete common.states;
-                            }
-                            common.states = commons;
-                        }
-                        if (!obj) {
-                            // @ts-ignore
-                            await this.setObjectNotExistsAsync(path + state, {
-                                type: "state",
-                                common: common,
-                                native: {},
-                            }).catch((error) => {
-                                this.log.error(error);
-                            });
-                        } else {
-                            // @ts-ignore
-                            obj.common = common;
-                            await this.setObjectAsync(path + state, obj);
-                        }
-                    });
-                });
-            deviceModel["Value"] &&
-                Object.keys(deviceModel["Value"]).forEach((state) => {
-                    this.log.debug(path + state); //Problem with 401 device
-                    this.getObject(path + state, async (err, obj) => {
-                        if (obj) {
-                            const common = obj.common;
-                            const commons = {};
-                            let valueObject = deviceModel["Value"][state]["option"]
-                                ? deviceModel["Value"][state]["option"]
-                                : null;
-                            const valueDefault = deviceModel["Value"][state]["default"]
-                                ? deviceModel["Value"][state]["default"]
-                                : null;
-                            if (deviceModel["Value"][state]["value_mapping"]) {
-                                valueObject = deviceModel["Value"][state]["value_mapping"];
-                            }
-                            if (deviceModel["Value"][state]["value_validation"]) {
-                                valueObject = deviceModel["Value"][state]["value_validation"];
-                            }
-                            if (valueObject) {
-                                if (valueObject.max) {
-                                    //LG Signature 201 thinq1????
-                                    common.min = 0;
-                                    if (state === "moreLessTime") {
-                                        common.max = 200;
-                                    } else if (state === "timeSetting") {
-                                        common.max = 360;
-                                    } else if (state === "airState.quality.odor") {
-                                        common.max = 20000;
-                                    } else {
-                                        if (valueDefault != null && valueDefault > valueObject.max) {
-                                            common.max = valueDefault;
-                                        } else {
-                                            common.max = valueObject.max;
-                                        }
-                                    }
-                                    common.def = valueDefault ? parseFloat(valueDefault) : 0;
+                                    if (value === "NO_ECOHYBRID") common.def = "NO_ECOHYBRID";
                                 } else {
-                                    const values = Object.keys(valueObject);
-                                    values.forEach((value) => {
-                                        const content = valueObject[value];
-                                        if (typeof content === "string") {
-                                            const new_content = content.replace("@", "");
-                                            if (langPack != null && langPack[content]) {
-                                                commons[value] = langPack[content].toString("utf-8");
-                                            } else if (constants[this.lang + "Translation"][new_content] != null) {
-                                                commons[value] = constants[this.lang + "Translation"][new_content];
-                                            } else {
-                                                commons[value] = new_content;
-                                            }
-                                        }
-                                    });
+                                    if (value === "NO_ECOHYBRID") common.def = "NO_ECOHYBRID";
+                                    commons[value] = value;
                                 }
-                            }
-                            if (Object.keys(commons).length > 0) {
-                                if (common["states"] != null) {
-                                    delete common.states;
-                                }
-                                common.states = commons;
-                            }
-                            if (!obj) {
-                                // @ts-ignore
-                                await this.setObjectNotExistsAsync(path + state, {
-                                    type: "state",
-                                    common: common,
-                                    native: {},
-                                }).catch((error) => {
-                                    this.log.error(error);
-                                });
-                            } else {
-                                // @ts-ignore
-                                obj.common = common;
-                                await this.setObjectAsync(path + state, obj);
                             }
                         }
-                    });
-                });
+                    }
+                    if (Object.keys(commons).length > 0) {
+                        if (common["states"] != null) {
+                            delete common.states;
+                        }
+                        common.states = commons;
+                    }
+                    if (!obj) {
+                        // @ts-ignore
+                        await this.setObjectNotExistsAsync(path + state, {
+                            type: "state",
+                            common: common,
+                            native: {},
+                        }).catch((error) => {
+                            this.log.error(error);
+                        });
+                    } else {
+                        obj.common = common;
+                        await this.setObjectAsync(path + state, obj);
+                    }
+                }
+            }
+            if (deviceModel["Value"]) {
+                for (const state in deviceModel["Value"]) {
+                    this.log.debug(path + state); //Problem with 401 device
+                    const obj = await this.getObjectAsync(path + state);
+                    if (!obj) {
+                        //await this.delObjectAsync(path + state);
+                        continue;
+                    }
+                    const common = obj.common;
+                    const commons = {};
+                    let valueObject = deviceModel["Value"][state]["option"]
+                        ? deviceModel["Value"][state]["option"]
+                        : null;
+                    const valueDefault = deviceModel["Value"][state]["default"]
+                        ? deviceModel["Value"][state]["default"]
+                        : null;
+                    if (deviceModel["Value"][state]["value_mapping"]) {
+                        valueObject = deviceModel["Value"][state]["value_mapping"];
+                    }
+                    if (deviceModel["Value"][state]["value_validation"]) {
+                        valueObject = deviceModel["Value"][state]["value_validation"];
+                    }
+                    if (valueObject) {
+                        if (valueObject.max) {
+                            //LG Signature 201 thinq1????
+                            common.min = 0;
+                            if (state === "moreLessTime") {
+                                common.max = 200;
+                            } else if (state === "timeSetting") {
+                                common.max = 360;
+                            } else if (state === "airState.quality.odor") {
+                                common.max = 20000;
+                            } else {
+                                if (valueDefault != null && valueDefault > valueObject.max) {
+                                    common.max = valueDefault;
+                                } else {
+                                    common.max = valueObject.max;
+                                }
+                            }
+                            common.def = valueDefault ? parseFloat(valueDefault) : 0;
+                        } else {
+                            const values = Object.keys(valueObject);
+                            for (const value of values) {
+                                const content = valueObject[value];
+                                if (typeof content === "string") {
+                                    const new_content = content.replace("@", "");
+                                    if (langPack != null && langPack[content]) {
+                                        commons[value] = langPack[content].toString("utf-8");
+                                    } else if (constants[this.lang + "Translation"][new_content] != null) {
+                                        commons[value] = constants[this.lang + "Translation"][new_content];
+                                    } else {
+                                        commons[value] = new_content;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (Object.keys(commons).length > 0) {
+                        if (common["states"] != null) {
+                            delete common.states;
+                        }
+                        common.states = commons;
+                    }
+                    if (!obj) {
+                        // @ts-ignore
+                        await this.setObjectNotExistsAsync(path + state, {
+                            type: "state",
+                            common: common,
+                            native: {},
+                        }).catch((error) => {
+                            this.log.error(error);
+                        });
+                    } else {
+                        obj.common = common;
+                        await this.setObjectAsync(path + state, obj);
+                    }
+                }
+            }
         }
     }
 
@@ -1688,10 +1699,12 @@ class LgThinq extends utils.Adapter {
             } else {
                 const idArray = id.split(".");
                 const lastElement = idArray.pop();
-                if (this.targetKeys[lastElement]) {
-                    this.targetKeys[lastElement].forEach((element) => {
-                        this.setState(idArray.join(".") + "." + element, state.val, true);
-                    });
+                if (this.targetKeys[lastElement] && this.isFinished) {
+                    if (id.indexOf(".remote.") === -1) {
+                        this.targetKeys[lastElement].forEach((element) => {
+                            this.setState(idArray.join(".") + "." + element, state.val, true);
+                        });
+                    }
                 }
             }
         }
@@ -1782,6 +1795,47 @@ class LgThinq extends utils.Adapter {
         } catch (e) {
             this.log.info(`cleanupQuality: ${e}`);
         }
+    }
+
+    async cleanOldVersion() {
+        const cleanOldVersion = await this.getObjectAsync("oldVersionCleaned");
+
+        if (!cleanOldVersion) {
+            try {
+                const devices = await this.getDevicesAsync();
+                for (const element of devices) {
+                    const id = element["_id"].split(".").pop();
+                    await this.delObjectAsync(`${id}`, { recursive: true });
+                }
+            } catch (e) {
+                this.log.info(`Cannot delete a folder`);
+            }
+            await this.setObjectNotExistsAsync("oldVersionCleaned", {
+                type: "state",
+                common: {
+                    name: {
+                        "en": "Version check",
+                        "de": "Versionskontrolle",
+                        "ru": "Проверка версии",
+                        "pt": "Verificação da versão",
+                        "nl": "Versie controle",
+                        "fr": "Vérification de la version",
+                        "it": "Controllo della versione",
+                        "es": "Verificación de la versión",
+                        "pl": "Kontrola",
+                        "uk": "Перевірка версій",
+                        "zh-cn": "检查"
+                    },
+                    type: "string",
+                    role: "meta.version",
+                    write: false,
+                    read: true,
+                },
+                native: {},
+            });
+            this.log.info("Done with cleaning");
+        }
+        await this.setStateAsync("oldVersionCleaned", this.version, true);
     }
 }
 

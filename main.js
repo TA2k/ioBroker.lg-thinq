@@ -188,6 +188,7 @@ class LgThinq extends utils.Adapter {
                     });
                     await this.json2iob.parse(element.deviceId, element, {
                         forceIndex: true,
+                        write: true,
                         preferedArrayName: null,
                         channelName: null,
                         autoCast: true,

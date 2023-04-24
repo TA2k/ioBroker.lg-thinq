@@ -58,6 +58,7 @@ class LgThinq extends utils.Adapter {
         this.sendStaticRequest = helper.sendStaticRequest;
         this.createCourse = helper.createCourse;
         this.refreshRemote = helper.refreshRemote;
+        this.refrigerator = helper.refrigerator;
         this.createAirRemoteStates = air.createAirRemoteStates;
         this.updateHoliday = air.updateHoliday;
         this.checkHolidayDate = air.checkHolidayDate;
@@ -197,9 +198,9 @@ class LgThinq extends utils.Adapter {
                         firstload: true,
                     });
                     this.modelInfos[element.deviceId] = await this.getDeviceModelInfo(element);
+                    this.modelInfos[element.deviceId]["thinq2"] = element.platformType;
                     this.modelInfos[element.deviceId]["signature"] = false;
                     if (element.platformType && element.platformType === "thinq2") {
-                        this.modelInfos[element.deviceId]["thinq2"] = element.platformType;
                         this.isThinq2 = true;
                         if (
                             element.deviceType &&
@@ -214,7 +215,7 @@ class LgThinq extends utils.Adapter {
                     }
                     if (element.deviceType) {
                         this.modelInfos[element.deviceId]["deviceType"] = element.deviceType;
-                        this.isThinq2 = true;
+                        //this.isThinq2 = true;
                     }
                     await this.pollMonitor(element);
                     //await this.sleep(2000);
@@ -262,6 +263,7 @@ class LgThinq extends utils.Adapter {
             listDevices.forEach(async (element) => {
                 this.json2iob.parse(element.deviceId, element, {
                     forceIndex: true,
+                    write: true,
                     preferedArrayName: null,
                     channelName: null,
                     autoCast: true,
@@ -279,10 +281,26 @@ class LgThinq extends utils.Adapter {
     async getDeviceEnergy(path) {
         const headers = this.defaultHeaders;
         const deviceUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", path);
-
         return this.requestClient
             .get(deviceUrl, { headers })
             .then((res) => res.data.result)
+            .catch((error) => {
+                if (error.message && error.message === "Request failed with status code 400") {
+                    return 400;
+                }
+                this.log.debug("getDeviceEnergy: " + error);
+                return 500;
+            });
+    }
+
+    async getDeviceEnergyThinq1(path, device) {
+        const headers = Object.assign({}, this.defaultHeaders);
+        headers["x-client-id"] = constants.API1_CLIENT_ID;
+        const deviceUrl = this.resolveUrl(this.gateway.thinq1Uri, path);
+        this.log.info(deviceUrl);
+        return this.requestClient
+            .get(deviceUrl, { headers })
+            .then((res) => res)
             .catch((error) => {
                 if (error.message && error.message === "Request failed with status code 400") {
                     return 400;
@@ -401,6 +419,7 @@ class LgThinq extends utils.Adapter {
                 if (result && typeof result === "object") {
                     let resultConverted;
                     if (this.modelInfos[device.deviceId].Monitoring.type === "BINARY(BYTE)") {
+                        this.log.debug("result: " + JSON.stringify(result));
                         resultConverted = this.decodeMonitorBinary(
                             result,
                             this.modelInfos[device.deviceId].Monitoring.protocol,
@@ -409,15 +428,20 @@ class LgThinq extends utils.Adapter {
                     if (this.modelInfos[device.deviceId].Monitoring.type === "JSON") {
                         resultConverted = JSON.parse(result.toString("utf-8"));
                     }
-                    this.log.debug(JSON.stringify(resultConverted));
+                    this.log.debug("resultConverted: " + JSON.stringify(resultConverted));
+                    if (this.modelInfos[device.deviceId].Info.productType === "REF") {
+                        this.refreshRemote(resultConverted, true, device.deviceId);
+                    }
                     await this.json2iob.parse(`${device.deviceId}.snapshot`, resultConverted, {
                         forceIndex: true,
+                        write: true,
                         preferedArrayName: null,
                         channelName: null,
                         autoCast: true,
-                        checkvalue: true,
+                        checkvalue: this.firstupdate,
                         checkType: true,
                     });
+                    this.firstupdate = true;
                     return resultConverted;
                 } else {
                     this.log.debug("No data:" + JSON.stringify(result) + " " + device.deviceId);
@@ -627,7 +651,7 @@ class LgThinq extends utils.Adapter {
                 if (!("returnData" in workList)) {
                     return null;
                 }
-
+                this.log.debug("worklist: " + JSON.stringify(workList));
                 return Buffer.from(workList.returnData, "base64");
             })
             .catch((error) => {
@@ -695,6 +719,7 @@ class LgThinq extends utils.Adapter {
             this.homes = home_result.result.item;
             this.json2iob.parse("homes", this.homes, {
                 forceIndex: true,
+                write: true,
                 preferedArrayName: null,
                 channelName: null,
                 autoCast: true,
@@ -842,8 +867,8 @@ class LgThinq extends utils.Adapter {
                     native: {},
                 });
                 if (deviceModel["Info"] && deviceModel["Info"].productType === "REF") {
-                    await this.createFridge(device);
-                    await this.createStatistic(device.deviceId, 101);
+                    await this.createFridge(device, deviceModel);
+                    await this.createStatistic(device, 101);
                 } else {
                     controlWifi &&
                         Object.keys(controlWifi).forEach(async (control) => {
@@ -926,7 +951,7 @@ class LgThinq extends utils.Adapter {
                         name: state,
                         type: "mixed",
                         role: "state",
-                        write: false,
+                        write: true,
                         read: true,
                     };
                     if (obj && obj.common) {
@@ -1264,6 +1289,7 @@ class LgThinq extends utils.Adapter {
                     ) {
                         this.json2iob.parse(`${monitoring.deviceId}.snapshot`, monitoring.data.state.reported, {
                             forceIndex: true,
+                            write: true,
                             preferedArrayName: null,
                             channelName: null,
                             autoCast: true,
@@ -1328,7 +1354,7 @@ class LgThinq extends utils.Adapter {
             data = values;
         }
 
-        this.log.debug(JSON.stringify(data));
+        this.log.debug("sendCommandToDevice: " + JSON.stringify(data));
         return this.requestClient
             .post(controlUrl, data, { headers })
             .then((resp) => resp.data)
@@ -1374,6 +1400,11 @@ class LgThinq extends utils.Adapter {
         }
     }
 
+    DecToHex(d) {
+        const hex = d.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+    }
+
     /**
      * Is called if a subscribed state changes
      * @param {string} id
@@ -1411,19 +1442,19 @@ class LgThinq extends utils.Adapter {
                         this.setAckFlag(id);
                         return;
                     }
-                    let devType = {};
+                    let devType;
                     if (this.modelInfos[deviceId] && this.modelInfos[deviceId]["deviceType"]) {
-                        devType["val"] = this.modelInfos[deviceId]["deviceType"];
+                        devType = {"val": this.modelInfos[deviceId]["deviceType"]};
                     } else {
                         devType = await this.getStateAsync(deviceId + ".deviceType");
                     }
                     if (secsplit === "Statistic" && lastsplit === "sendRequest") {
-                        if (devType.val > 100 && devType.val < 104) {
-                            this.sendStaticRequest(deviceId, "fridge");
-                        } else if (devType.val === 401) {
-                            this.sendStaticRequest(deviceId, "air");
+                        if (devType && devType.val > 100 && devType.val < 104) {
+                            this.sendStaticRequest(deviceId, "fridge", this.modelInfos[deviceId]["thinq2"]);
+                        } else if (devType && devType.val === 401) {
+                            this.sendStaticRequest(deviceId, "air", "thinq2");
                         } else {
-                            this.sendStaticRequest(deviceId, "other");
+                            this.sendStaticRequest(deviceId, "other", "thinq2");
                         }
                         this.log.debug(JSON.stringify(this.courseactual[deviceId]));
                         this.setAckFlag(id, {val: false});
@@ -1442,7 +1473,7 @@ class LgThinq extends utils.Adapter {
                         let rawData = {};
                         let WMStateDL;
                         let noff;
-                        if (devType.val === 401) {
+                        if (devType && devType.val === 401) {
                             if (secsplit === "break") {
                                 this.updateHoliday(deviceId, devType, id, state);
                                 this.setAckFlag(id);
@@ -1495,29 +1526,52 @@ class LgThinq extends utils.Adapter {
                                 "ecoFriendly",
                             ].includes(action)
                         ) {
-                            const dataTemp = await this.getStateAsync(deviceId + ".snapshot.refState.tempUnit");
+                            let dataTemp;
+                            dataTemp = await this.getStateAsync(deviceId + ".snapshot.refState.tempUnit");
+                            if (!dataTemp) dataTemp = {"val": ""};
                             switch (action) {
                                 case "fridgeTemp":
-                                    rawData.data = { refState: { fridgeTemp: state.val, tempUnit: dataTemp.val } };
-                                    action = "basicCtrl";
-                                    rawData.command = "Set";
+                                    if (this.modelInfos[deviceId]["thinq2"] === "thinq1") {
+                                        this.refrigerator(deviceId, "TempRefrigerator", state.val, uuid.v4());
+                                        return;
+                                    } else {
+                                        this.log.info("TEST2: " + this.modelInfos[deviceId]["thinq2"]);
+                                        rawData.data = { refState: { fridgeTemp: state.val, tempUnit: dataTemp.val } };
+                                        action = "basicCtrl";
+                                        rawData.command = "Set";
+                                    }
                                     break;
                                 case "freezerTemp":
-                                    rawData.data = { refState: { freezerTemp: state.val, tempUnit: dataTemp.val } };
-                                    action = "basicCtrl";
-                                    rawData.command = "Set";
+                                    if (this.modelInfos[deviceId]["thinq2"] === "thinq1") {
+                                        this.refrigerator(deviceId, "TempFreezer", state.val, uuid.v4());
+                                        return;
+                                    } else {
+                                        rawData.data = { refState: { freezerTemp: state.val, tempUnit: dataTemp.val } };
+                                        action = "basicCtrl";
+                                        rawData.command = "Set";
+                                    }
                                     break;
                                 case "expressMode":
-                                    noff = state.val === "IGNORE" ? "OFF" : state.val;
-                                    rawData.data = { refState: { expressMode: noff, tempUnit: dataTemp.val } };
-                                    action = "basicCtrl";
-                                    rawData.command = "Set";
+                                    if (this.modelInfos[deviceId]["thinq2"] === "thinq1") {
+                                        this.refrigerator(deviceId, "IcePlus", state.val, uuid.v4());
+                                        return;
+                                    } else {
+                                        noff = state.val === "IGNORE" ? "OFF" : state.val;
+                                        rawData.data = { refState: { expressMode: noff, tempUnit: dataTemp.val } };
+                                        action = "basicCtrl";
+                                        rawData.command = "Set";
+                                    }
                                     break;
                                 case "ecoFriendly":
-                                    onoff = state.val ? "ON" : "OFF";
-                                    rawData.data = { refState: { ecoFriendly: onoff, tempUnit: dataTemp.val } };
-                                    action = "basicCtrl";
-                                    rawData.command = "Set";
+                                    if (this.modelInfos[deviceId]["thinq2"] === "thinq1") {
+                                        this.refrigerator(deviceId, "ecoFriendly", state.val, uuid.v4());
+                                        return;
+                                    } else {
+                                        onoff = state.val ? "ON" : "OFF";
+                                        rawData.data = { refState: { ecoFriendly: onoff, tempUnit: dataTemp.val } };
+                                        action = "basicCtrl";
+                                        rawData.command = "Set";
+                                    }
                                     break;
                                 case "LastCourse":
                                     if (state.val != null && state.val > 0) {

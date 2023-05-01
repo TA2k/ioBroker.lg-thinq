@@ -296,7 +296,7 @@ class LgThinq extends utils.Adapter {
     async getDeviceEnergyThinq1(path, device) {
         const headers = Object.assign({}, this.defaultHeaders);
         headers["x-client-id"] = constants.API1_CLIENT_ID;
-        const deviceUrl = this.resolveUrl(this.gateway.thinq1Uri, path);
+        const deviceUrl = this.resolveUrl(this.gateway.thinq1Uri + "/", path);
         this.log.info(deviceUrl);
         return this.requestClient
             .get(deviceUrl, { headers })

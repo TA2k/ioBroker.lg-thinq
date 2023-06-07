@@ -60,6 +60,8 @@ class LgThinq extends utils.Adapter {
         this.refreshRemote = helper.refreshRemote;
         this.refrigerator = helper.refrigerator;
         this.createAirRemoteStates = air.createAirRemoteStates;
+        this.createAirRemoteThinq1States = air.createAirRemoteThinq1States;
+        this.sendCommandThinq1AC = air.sendCommandThinq1AC;
         this.updateHoliday = air.updateHoliday;
         this.checkHolidayDate = air.checkHolidayDate;
         this.mqttdata = {};
@@ -294,7 +296,9 @@ class LgThinq extends utils.Adapter {
     }
 
     async getDeviceEnergyThinq1(path, device) {
+        this.log.debug("getDeviceEnergyThinq1: " + device);
         const headers = Object.assign({}, this.defaultHeaders);
+        // @ts-ignore
         headers["x-client-id"] = constants.API1_CLIENT_ID;
         const deviceUrl = this.resolveUrl(this.gateway.thinq1Uri + "/", path);
         this.log.info(deviceUrl);
@@ -349,7 +353,7 @@ class LgThinq extends utils.Adapter {
                 this.log.error(JSON.stringify(err.response.data));
                 const { code, message } = err.response.data.error;
                 if (code === "MS.001.03") {
-                    this.log.error("Double-check your country in configuration");
+                    this.log.error("Double-check your country in configuration - " + message);
                 }
                 return;
             });
@@ -426,6 +430,7 @@ class LgThinq extends utils.Adapter {
                         );
                     }
                     if (this.modelInfos[device.deviceId].Monitoring.type === "JSON") {
+                        // @ts-ignore
                         resultConverted = JSON.parse(result.toString("utf-8"));
                     }
                     this.log.debug("resultConverted: " + JSON.stringify(resultConverted));
@@ -448,7 +453,7 @@ class LgThinq extends utils.Adapter {
                 }
                 await this.stopMonitor(device);
             } catch (err) {
-                this.log.debug(err);
+                this.log.debug(JSON.stringify(err));
             }
         }
     }
@@ -462,7 +467,7 @@ class LgThinq extends utils.Adapter {
                 this.workIds[device.deviceId] = returnWorkId;
             }
         } catch (err) {
-            this.log.debug(err);
+            this.log.debug(JSON.stringify(err));
         }
     }
 
@@ -472,7 +477,7 @@ class LgThinq extends utils.Adapter {
                 await this.sendMonitorCommand(device.deviceId, "Stop", this.workIds[device.deviceId]);
                 delete this.workIds[device.deviceId];
             } catch (err) {
-                this.log.debug(err);
+                this.log.debug(JSON.stringify(err));
             }
         }
     }
@@ -522,6 +527,7 @@ class LgThinq extends utils.Adapter {
         this.log.debug(JSON.stringify(resp));
         if (this.session && resp && resp.access_token) {
             this.session.access_token = resp.access_token;
+            // @ts-ignore
             this.defaultHeaders["x-emp-token"] = this.session.access_token;
             if (this.isThinq2) {
                 this.restartMqtt();
@@ -596,6 +602,7 @@ class LgThinq extends utils.Adapter {
 
     async sendMonitorCommand(deviceId, cmdOpt, workId) {
         const headers = Object.assign({}, this.defaultHeaders);
+        // @ts-ignore
         headers["x-client-id"] = constants.API1_CLIENT_ID;
         const data = {
             cmd: "Mon",
@@ -626,6 +633,7 @@ class LgThinq extends utils.Adapter {
 
     async getMonitorResult(device_id, work_id) {
         const headers = Object.assign({}, this.defaultHeaders);
+        // @ts-ignore
         headers["x-client-id"] = constants.API1_CLIENT_ID;
         const workList = [{ deviceId: device_id, workId: work_id }];
         return await this.requestClient
@@ -789,6 +797,7 @@ class LgThinq extends utils.Adapter {
         }
         this.log.debug("Get Device Model Info");
         this.log.debug(JSON.stringify(device));
+        let stopp = false;
         const deviceModel = await this.requestClient
             .get(device.modelJsonUri)
             .then((res) => res.data)
@@ -818,6 +827,7 @@ class LgThinq extends utils.Adapter {
                     : "courseType";
             }
             if (device.deviceType === 401) {
+                this.log.info("deviceModel.type: " + deviceModel["ControlWifi"].type);
                 if (device.platformType == "thinq2") {
                     await this.createAirRemoteStates(device, deviceModel);
                     await this.createStatistic(device.deviceId);
@@ -830,6 +840,11 @@ class LgThinq extends utils.Adapter {
                             this.log.info("Cannot find the snapshot folder!");
                         }
                     }
+                    stopp = true;
+                } else if (device.platformType == "thinq1" && deviceModel["ControlWifi"] && deviceModel["ControlWifi"].type === "JSON") {
+                    this.log.debug("Found device 401 thinq1.");
+                    await this.createAirRemoteThinq1States(device, deviceModel, constants);
+                    stopp = true;
                 } else {
                     this.log.warn(`DeviceType 401 with platformType ${device.platformType} is not supported yet`);
                     this.log.info(JSON.stringify(device));
@@ -862,13 +877,15 @@ class LgThinq extends utils.Adapter {
                     type: "channel",
                     common: {
                         name: "remote control device",
-                        role: "state",
+                        desc: "Create by LG-Thinq Adapter",
                     },
                     native: {},
                 });
                 if (deviceModel["Info"] && deviceModel["Info"].productType === "REF") {
                     await this.createFridge(device, deviceModel);
                     await this.createStatistic(device, 101);
+                } else if (stopp) {
+                    return deviceModel;
                 } else {
                     controlWifi &&
                         Object.keys(controlWifi).forEach(async (control) => {
@@ -880,7 +897,7 @@ class LgThinq extends utils.Adapter {
                                 common: {
                                     name: control,
                                     type: "boolean",
-                                    role: "boolean",
+                                    role: "switch",
                                     write: true,
                                     read: true,
                                 },
@@ -955,6 +972,7 @@ class LgThinq extends utils.Adapter {
                         read: true,
                     };
                     if (obj && obj.common) {
+                        // @ts-ignore
                         common = obj.common;
                     }
                     const commons = {};
@@ -1328,6 +1346,7 @@ class LgThinq extends utils.Adapter {
     async getUser(uri_value, data) {
         const userUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", uri_value);
         const headers = this.defaultHeaders;
+        // @ts-ignore
         headers["x-client-id"] = this.mqtt_userID;
         return this.requestClient
             .post(userUrl, data, { headers })
@@ -1353,8 +1372,8 @@ class LgThinq extends utils.Adapter {
             controlUrl = this.gateway.thinq1Uri + "/" + "rti/rtiControl";
             data = values;
         }
-
         this.log.debug("sendCommandToDevice: " + JSON.stringify(data));
+
         return this.requestClient
             .post(controlUrl, data, { headers })
             .then((resp) => resp.data)
@@ -1423,7 +1442,14 @@ class LgThinq extends utils.Adapter {
                             this.gateway.thinq2Uri + "/",
                             "service/devices/" + deviceId + "/control-sync",
                         );
-                        const sendData = JSON.parse(state.val);
+                        const js = state.val != null ? state.val.toString() : "";
+                        let sendData;
+                        try {
+                            sendData = JSON.parse(js);
+                        } catch (e) {
+                            this.log.info("sendData: " + e);
+                            return;
+                        }
                         this.log.debug(JSON.stringify(sendData));
                         const sendJ = await this.requestClient
                             .post(controlUrl, sendData, { headers })
@@ -1436,6 +1462,7 @@ class LgThinq extends utils.Adapter {
                         this.setAckFlag(id);
                         return;
                     }
+                    let response = null;
                     if (secsplit === "Course") {
                         this.courseactual[deviceId][lastsplit] = state.val;
                         this.log.debug(JSON.stringify(this.courseactual[deviceId]));
@@ -1463,9 +1490,11 @@ class LgThinq extends utils.Adapter {
                         this.setAckFlag(id);
                         return;
                     }
-                    let response = null;
                     let sync = false;
-                    if (id.indexOf(".remote.") !== -1) {
+                    if (id.indexOf(".settings.") !== -1) {
+                        this.setAckFlag(id);
+                        return;
+                    } else if (id.indexOf(".remote.") !== -1) {
                         let no_for = true;
                         let action = id.split(".")[4];
                         let data = {};
@@ -1473,7 +1502,7 @@ class LgThinq extends utils.Adapter {
                         let rawData = {};
                         let WMStateDL;
                         let noff;
-                        if (devType && devType.val === 401) {
+                        if (devType && devType.val === 401 && this.modelInfos[deviceId]["thinq2"] === "thinq2") {
                             if (secsplit === "break") {
                                 this.updateHoliday(deviceId, devType, id, state);
                                 this.setAckFlag(id);
@@ -1513,6 +1542,15 @@ class LgThinq extends utils.Adapter {
                                 this.log.info("The command is not implemented");
                                 return;
                             }
+                        } else if (devType && devType.val === 401 && this.modelInfos[deviceId]["thinq2"] === "thinq1") {
+                            rawData = this.deviceControls[deviceId][action]
+                                ? this.deviceControls[deviceId][action]
+                                : {};
+                            if (rawData.length === 0) {
+                                this.log.info("Not found devicecontrol!!");
+                                return;
+                            }
+                            data = await this.sendCommandThinq1AC(id, deviceId, rawData, action);
                         } else if (
                             [
                                 "LastCourse",
@@ -1574,7 +1612,7 @@ class LgThinq extends utils.Adapter {
                                     }
                                     break;
                                 case "LastCourse":
-                                    if (state.val != null && state.val > 0) {
+                                    if (state.val != null && typeof state.val === "number" && state.val > 0) {
                                         this.setCourse(id, deviceId, state);
                                         this.setAckFlag(id);
                                     }
@@ -1589,20 +1627,28 @@ class LgThinq extends utils.Adapter {
                                         return;
                                     }
                                     if (
+                                        state.val != true &&
+                                        state.val != false &&
+                                        state.val != null &&
                                         this.deviceJson &&
                                         this.deviceJson[deviceId] &&
                                         this.deviceJson[deviceId]["Course"] &&
                                         this.deviceJson[deviceId]["Course"][state.val]
                                     ) {
-                                        this.insertCourse(state.val, deviceId, "Course");
+                                        onoff = state.val != null && state.val != "" ? state.val.toString() : "";
+                                        this.insertCourse(onoff, deviceId, "Course");
                                         return;
                                     } else if (
+                                        state.val != true &&
+                                        state.val != false &&
+                                        state.val != null &&
                                         this.deviceJson &&
                                         this.deviceJson[deviceId] &&
                                         this.deviceJson[deviceId]["SmartCourse"] &&
                                         this.deviceJson[deviceId]["SmartCourse"][state.val]
                                     ) {
-                                        this.insertCourse(state.val, deviceId, "SmartCourse");
+                                        onoff = state.val != null && state.val != "" ? state.val.toString() : "";
+                                        this.insertCourse(onoff, deviceId, "SmartCourse");
                                         return;
                                     } else {
                                         this.log.warn("Command " + action + " and value " + state.val + " not found");
@@ -1704,6 +1750,17 @@ class LgThinq extends utils.Adapter {
                         } else if (data && data.command && data.dataSetList) {
                             this.log.debug(JSON.stringify(data));
                             response = await this.sendCommandToDevice(deviceId, data);
+                        } else if (data && data.cmd && data.cmdOpt) {
+                            this.log.info("rawData: " + JSON.stringify(data));
+                            data = {
+                                lgedmRoot: {
+                                    deviceId: deviceId,
+                                    workId: uuid.v4(),
+                                    ...data,
+                                }
+                            };
+                            this.log.debug(JSON.stringify(data));
+                            response = await this.sendCommandToDevice(deviceId, data, true);
                         } else {
                             rawData.value = rawData.value.replace("{Operation}", state.val ? "Start" : "Stop");
                             data = {
@@ -1711,12 +1768,11 @@ class LgThinq extends utils.Adapter {
                                     deviceId: deviceId,
                                     workId: uuid.v4(),
                                     cmd: rawData.cmd,
-                                    cmdOpt: rawData.cmdOpt,
+                                    cmdOpt: "Set",
                                     value: rawData.value,
                                     data: "",
                                 },
                             };
-
                             this.log.debug(JSON.stringify(data));
                             response = await this.sendCommandToDevice(deviceId, data, true);
                         }
@@ -1732,9 +1788,9 @@ class LgThinq extends utils.Adapter {
                         }
                     } else {
                         const object = await this.getObjectAsync(id);
-                        const name = object ? object.common.name : "";
+                        const name = object ? JSON.stringify(object.common.name) : "";
                         const data = { ctrlKey: "basicCtrl", command: "Set", dataKey: name, dataValue: state.val };
-                        if (name.indexOf(".operation") !== -1) {
+                        if (name != null && name != "" && name.indexOf(".operation") !== -1) {
                             data.command = "Operation";
                         }
                         this.log.debug(JSON.stringify(data));

@@ -95,7 +95,6 @@
                 "zh-cn": "首次出版"
             }
         },
-        "title": "LG ThinQ",
         "titleLang": {
             "en": "LG ThinQ",
             "de": "LG ThinQ",
@@ -137,7 +136,10 @@
         "compact": true,
         "connectionType": "cloud",
         "dataSource": "poll",
-        "materialize": true,
+        "materialize": false,
+        "adminUI": {
+            "config": "json"
+        },      
         "plugins": {
             "sentry": {
                 "dsn": "https://414a0c2632d7439a81cdeaff30884373@sentry.iobroker.net/157"
@@ -145,12 +147,12 @@
         },
         "dependencies": [
             {
-                "js-controller": ">=3.0.0"
+                "js-controller": ">=3.3.22"
             }
         ],
         "globalDependencies": [
             {
-                "admin": ">=4.0.9"
+                "admin": ">=5.1.13"
             }
         ]
     },

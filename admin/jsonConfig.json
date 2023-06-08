@@ -1,0 +1,53 @@
+{
+    "i18n": true,
+    "type": "panel",
+    "items": {
+        "_headerAdapter": {
+            "type": "header",
+            "text": "Adapter settings for lg-thinq",
+            "size": 2
+        },
+        "user": {
+            "type": "text",
+            "label": "LG ThinQ Email",
+            "newLine": true,
+            "sm": 3
+        },
+        "password": {
+            "type": "password",
+            "label": "LG ThinQ Password",
+            "newLine": true,
+            "sm": 3
+        },
+        "interval": {
+            "type": "number",
+            "label": "Update interval in minutes",
+            "min":0.5,
+            "max":150,
+            "newLine": true,
+            "sm": 3,
+            "default": 5
+        },
+        "country": {
+            "type": "text",
+            "label": "Country",
+            "newLine": true,
+            "sm": 3,
+            "default": "DE"
+        },
+        "language": {
+            "type": "text",
+            "label": "Language",
+            "newLine": true,
+            "sm": 3,
+            "default": "de_DE"
+        },
+        "platform": {
+            "type": "text",
+            "label": "Platform",
+            "newLine": true,
+            "sm": 3,
+            "default": "LGThinQ"
+        }
+    }
+}

@@ -76,7 +76,6 @@ class LgThinq extends utils.Adapter {
         this.mqtt_userID = "";
         this.isThinq2 = false;
         this.isRestart = true;
-        this.firstupdate = false;
         this.isFinished = false;
     }
 
@@ -269,13 +268,12 @@ class LgThinq extends utils.Adapter {
                     preferedArrayName: null,
                     channelName: null,
                     autoCast: true,
-                    checkvalue: this.firstupdate,
+                    checkvalue: this.isFinished,
                     checkType: true,
                 });
                 this.pollMonitor(element);
                 this.refreshRemote(element);
             });
-            this.firstupdate = true;
         }
         this.log.debug(JSON.stringify(listDevices));
     }
@@ -443,10 +441,9 @@ class LgThinq extends utils.Adapter {
                         preferedArrayName: null,
                         channelName: null,
                         autoCast: true,
-                        checkvalue: this.firstupdate,
+                        checkvalue: this.isFinished,
                         checkType: true,
                     });
-                    this.firstupdate = true;
                     return resultConverted;
                 } else {
                     this.log.debug("No data:" + JSON.stringify(result) + " " + device.deviceId);
@@ -1119,6 +1116,8 @@ class LgThinq extends utils.Adapter {
                                 common.max = 360;
                             } else if (state === "airState.quality.odor") {
                                 common.max = 20000;
+                            } else if (state === "AirPolution") {
+                                common.max = 2000000;
                             } else {
                                 if (valueDefault != null && valueDefault > valueObject.max) {
                                     common.max = valueDefault;
@@ -1751,7 +1750,11 @@ class LgThinq extends utils.Adapter {
                             this.log.debug(JSON.stringify(data));
                             response = await this.sendCommandToDevice(deviceId, data);
                         } else if (data && data.cmd && data.cmdOpt) {
-                            this.log.info("rawData: " + JSON.stringify(data));
+                            this.log.debug("rawData: " + JSON.stringify(data));
+                            if (data && data.cmdOpt && data.cmdOpt === "Operation") {
+                                data.value = data.value ? "Start" : "Stop";
+                                data.cmdOpt = "Set";
+                            }
                             data = {
                                 lgedmRoot: {
                                     deviceId: deviceId,

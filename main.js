@@ -1372,7 +1372,7 @@ class LgThinq extends utils.Adapter {
             data = values;
         }
         this.log.debug("sendCommandToDevice: " + JSON.stringify(data));
-        return;
+
         return this.requestClient
             .post(controlUrl, data, { headers })
             .then((resp) => resp.data)

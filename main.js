@@ -824,7 +824,11 @@ class LgThinq extends utils.Adapter {
                     : "courseType";
             }
             if (device.deviceType === 401) {
-                this.log.info("deviceModel.type: " + deviceModel["ControlWifi"].type);
+                if (deviceModel["ControlWifi"] && deviceModel["ControlWifi"].type) {
+                    this.log.debug("deviceModel.type: " + deviceModel["ControlWifi"].type);
+                } else {
+                    this.log.debug("deviceModel.type not found");
+                }
                 if (device.platformType == "thinq2") {
                     await this.createAirRemoteStates(device, deviceModel);
                     await this.createStatistic(device.deviceId);
@@ -1382,9 +1386,14 @@ class LgThinq extends utils.Adapter {
             });
     }
 
+    /**
+     * @param {number} ms
+     */
     sleep(ms) {
         return new Promise((resolve) => {
-            this.sleepTimer = setTimeout(resolve, ms);
+            this.sleepTimer = this.setTimeout(() => {
+                resolve(true);
+            }, ms);
         });
     }
 
@@ -1398,7 +1407,7 @@ class LgThinq extends utils.Adapter {
             this.qualityInterval && this.clearInterval(this.qualityInterval);
             this.refreshTokenInterval && this.clearInterval(this.refreshTokenInterval);
             this.refreshTimeout && this.clearTimeout(this.refreshTimeout);
-            this.sleepTimer && clearTimeout(this.sleepTimer);
+            this.sleepTimer && this.clearTimeout(this.sleepTimer);
             callback();
         } catch (e) {
             callback();
@@ -1752,7 +1761,7 @@ class LgThinq extends utils.Adapter {
                         } else if (data && data.cmd && data.cmdOpt) {
                             this.log.debug("rawData: " + JSON.stringify(data));
                             if (data && data.cmdOpt && data.cmdOpt === "Operation") {
-                                data.value = data.value ? "Start" : "Stop";
+                                data.value.Operation = data.value ? "Start" : "Stop";
                                 data.cmdOpt = "Set";
                             }
                             data = {

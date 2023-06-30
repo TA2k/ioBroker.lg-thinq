@@ -1761,15 +1761,14 @@ class LgThinq extends utils.Adapter {
                         } else if (data && data.cmd && data.cmdOpt) {
                             this.log.debug("rawData: " + JSON.stringify(data));
                             if (data && data.cmdOpt && data.cmdOpt === "Operation") {
-                                data.value.Operation = data.value ? "Start" : "Stop";
-                                data.cmdOpt = "Set";
+                                data.value = data.value ? "Start" : "Stop";
                             }
                             data = {
                                 lgedmRoot: {
                                     deviceId: deviceId,
                                     workId: uuid.v4(),
                                     ...data,
-                                    data: ""
+                                    isControlFree: "Y",
                                 }
                             };
                             this.log.debug(JSON.stringify(data));

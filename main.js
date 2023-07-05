@@ -138,12 +138,21 @@ class LgThinq extends utils.Adapter {
                 this.mqtt_userID = hash.update(clientID + new Date().getTime()).digest("hex");
                 this.defaultHeaders["x-user-no"] = this.userNumber;
                 this.defaultHeaders["x-emp-token"] = this.session.access_token;
-                const listDevices = await this.getListDevices();
+                let listDevices = await this.getListDevices();
                 if (listDevices && listDevices === "TERMS") {
                     this.setState("info.connection", false, true);
-                    //this.terms = await this.Term();
+                    const new_term = await this.terms();
+                    if (new_term) {
+                        listDevices = await this.getListDevices();
+                    } else {
+                        return;
+                    }
+                }
+                if (listDevices && listDevices === "TERMS") {
+                    this.setState("info.connection", false, true);
                     return;
                 } else if (listDevices && listDevices === "BLOCKED") {
+                    this.setState("info.connection", false, true);
                     return;
                 }
                 if (!listDevices) {
@@ -238,6 +247,78 @@ class LgThinq extends utils.Adapter {
         }
     }
 
+    async terms() {
+        try {
+            const showTermUrl = "common/showTerms?callback_url=lgaccount.lgsmartthinq:/updateTerms&country=VN&language=en-VN&division=ha:T20&terms_display_type=3&svc_list=SVC202";
+            this.log.info("New term agreement is starting...");
+            const showTermHtml = await this.requestClient
+                .get(this.gateway.empSpxUri + "/" + showTermUrl, {
+                    headers: {
+                        "X-Login-Session": this.session.access_token,
+                    },
+                }).then(res => res.data)
+                .catch((error) => {
+                    this.log.debug("terms: " + error);
+                    return false;
+                });
+            const headers = {
+                Accept: "application/json",
+                "X-Application-Key": constants.APPLICATION_KEY,
+                "X-Client-App-Key": constants.CLIENT_ID,
+                "X-Lge-Svccode": "SVC709",
+                "X-Device-Type": "M01",
+                "X-Device-Platform": "ADR",
+                "X-Device-Language-Type": "IETF",
+                "X-Device-Publish-Flag": "Y",
+                "X-Device-Country": this.gateway.countryCode,
+                "X-Device-Language": this.gateway.languageCode,
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                "X-Login-Session": this.session.access_token,
+                "X-Signature": showTermHtml.match(/signature\s+:\s+"([^"]+)"/)[1],
+                "X-Timestamp": showTermHtml.match(/tStamp\s+:\s+"([^"]+)"/)[1],
+            };
+            const accountTermUrl = "emp/v2.0/account/user/terms?opt_term_cond=001&term_data=SVC202&itg_terms_use_flag=Y&dummy_terms_use_flag=Y";
+            const accountTerms = await this.requestClient
+                .get(this.gateway.empTermsUri + "/" + accountTermUrl, {headers})
+                .then(res => {
+                    return res.data.account.terms;
+                })
+                .catch((error) => {
+                    this.log.debug("terms: " + error);
+                    return false;
+                });
+            const termInfoUrl = "emp/v2.0/info/terms?opt_term_cond=001&only_service_terms_flag=&itg_terms_use_flag=Y&term_data=SVC202";
+            const infoTerms = await this.requestClient.get(this.gateway.empTermsUri + "/" + termInfoUrl, {headers}).then(res => {
+                return res.data.info.terms;
+            })
+                .catch((error) => {
+                    this.log.debug("terms: " + error);
+                    return false;
+                });
+
+            const newTermAgreeNeeded = infoTerms.filter((term) => {
+                return accountTerms.indexOf(term.termsID) === -1;
+            }).map(term => {
+                return [term.termsType, term.termsID, term.defaultLang].join(":");
+            }).join(",");
+            if (newTermAgreeNeeded) {
+                const updateAccountTermUrl = "emp/v2.0/account/user/terms";
+                await this.requestClient.post(this.gateway.empTermsUri + "/" + updateAccountTermUrl, qs.stringify({terms: newTermAgreeNeeded}), {
+                    headers,
+                })
+                    .catch((error) => {
+                        this.log.debug("terms: " + error);
+                        return false;
+                    });
+                return true;
+            }
+            return false;
+        } catch(e) {
+            this.log.debug("terms: " + e);
+            return false;
+        }
+    }
+
     async restartMqtt() {
         this.log.debug("Restart MQTT Connection");
         if (this.mqttC) {
@@ -255,6 +336,7 @@ class LgThinq extends utils.Adapter {
         });
         if (listDevices && listDevices === "TERMS") {
             this.setState("info.connection", false, true);
+            this.terms();
             return;
         } else if (listDevices && listDevices === "BLOCKED") {
             this.setState("info.connection", false, true);
@@ -711,7 +793,7 @@ class LgThinq extends utils.Adapter {
             ) {
                 this.log.warn("LG does not provide any data! Maybe your account is blocked");
                 return "BLOCKED";
-            } else if (home_result && home_result.result && home_result.resultCode === "0110") {
+            } else if (home_result && home_result.resultCode && home_result.resultCode === "0110") {
                 this.log.error("Could not receive homes. Please check your app and accept new agreements");
                 return "TERMS";
             } else if (!home_result || !home_result.result || !home_result.result.item) {
@@ -781,7 +863,10 @@ class LgThinq extends utils.Adapter {
                 })
                 .catch((error) => {
                     this.log.error(error);
-                    error.response && this.log.error(JSON.stringify(error.response.data));
+                    if (error.response) {
+                        this.log.error(JSON.stringify(error.response.data));
+                        return error.response.data;
+                    }
                 });
         }
 
@@ -1247,6 +1332,9 @@ class LgThinq extends utils.Adapter {
             this.log.error("Create CSR ERROR: " + error);
             this.mqttC = null;
             this.isRestart = true;
+            if (error && error.toString().indexOf("0110") === -1) {
+                this.terms();
+            }
         }
     }
 

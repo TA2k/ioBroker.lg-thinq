@@ -176,17 +176,17 @@ class LgThinq extends utils.Adapter {
                         type: "state",
                         common: {
                             name: {
-                                "en": "Datapoint quality",
-                                "de": "Datenpunktqualität",
-                                "ru": "Качество Datapoint",
-                                "pt": "Qualidade de Datapoint",
-                                "nl": "Datapunt kwaliteit",
-                                "fr": "Qualité du Datapoint",
-                                "it": "Qualità dei dati",
-                                "es": "Calidad del punto de datos",
-                                "pl": "Jakości danych",
-                                "uk": "Якість даних",
-                                "zh-cn": "数据点"
+                                en: "Datapoint quality",
+                                de: "Datenpunktqualität",
+                                ru: "Качество Datapoint",
+                                pt: "Qualidade de Datapoint",
+                                nl: "Datapunt kwaliteit",
+                                fr: "Qualité du Datapoint",
+                                it: "Qualità dei dati",
+                                es: "Calidad del punto de datos",
+                                pl: "Jakości danych",
+                                uk: "Якість даних",
+                                "zh-cn": "数据点",
                             },
                             type: "string",
                             role: "json",
@@ -249,14 +249,16 @@ class LgThinq extends utils.Adapter {
 
     async terms() {
         try {
-            const showTermUrl = "common/showTerms?callback_url=lgaccount.lgsmartthinq:/updateTerms&country=VN&language=en-VN&division=ha:T20&terms_display_type=3&svc_list=SVC202";
+            const showTermUrl =
+                "common/showTerms?callback_url=lgaccount.lgsmartthinq:/updateTerms&country=VN&language=en-VN&division=ha:T20&terms_display_type=3&svc_list=SVC202";
             this.log.info("New term agreement is starting...");
             const showTermHtml = await this.requestClient
                 .get(this.gateway.empSpxUri + "/" + showTermUrl, {
                     headers: {
                         "X-Login-Session": this.session.access_token,
                     },
-                }).then(res => res.data)
+                })
+                .then((res) => res.data)
                 .catch((error) => {
                     this.log.debug("terms: " + error);
                     return false;
@@ -277,35 +279,47 @@ class LgThinq extends utils.Adapter {
                 "X-Signature": showTermHtml.match(/signature\s+:\s+"([^"]+)"/)[1],
                 "X-Timestamp": showTermHtml.match(/tStamp\s+:\s+"([^"]+)"/)[1],
             };
-            const accountTermUrl = "emp/v2.0/account/user/terms?opt_term_cond=001&term_data=SVC202&itg_terms_use_flag=Y&dummy_terms_use_flag=Y";
+            const accountTermUrl =
+                "emp/v2.0/account/user/terms?opt_term_cond=001&term_data=SVC202&itg_terms_use_flag=Y&dummy_terms_use_flag=Y";
             const accountTerms = await this.requestClient
-                .get(this.gateway.empTermsUri + "/" + accountTermUrl, {headers})
-                .then(res => {
+                .get(this.gateway.empTermsUri + "/" + accountTermUrl, { headers })
+                .then((res) => {
                     return res.data.account.terms;
                 })
                 .catch((error) => {
                     this.log.debug("terms: " + error);
                     return false;
                 });
-            const termInfoUrl = "emp/v2.0/info/terms?opt_term_cond=001&only_service_terms_flag=&itg_terms_use_flag=Y&term_data=SVC202";
-            const infoTerms = await this.requestClient.get(this.gateway.empTermsUri + "/" + termInfoUrl, {headers}).then(res => {
-                return res.data.info.terms;
-            })
+            const termInfoUrl =
+                "emp/v2.0/info/terms?opt_term_cond=001&only_service_terms_flag=&itg_terms_use_flag=Y&term_data=SVC202";
+            const infoTerms = await this.requestClient
+                .get(this.gateway.empTermsUri + "/" + termInfoUrl, { headers })
+                .then((res) => {
+                    return res.data.info.terms;
+                })
                 .catch((error) => {
                     this.log.debug("terms: " + error);
                     return false;
                 });
 
-            const newTermAgreeNeeded = infoTerms.filter((term) => {
-                return accountTerms.indexOf(term.termsID) === -1;
-            }).map(term => {
-                return [term.termsType, term.termsID, term.defaultLang].join(":");
-            }).join(",");
+            const newTermAgreeNeeded = infoTerms
+                .filter((term) => {
+                    return accountTerms.indexOf(term.termsID) === -1;
+                })
+                .map((term) => {
+                    return [term.termsType, term.termsID, term.defaultLang].join(":");
+                })
+                .join(",");
             if (newTermAgreeNeeded) {
                 const updateAccountTermUrl = "emp/v2.0/account/user/terms";
-                await this.requestClient.post(this.gateway.empTermsUri + "/" + updateAccountTermUrl, qs.stringify({terms: newTermAgreeNeeded}), {
-                    headers,
-                })
+                await this.requestClient
+                    .post(
+                        this.gateway.empTermsUri + "/" + updateAccountTermUrl,
+                        qs.stringify({ terms: newTermAgreeNeeded }),
+                        {
+                            headers,
+                        },
+                    )
                     .catch((error) => {
                         this.log.debug("terms: " + error);
                         return false;
@@ -313,7 +327,7 @@ class LgThinq extends utils.Adapter {
                 return true;
             }
             return false;
-        } catch(e) {
+        } catch (e) {
             this.log.debug("terms: " + e);
             return false;
         }
@@ -578,7 +592,7 @@ class LgThinq extends utils.Adapter {
     }
     async refreshNewToken() {
         this.log.debug("refreshToken");
-        const tokenUrl = this.lgeapi_url + "oauth2/token";
+        const tokenUrl = this.lgeapi_url + "oauth/1.0/oauth2/token";
         const data = {
             grant_type: "refresh_token",
             refresh_token: this.session.refresh_token,
@@ -586,16 +600,20 @@ class LgThinq extends utils.Adapter {
 
         const timestamp = DateTime.utc().toRFC2822();
 
-        const requestUrl = "/oauth2/token" + qs.stringify(data, { addQueryPrefix: true });
+        const requestUrl = "/oauth/1.0/oauth2/token" + qs.stringify(data, { addQueryPrefix: true });
         const signature = this.signature(`${requestUrl}\n${timestamp}`, constants.OAUTH_SECRET_KEY);
 
         const headers = {
-            "lgemp-x-app-key": constants.CLIENT_ID,
-            "lgemp-x-signature": signature,
-            "lgemp-x-date": timestamp,
+            "x-lge-app-os": "ADR",
+            "x-lge-appkey": constants.CLIENT_ID,
+            "x-lge-oauth-signature": signature,
+            "x-lge-oauth-date": timestamp,
             Accept: "application/json",
             "Content-Type": "application/x-www-form-urlencoded",
         };
+        this.log.debug(JSON.stringify(tokenUrl));
+        this.log.debug(JSON.stringify(headers));
+        this.log.debug(JSON.stringify(data));
         const resp = await this.requestClient
             .post(tokenUrl, qs.stringify(data), { headers })
             .then((resp) => resp.data)
@@ -604,6 +622,12 @@ class LgThinq extends utils.Adapter {
                 return;
             });
         this.log.debug(JSON.stringify(resp));
+        if (resp.status !== 1) {
+            this.log.warn("refresh token failed, start relogin");
+            this.session = await this.login(this.config.user, this.config.password).catch((error) => {
+                this.log.error(error);
+            });
+        }
         if (this.session && resp && resp.access_token) {
             this.session.access_token = resp.access_token;
             // @ts-ignore
@@ -927,7 +951,11 @@ class LgThinq extends utils.Adapter {
                         }
                     }
                     stopp = true;
-                } else if (device.platformType == "thinq1" && deviceModel["ControlWifi"] && deviceModel["ControlWifi"].type === "JSON") {
+                } else if (
+                    device.platformType == "thinq1" &&
+                    deviceModel["ControlWifi"] &&
+                    deviceModel["ControlWifi"].type === "JSON"
+                ) {
                     this.log.debug("Found device 401 thinq1.");
                     await this.createAirRemoteThinq1States(device, deviceModel, constants);
                     stopp = true;
@@ -1081,21 +1109,21 @@ class LgThinq extends utils.Adapter {
                                     : key;
                         }
                         commons["NOT_SELECTED"] =
-                                constants[this.lang + "Translation"]["NOT_SELECTED"] != null
-                                    ? constants[this.lang + "Translation"]["NOT_SELECTED"]
-                                    : 0;
+                            constants[this.lang + "Translation"]["NOT_SELECTED"] != null
+                                ? constants[this.lang + "Translation"]["NOT_SELECTED"]
+                                : 0;
                     }
                     if (state === smartCourseType || state === downloadedCourseType) {
                         for (const key in deviceModel["SmartCourse"]) {
                             commons[key] =
-                                    constants[this.lang + "Translation"][key] != null
-                                        ? constants[this.lang + "Translation"][key]
-                                        : key;
+                                constants[this.lang + "Translation"][key] != null
+                                    ? constants[this.lang + "Translation"][key]
+                                    : key;
                         }
                         commons["NOT_SELECTED"] =
-                                constants[this.lang + "Translation"]["NOT_SELECTED"] != null
-                                    ? constants[this.lang + "Translation"]["NOT_SELECTED"]
-                                    : 0;
+                            constants[this.lang + "Translation"]["NOT_SELECTED"] != null
+                                ? constants[this.lang + "Translation"]["NOT_SELECTED"]
+                                : 0;
                     }
                     if (deviceModel["MonitoringValue"][state]["valueMapping"]) {
                         if (deviceModel["MonitoringValue"][state]["valueMapping"].max) {
@@ -1109,18 +1137,17 @@ class LgThinq extends utils.Adapter {
                                 common.max = 360;
                             } else if (state === "airState.quality.odor") {
                                 common.max = 20000;
-                            } else if (this.modelInfos[device.deviceId]["signature"] &&
-                                    (
-                                        state === "reserveTimeMinute" ||
-                                        state === "remainTimeMinute" ||
-                                        state === "initialTimeMinute"
-                                    )
+                            } else if (
+                                this.modelInfos[device.deviceId]["signature"] &&
+                                (state === "reserveTimeMinute" ||
+                                    state === "remainTimeMinute" ||
+                                    state === "initialTimeMinute")
                             ) {
                                 common.max = 1000;
                             } else {
                                 if (
                                     valueDefault != null &&
-                                        valueDefault > deviceModel["MonitoringValue"][state]["valueMapping"].max
+                                    valueDefault > deviceModel["MonitoringValue"][state]["valueMapping"].max
                                 ) {
                                     common.max = valueDefault;
                                 } else {
@@ -1135,14 +1162,14 @@ class LgThinq extends utils.Adapter {
                                     const valueMap = deviceModel["MonitoringValue"][state]["valueMapping"][value];
                                     if (onlynumber.test(value)) {
                                         commons[valueMap.index] =
-                                                langPack != null && langPack[valueMap.label]
-                                                    ? langPack[valueMap.label].toString("utf-8")
-                                                    : valueMap.label;
+                                            langPack != null && langPack[valueMap.label]
+                                                ? langPack[valueMap.label].toString("utf-8")
+                                                : valueMap.label;
                                     } else {
                                         commons[value] =
-                                                langPack != null && langPack[valueMap.label]
-                                                    ? langPack[valueMap.label].toString("utf-8")
-                                                    : valueMap.index;
+                                            langPack != null && langPack[valueMap.label]
+                                                ? langPack[valueMap.label].toString("utf-8")
+                                                : valueMap.index;
                                     }
                                     if (value === "NO_ECOHYBRID") common.def = "NO_ECOHYBRID";
                                 } else {
@@ -1356,7 +1383,7 @@ class LgThinq extends utils.Adapter {
                 region: region,
                 debug: !!this.log.debug,
                 baseReconnectTimeMs: 10000,
-                keepalive:  60
+                keepalive: 60,
             };
             this.mqttC = new awsIot(connectData);
 
@@ -1567,7 +1594,7 @@ class LgThinq extends utils.Adapter {
                     }
                     let devType;
                     if (this.modelInfos[deviceId] && this.modelInfos[deviceId]["deviceType"]) {
-                        devType = {"val": this.modelInfos[deviceId]["deviceType"]};
+                        devType = { val: this.modelInfos[deviceId]["deviceType"] };
                     } else {
                         devType = await this.getStateAsync(deviceId + ".deviceType");
                     }
@@ -1580,7 +1607,7 @@ class LgThinq extends utils.Adapter {
                             this.sendStaticRequest(deviceId, "other", "thinq2");
                         }
                         this.log.debug(JSON.stringify(this.courseactual[deviceId]));
-                        this.setAckFlag(id, {val: false});
+                        this.setAckFlag(id, { val: false });
                         return;
                     } else if (secsplit === "Statistic") {
                         this.setAckFlag(id);
@@ -1662,7 +1689,7 @@ class LgThinq extends utils.Adapter {
                         ) {
                             let dataTemp;
                             dataTemp = await this.getStateAsync(deviceId + ".snapshot.refState.tempUnit");
-                            if (!dataTemp) dataTemp = {"val": ""};
+                            if (!dataTemp) dataTemp = { val: "" };
                             switch (action) {
                                 case "fridgeTemp":
                                     if (this.modelInfos[deviceId]["thinq2"] === "thinq1") {
@@ -1715,7 +1742,7 @@ class LgThinq extends utils.Adapter {
                                     return;
                                 case "Favorite":
                                     this.setFavoriteCourse(deviceId);
-                                    this.setAckFlag(id, {val: false});
+                                    this.setAckFlag(id, { val: false });
                                     return;
                                 case "WMDownload_Select":
                                     this.setAckFlag(id);
@@ -1857,7 +1884,7 @@ class LgThinq extends utils.Adapter {
                                     workId: uuid.v4(),
                                     ...data,
                                     isControlFree: "Y",
-                                }
+                                },
                             };
                             this.log.debug(JSON.stringify(data));
                             response = await this.sendCommandToDevice(deviceId, data, true);
@@ -2025,17 +2052,17 @@ class LgThinq extends utils.Adapter {
                 type: "state",
                 common: {
                     name: {
-                        "en": "Version check",
-                        "de": "Versionskontrolle",
-                        "ru": "Проверка версии",
-                        "pt": "Verificação da versão",
-                        "nl": "Versie controle",
-                        "fr": "Vérification de la version",
-                        "it": "Controllo della versione",
-                        "es": "Verificación de la versión",
-                        "pl": "Kontrola",
-                        "uk": "Перевірка версій",
-                        "zh-cn": "检查"
+                        en: "Version check",
+                        de: "Versionskontrolle",
+                        ru: "Проверка версии",
+                        pt: "Verificação da versão",
+                        nl: "Versie controle",
+                        fr: "Vérification de la version",
+                        it: "Controllo della versione",
+                        es: "Verificación de la versión",
+                        pl: "Kontrola",
+                        uk: "Перевірка версій",
+                        "zh-cn": "检查",
                     },
                     type: "string",
                     role: "meta.version",

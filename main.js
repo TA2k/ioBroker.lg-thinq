@@ -622,7 +622,7 @@ class LgThinq extends utils.Adapter {
                 return;
             });
         this.log.debug(JSON.stringify(resp));
-        if (resp.status !== 1) {
+        if (!resp.access_token) {
             this.log.warn("refresh token failed, start relogin");
             this.session = await this.login(this.config.user, this.config.password).catch((error) => {
                 this.log.error(error);

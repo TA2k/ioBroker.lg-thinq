@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "lg-thinq",
-        "version": "0.1.4",
+        "version": "0.2.0",
         "news": {
+            "0.2.0": {
+                "en": "Added automatic terms acceptance and 401/101 Thinq1 devices",
+                "de": "Automatische Annahme der AGBs und 401/101 Thinq1-Geräte hinzugefügt"
+            },
             "0.1.4": {
                 "en": "Add warning for not supported devices.",
                 "de": "Warnung für nicht unterstützte Geräte hinzufügen.",
@@ -139,7 +143,7 @@
         "materialize": false,
         "adminUI": {
             "config": "json"
-        },      
+        },
         "plugins": {
             "sentry": {
                 "dsn": "https://414a0c2632d7439a81cdeaff30884373@sentry.iobroker.net/157"

@@ -17,7 +17,8 @@ const Json2iob = require("./lib/extractKeys");
 const constants = require("./lib/constants");
 const { URL } = require("url");
 const helper = require("./lib/helper");
-const air = require("./lib/air_conditioning");
+const air = require("./lib/air_conditioning"); // Device 401
+const heat = require("./lib/heat_pump"); // Device 406
 const awsIot = require("aws-iot-device-sdk").device;
 const forge = require("node-forge");
 
@@ -64,6 +65,12 @@ class LgThinq extends utils.Adapter {
         this.sendCommandThinq1AC = air.sendCommandThinq1AC;
         this.updateHoliday = air.updateHoliday;
         this.checkHolidayDate = air.checkHolidayDate;
+        this.createHeatRemoteStates = heat.createHeatRemoteStates;
+        this.createHeatSchedule = heat.createHeatSchedule;
+        this.addHeat = heat.addHeat;
+        this.delHeat = heat.delHeat;
+        this.sendHeat = heat.sendHeat;
+        this.updateHeat = heat.updateHeat;
         this.mqttdata = {};
         this.mqttC = null;
         this.lang = "de";
@@ -932,6 +939,30 @@ class LgThinq extends utils.Adapter {
                     ? deviceModel.Config.downloadedCourseType
                     : "courseType";
             }
+            if (device.deviceType === 406) {
+                if (deviceModel["ControlWifi"] && deviceModel["ControlWifi"].type) {
+                    this.log.debug("deviceModel.type: " + deviceModel["ControlWifi"].type);
+                } else {
+                    this.log.debug("deviceModel.type not found");
+                }
+                if (device.platformType == "thinq2") {
+                    await this.createHeatRemoteStates(device, deviceModel);
+                    await this.createStatistic(device.deviceId, 406);
+                    const dataKeys = deviceModel["ControlDevice"];
+                    if (deviceModel && dataKeys[0] && dataKeys[0].dataKey) {
+                        try {
+                            const arr_dataKey = dataKeys[0].dataKey.split("|").pop();
+                            deviceModel["folder"] = arr_dataKey.split(".")[0];
+                        } catch (error) {
+                            this.log.info("Cannot find the snapshot folder!");
+                        }
+                    }
+                    stopp = true;
+                } else {
+                    this.log.warn(`DeviceType 406 with platformType ${device.platformType} is not supported yet`);
+                    this.log.info(JSON.stringify(device));
+                }
+            }
             if (device.deviceType === 401) {
                 if (deviceModel["ControlWifi"] && deviceModel["ControlWifi"].type) {
                     this.log.debug("deviceModel.type: " + deviceModel["ControlWifi"].type);
@@ -940,7 +971,7 @@ class LgThinq extends utils.Adapter {
                 }
                 if (device.platformType == "thinq2") {
                     await this.createAirRemoteStates(device, deviceModel);
-                    await this.createStatistic(device.deviceId);
+                    await this.createStatistic(device.deviceId, 401);
                     const dataKeys = deviceModel["ControlDevice"];
                     if (deviceModel && dataKeys[0] && dataKeys[0].dataKey) {
                         try {
@@ -1433,6 +1464,17 @@ class LgThinq extends utils.Adapter {
                             checkType: true,
                             firstload: true,
                         });
+                        if (
+                            monitoring.data.state.reported &&
+                            monitoring.data.state.reported.static &&
+                            monitoring.data.state.reported.static.deviceType &&
+                            (monitoring.data.state.reported.static.deviceType == "406" ||
+                            monitoring.data.state.reported.static.deviceType == "101")) {
+                            this.refreshRemote(monitoring);
+                            if (monitoring.data.state.reported["airState.preHeat.schedule"] != null) {
+                                this.updateHeat(monitoring.deviceId);
+                            }
+                        }
                     }
                 } catch (error) {
                     this.log.info("message: " + error);
@@ -1602,7 +1644,9 @@ class LgThinq extends utils.Adapter {
                         if (devType && devType.val > 100 && devType.val < 104) {
                             this.sendStaticRequest(deviceId, "fridge", this.modelInfos[deviceId]["thinq2"]);
                         } else if (devType && devType.val === 401) {
-                            this.sendStaticRequest(deviceId, "air", "thinq2");
+                            this.sendStaticRequest(deviceId, "air", this.modelInfos[deviceId]["thinq2"]);
+                        } else if (devType && devType.val === 406) {
+                            this.sendStaticRequest(deviceId, "air", this.modelInfos[deviceId]["thinq2"]);
                         } else {
                             this.sendStaticRequest(deviceId, "other", "thinq2");
                         }
@@ -1674,6 +1718,56 @@ class LgThinq extends utils.Adapter {
                                 return;
                             }
                             data = await this.sendCommandThinq1AC(id, deviceId, rawData, action);
+                        } else if (devType && devType.val === 406 && this.modelInfos[deviceId]["thinq2"] === "thinq2") {
+                            if (
+                                id.indexOf("_end") !== -1 ||
+                                id.indexOf("_start") !== -1 ||
+                                id.indexOf("_state") !== -1
+                            ){
+                                this.setAckFlag(id);
+                                return;
+                            }
+                            if (lastsplit === "add_new_schedule") {
+                                this.addHeat(deviceId);
+                                this.setAckFlag(id, {ack: true});
+                                return;
+                            } else if (lastsplit === "del_new_schedule") {
+                                this.delHeat(deviceId, state.val);
+                                this.setAckFlag(id);
+                                return;
+                            } else if (lastsplit === "send_new_schedule") {
+                                this.sendHeat(deviceId);
+                                this.setAckFlag(id, {ack: true});
+                                return;
+                            }
+                            if (!this.modelInfos[deviceId] || !this.modelInfos[deviceId]["ControlDevice"]) {
+                                this.log.info("Cannot found modelInfos = action: " + action);
+                                return;
+                            }
+                            const obj = await this.getObjectAsync(id);
+                            if (!obj || !obj.native || !obj.native.dataKey) {
+                                this.log.info("Cannot found dataKey!");
+                                return;
+                            }
+                            this.log.info(JSON.stringify(obj));
+                            this.log.info(obj.native["dataKey"]);
+                            if (
+                                lastsplit === "operation" ||
+                                lastsplit === "opMode" ||
+                                lastsplit === "hotWaterTarget" ||
+                                lastsplit === "schedule"
+                            ) {
+                                action = secsplit;
+                                rawData["command"] = lastsplit === "operation" ? "Operation" : "Set";
+                                rawData["dataKey"] = obj.native.dataKey;
+                                rawData["dataValue"] = state.val;
+                                rawData["dataSetList"] = null;
+                                rawData["dataGetList"] = null;
+                                this.setAckFlag(id);
+                            } else {
+                                this.log.info("The command is not implemented: " + lastsplit);
+                                return;
+                            }
                         } else if (
                             [
                                 "LastCourse",
@@ -2073,6 +2167,7 @@ class LgThinq extends utils.Adapter {
             });
             this.log.info("Done with cleaning");
         }
+        // @ts-ignore
         await this.setStateAsync("oldVersionCleaned", this.version, true);
     }
 }

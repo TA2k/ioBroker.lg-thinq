@@ -71,6 +71,7 @@ class LgThinq extends utils.Adapter {
         this.delHeat = heat.delHeat;
         this.sendHeat = heat.sendHeat;
         this.updateHeat = heat.updateHeat;
+        this.check_reservationCtrl = heat.check_reservationCtrl;
         this.mqttdata = {};
         this.mqttC = null;
         this.lang = "de";
@@ -1724,6 +1725,7 @@ class LgThinq extends utils.Adapter {
                                 id.indexOf("_start") !== -1 ||
                                 id.indexOf("_state") !== -1
                             ){
+                                this.check_reservationCtrl(id, deviceId, lastsplit, state.val);
                                 this.setAckFlag(id);
                                 return;
                             }

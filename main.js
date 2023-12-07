@@ -1731,7 +1731,7 @@ class LgThinq extends utils.Adapter {
                             }
                             if (lastsplit === "add_new_schedule") {
                                 this.addHeat(deviceId);
-                                this.setAckFlag(id, {ack: true});
+                                this.setAckFlag(id, { val: false });
                                 return;
                             } else if (lastsplit === "del_new_schedule") {
                                 this.delHeat(deviceId, state.val);
@@ -1739,7 +1739,7 @@ class LgThinq extends utils.Adapter {
                                 return;
                             } else if (lastsplit === "send_new_schedule") {
                                 this.sendHeat(deviceId);
-                                this.setAckFlag(id, {ack: true});
+                                this.setAckFlag(id, { val: false });
                                 return;
                             }
                             if (!this.modelInfos[deviceId] || !this.modelInfos[deviceId]["ControlDevice"]) {
@@ -1754,13 +1754,12 @@ class LgThinq extends utils.Adapter {
                             this.log.info(JSON.stringify(obj));
                             this.log.info(obj.native["dataKey"]);
                             if (
-                                lastsplit === "operation" ||
                                 lastsplit === "opMode" ||
                                 lastsplit === "hotWaterTarget" ||
                                 lastsplit === "schedule"
                             ) {
                                 action = secsplit;
-                                rawData["command"] = lastsplit === "operation" ? "Operation" : "Set";
+                                rawData["command"] = "Set";
                                 rawData["dataKey"] = obj.native.dataKey;
                                 rawData["dataValue"] = state.val;
                                 rawData["dataSetList"] = null;

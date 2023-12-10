@@ -1033,23 +1033,32 @@ class LgThinq extends utils.Adapter {
                 } else if (stopp) {
                     return deviceModel;
                 } else {
-                    controlWifi &&
-                        Object.keys(controlWifi).forEach(async (control) => {
+                    if (controlWifi) {
+                        for (const control in controlWifi) {
                             if (control === "WMDownload" && device.platformType === "thinq2") {
                                 await this.createremote(device.deviceId, control, deviceModel);
                             }
-                            await this.setObjectNotExistsAsync(device.deviceId + ".remote." + control, {
-                                type: "state",
-                                common: {
-                                    name: control,
-                                    type: "boolean",
-                                    role: "switch",
-                                    write: true,
-                                    read: true,
-                                },
-                                native: {},
-                            });
-                        });
+                            const common = {
+                                name: control,
+                                type: "boolean",
+                                role: "switch",
+                                write: true,
+                                read: true,
+                                def: false
+                            };
+                            if (
+                                control === "WMDownload" ||
+                                control === "WMStart" ||
+                                control === "WMStop" ||
+                                control === "WMOff" ||
+                                control === "WMWakeup"
+                            ) {
+                                common.role = "button";
+                                common.def = false;
+                            }
+                            await this.createDataPoint(device.deviceId + ".remote." + control, common, "state");
+                        }
+                    }
                 }
             }
         }

@@ -45,6 +45,8 @@ Adapter for LG ThinQ
 ### **WORK IN PROGRESS**
 
 -   (Lucky-ESA) Added device 406 (heat pump)
+-   (Lucky-ESA) Added description
+-   (Lucky-ESA) Bugfixe
 
 ### 0.2.0
 

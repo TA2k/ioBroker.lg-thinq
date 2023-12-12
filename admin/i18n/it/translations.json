@@ -5,5 +5,6 @@
     "Update interval in minutes": "Intervallo di aggiornamento in minuti",
     "Country": "Paese",
     "Language": "Lingua",
-    "Platform": "piattaforma"
+    "Platform": "piattaforma",
+    "Update thinq1 interval in minutes": "Intervallo di aggiornamento in secondi per Thinq1 (per dispositivo 1 secondo)"
 }

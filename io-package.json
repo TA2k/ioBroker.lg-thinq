@@ -5,7 +5,16 @@
         "news": {
             "0.2.0": {
                 "en": "Added automatic terms acceptance and 401/101 Thinq1 devices",
-                "de": "Automatische Annahme der AGBs und 401/101 Thinq1-Geräte hinzugefügt"
+                "de": "Automatische Annahme der AGBs und 401/101 Thinq1-Geräte hinzugefügt",
+                "ru": "Добавлено автоматическое принятие условий и устройства 401/101 Thinq1.",
+                "pt": "Adicionada aceitação automática de termos e dispositivos 401/101 Thinq1",
+                "nl": "Automatische acceptatie van voorwaarden en 401/101 Thinq1-apparaten toegevoegd",
+                "fr": "Ajout de l'acceptation automatique des conditions et des appareils 401/101 Thinq1",
+                "it": "Aggiunta l'accettazione automatica dei termini e i dispositivi 401/101 Thinq1",
+                "es": "Se agregó aceptación automática de términos y dispositivos 401/101 Thinq1.",
+                "pl": "Dodano automatyczną akceptację warunków i urządzenia 401/101 Thinq1",
+                "uk": "Додано автоматичне прийняття умов і пристрої 401/101 Thinq1",
+                "zh-cn": "添加了自动条款接受和 401/101 Thinq1 设备"
             },
             "0.1.4": {
                 "en": "Add warning for not supported devices.",
@@ -125,8 +134,14 @@
             "uk": "Адаптер для LG Навігація",
             "zh-cn": "LG ThinQ 适配器"
         },
-        "authors": ["TA2k <tombox2020@gmail.com>", "Lucky-ESA <github@luckyskills.de>"],
-        "keywords": ["lg", "thinq"],
+        "authors": [
+            "TA2k <tombox2020@gmail.com>",
+            "Lucky-ESA <github@luckyskills.de>"
+        ],
+        "keywords": [
+            "lg",
+            "thinq"
+        ],
         "license": "MIT",
         "platform": "Javascript/Node.js",
         "main": "main.js",
@@ -160,12 +175,17 @@
             }
         ]
     },
-    "encryptedNative": ["password"],
-    "protectedNative": ["password"],
+    "encryptedNative": [
+        "password"
+    ],
+    "protectedNative": [
+        "password"
+    ],
     "native": {
         "user": "",
         "password": "",
         "interval": 5,
+        "interval_thinq1": 30,
         "country": "DE",
         "language": "de_DE",
         "thinq1": false,

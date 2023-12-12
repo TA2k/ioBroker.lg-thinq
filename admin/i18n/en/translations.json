@@ -3,6 +3,7 @@
     "LG ThinQ Email": "LG ThinQ Email",
     "LG ThinQ Password": "LG ThinQ Password",
     "Update interval in minutes": "Update interval in minutes",
+    "Update thinq1 interval in minutes": "Update interval in seconds for Thinq1 (per device 1 Second)",
     "Country": "Country",
     "Language": "Language",
     "Platform": "Platform"

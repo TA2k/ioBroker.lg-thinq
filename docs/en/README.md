@@ -12,6 +12,7 @@ The adapter creates all data points with the template from the data point `model
 
 -   [Instance Settings](#instance-settings)
     -   [Setting LG-Thinq](#instance-setting-lg-thinq)
+    -   [Thinq1 Interval](#interval-thinq1-lg-thinq)
 -   [Datapoints](#datapoints)
     -   [Datapoint Device 101 Refrigerator/Freezer](#device-101-refrigeratorfreezer-thinq1--thinq2)
         -   [Remote Statistic](#101-remote-statistic-thinq2)
@@ -33,6 +34,7 @@ The adapter creates all data points with the template from the data point `model
         -   [Remote Holiday](#401-remote-holiday-thinq2)
         -   [Snapshot](#401-snapshot-thinq2)
     -   [Datapoint Device 401 air conditioner thinq1](#device-401-air-conditioner-thinq1)
+        -   [Remote Statistic](#401-remote-statistic-thinq1)
         -   [Remote basic commands](#401-remote-control-thinq1)
         -   [Snapshot](#401-snapshot-thinq1)
     -   [Datapoint Device 406 Head pump](#device-406-heat-pump-thinq2)
@@ -49,13 +51,25 @@ The adapter creates all data points with the template from the data point `model
 
 -   `LG ThinQ Email`: Enter APP email
 -   `LG ThinQ Password`: Enter APP password
--   `Update interval in minutes`:  Recommended: For thinq2 60 minutes and thinq1 0.5/1 minute
+-   `Update interval in minutes`: Recommended: At 60 minutes. If interval thinq1 is set to 0 then here is 0.5/1 minute
+-   `Update interval in seconds for Thinq1 (per device 1 Second)`: Interval for thinq1 users
 -   `Country`: Enter country - default DE
 -   `Language`: Enter language - default de_DE
 -   `Platform`: Enter platform - default LGThinQ
 
     ![instance_config_1.png](img/instance_config_1.png)
     ![instance_config_2.png](img/instance_config_2.png)
+
+### Interval thinq1 LG-Thinq
+
+[Summary](#summary)
+
+-   `interval.active` How many devices are currently receiving updates
+-   `interval.inactive` How many devices are currently not receiving updates
+-   `interval.interval` Change interval from instance setting. After an adapter restart, the instance setting is applied.
+-   `interval.last_update` Latest update
+
+    ![interval.png](img/interval.png)
 
 # Datapoints
 
@@ -501,6 +515,86 @@ When one of the 3 data points is filled, the selected program is written to the 
 
 [Summary](#summary)
 
+### 401 Remote Statistic thinq1
+
+[Summary](#summary)
+
+-   hourly
+-   `remote.Statistic.endDate` Enter the date for hourly, end and start must be the same Format: 2023.12.01
+-   `remote.Statistic.startDate` Enter the date for hourly, end and start must be the same Format: 2023.12.01
+-   Or daily
+-   `remote.Statistic.endDate` Enter date daily - Format: 2023.12.06
+-   `remote.Statistic.startDate` Enter date daily - Format: 2023.12.01
+-   Or monthly
+-   `remote.Statistic.endDate` Enter date monthly - Format: 2023.12.01
+-   `remote.Statistic.startDate` Enter date monthly - Format: 2023.10.01
+-   `remote.Statistic.period` Select period
+-   `remote.Statistic.sendRequest` Send selection
+-   `remote.Statistic.jsonResult` Statistics as JSON. If the attributes are empty then your device does not support them or an incorrect date was specified.
+
+    ![401_thinq1_remote_statistic.png](img/401_thinq1_remote_statistic.png)
+
+```json
+[
+  {
+    "month": 0,
+    "day": "03",
+    "hour": 0,
+    "min": "16",
+    "kwh": 0.1
+  },
+  {
+    "month": 0,
+    "day": "04",
+    "hour": 0,
+    "min": "59",
+    "kwh": 0.2
+  },
+  {
+    "month": 0,
+    "day": "06",
+    "hour": 0,
+    "min": "15",
+    "kwh": 0.1
+  },
+  {
+    "month": 0,
+    "day": "07",
+    "hour": 0,
+    "min": "40",
+    "kwh": 0.1
+  },
+  {
+    "month": 0,
+    "day": "09",
+    "hour": 0,
+    "min": "35",
+    "kwh": 0.2
+  },
+  {
+    "month": 0,
+    "day": "10",
+    "hour": 0,
+    "min": "60",
+    "kwh": 0.2
+  },
+  {
+    "month": 0,
+    "day": "11",
+    "hour": 0,
+    "min": "60",
+    "kwh": 0.2
+  },
+  {
+    "month": 0,
+    "day": "12",
+    "hour": 0,
+    "min": "90",
+    "kwh": 0.3
+  }
+]
+```
+
 ### 401 Remote Control thinq1
 
 ![401_thinq1_folder.png](img/401_thinq1_folder.png)
@@ -527,7 +621,7 @@ lg-thinq.0.xxx.remote.SetWDirLeftRight -> {"`WDirLeftRight`":"{{WDirLeftRight}}"
 -   `remote.settings.WDirLeftRight` 0 or 1
 -   `remote.SetWDirLeftRight` then set this data point to true
 
-    ![401_thinq1_folder.png](img/401_thinq1_remote.png)
+    ![401_thinq1_remote.png](img/401_thinq1_remote.png)
 
 ### 401 Snapshot thinq1
 

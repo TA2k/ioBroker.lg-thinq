@@ -12,6 +12,7 @@ Der Adapter erstellt alle Datenpunkte mit dem Template aus dem Datenpunkt `model
 
 -   [Instanz Einstellungen](#instanz-einstellungen)
     -   [Einstellung LG-Thinq](#instanz-einstellung-lg-thinq)
+    -   [Intervall thinq1](#intervall-thinq1-lg-thinq)
 -   [Datenpunkte](#datenpunkte)
     -   [Datenpunkte Gerät 101 Kühl-Gefrierschrank](#gerät-101-kühlschrankeisschrank-thinq1--thinq2)
         -   [Remote Statistik](#101-remote-statistik-thinq2)
@@ -33,6 +34,7 @@ Der Adapter erstellt alle Datenpunkte mit dem Template aus dem Datenpunkt `model
         -   [Remote Holiday](#401-remote-holiday-thinq2)
         -   [Snapshot](#401-snapshot-thinq2)
     -   [Datenpunkte Gerät 401 Klimaanlage thinq1](#gerät-401-klimanalage-thinq1)
+        -   [Remote Statistik](#401-remote-statistik-thinq1)
         -   [Remote Basis Befehle](#401-remote-control-thinq1)
         -   [Snapshot](#401-snapshot-thinq1)
     -   [Datenpunkte Gerät 406 Wärmepumpe](#gerät-406-wärmepumpe-thinq2)
@@ -49,13 +51,25 @@ Der Adapter erstellt alle Datenpunkte mit dem Template aus dem Datenpunkt `model
 
 -   `LG ThinQ E-Mail`: APP eMail eintragen
 -   `LG ThinQ-Passwort`: APP Passwort eintragen
--   `Aktualisierungsintervall in Minuten`:  Empfohlen: Bei thinq2 60 Minuten und thinq1 0.5/1 Minute
+-   `Aktualisierungsintervall in Minuten`: Empfohlen: Bei 60 Minuten. Wenn Intervall thinq1 auf 0 gesetzt wird dann hier 0.5/1 Minute
+-   `Aktualisierungsintervall in Sekunden für Thinq1 (pro Gerät 1 Sekunde)`: Intervall für thinq1 User
 -   `Land`: Land eingeben - Standard DE
 -   `Sprache`: Sprache eingeben - Standard de_DE
 -   `Plattform`: Plattform eingeben - Default LGThinQ
 
     ![instance_config_1.png](img/instance_config_1.png)
     ![instance_config_2.png](img/instance_config_2.png)
+
+### Intervall thinq1 LG-Thinq
+
+[Zusammenfassung](#zusammenfassung)
+
+-   `interval.active` Wie viele Geräte bekommen derzeit Updates
+-   `interval.inactive` Wie viele Geräte bekommen derzeit keine Updates
+-   `interval.interval` Intervall aus der Instanz Einstellung ändern. Nach einem Adapter Neustart wird die Instanz Einstellung angewendet.
+-   `interval.last_update` Letzte Update
+
+    ![interval.png](img/interval.png)
 
 # Datenpunkte
 
@@ -501,9 +515,89 @@ Wenn einer der 3 Datenpunkte gefüllt wird, wird das ausgewählt Programm in den
 
 [Zusammenfassung](#zusammenfassung)
 
+### 401 Remote Statistik thinq1
+
+[Zusammenfassung](#zusammenfassung)
+
+-   hourly
+-   `remote.Statistic.endDate` Datum eintragen bei hourly muss end und start gleich sein Format: 2023.12.01
+-   `remote.Statistic.startDate` Datum eintragen bei hourly muss end und start gleich sein Format: 2023.12.01
+-   ODER daily
+-   `remote.Statistic.endDate` Datum eintragen daily - Format: 2023.12.06
+-   `remote.Statistic.startDate` Datum eintragen daily - Format: 2023.12.01
+-   ODER monthly
+-   `remote.Statistic.endDate` Datum eintragen monthly - Format: 2023.12.01
+-   `remote.Statistic.startDate` Datum eintragen monthly - Format: 2023.10.01
+-   `remote.Statistic.period` Welche Periode
+-   `remote.Statistic.sendRequest` Auswahl senden
+-   `remote.Statistic.jsonResult` Statistik als JSON. Sind die Attribute leer dann unterstützt euer Geräte diese nicht oder es wurde ein falsches Datum angegeben.
+
+    ![401_thinq1_remote_statistic.png](img/401_thinq1_remote_statistic.png)
+
+```json
+[
+  {
+    "month": 0,
+    "day": "03",
+    "hour": 0,
+    "min": "16",
+    "kwh": 0.1
+  },
+  {
+    "month": 0,
+    "day": "04",
+    "hour": 0,
+    "min": "59",
+    "kwh": 0.2
+  },
+  {
+    "month": 0,
+    "day": "06",
+    "hour": 0,
+    "min": "15",
+    "kwh": 0.1
+  },
+  {
+    "month": 0,
+    "day": "07",
+    "hour": 0,
+    "min": "40",
+    "kwh": 0.1
+  },
+  {
+    "month": 0,
+    "day": "09",
+    "hour": 0,
+    "min": "35",
+    "kwh": 0.2
+  },
+  {
+    "month": 0,
+    "day": "10",
+    "hour": 0,
+    "min": "60",
+    "kwh": 0.2
+  },
+  {
+    "month": 0,
+    "day": "11",
+    "hour": 0,
+    "min": "60",
+    "kwh": 0.2
+  },
+  {
+    "month": 0,
+    "day": "12",
+    "hour": 0,
+    "min": "90",
+    "kwh": 0.3
+  }
+]
+```
+
 ### 401 Remote Control thinq1
 
-![401_thinq1_folder.png](../en/img/401_thinq1_folder.png)
+![401_thinq1_folder.png](401_thinq1_folder.png)
 
 [Zusammenfassung](#zusammenfassung)
 
@@ -527,7 +621,7 @@ lg-thinq.0.xxx.remote.SetWDirLeftRight -> {"`WDirLeftRight`":"{{WDirLeftRight}}"
 -   `remote.settings.WDirLeftRight` 0 oder 1
 -   `remote.SetWDirLeftRight` danach diesen Datenpunkt auf true setzen
 
-    ![401_thinq1_folder.png](../en/img/401_thinq1_remote.png)
+    ![401_thinq1_remote.png](../en/img/401_thinq1_remote.png)
 
 ### 401 Snapshot thinq1
 

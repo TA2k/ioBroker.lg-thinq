@@ -69,6 +69,7 @@ class LgThinq extends utils.Adapter {
         this.setFavoriteCourse = helper.setFavoriteCourse;
         this.checkdate = helper.checkdate;
         this.sendStaticRequest = helper.sendStaticRequest;
+        this.sendStaticRequestThinq1 = helper.sendStaticRequestThinq1;
         this.createCourse = helper.createCourse;
         this.refreshRemote = helper.refreshRemote;
         this.refrigerator = helper.refrigerator;
@@ -349,6 +350,10 @@ class LgThinq extends utils.Adapter {
             }
             const result = await this.getMonResult(all_workids);
             this.log.debug("RESULTS: " + JSON.stringify(result));
+            if (result == null) {
+                this.log.debug(`Result is undefined`);
+                return;
+            }
             for (const device of result) {
                 if (device && device.returnData && device.returnCode === "0000") {
                     let resultConverted;
@@ -1163,7 +1168,7 @@ class LgThinq extends utils.Adapter {
                 }
                 if (device.platformType == "thinq2") {
                     await this.createAirRemoteStates(device, deviceModel);
-                    await this.createStatistic(device.deviceId, 401);
+                    await this.createStatistic(device, 401);
                     const dataKeys = deviceModel["ControlDevice"];
                     if (deviceModel && dataKeys[0] && dataKeys[0].dataKey) {
                         try {
@@ -1181,6 +1186,7 @@ class LgThinq extends utils.Adapter {
                 ) {
                     this.log.debug("Found device 401 thinq1.");
                     await this.createAirRemoteThinq1States(device, deviceModel, constants);
+                    await this.createStatistic(device, 401);
                     stopp = true;
                 } else {
                     this.log.warn(`DeviceType 401 with platformType ${device.platformType} is not supported yet`);
@@ -1853,6 +1859,8 @@ class LgThinq extends utils.Adapter {
                     if (secsplit === "Statistic" && lastsplit === "sendRequest") {
                         if (devType && devType.val > 100 && devType.val < 104) {
                             this.sendStaticRequest(deviceId, "fridge", this.modelInfos[deviceId]["thinq2"]);
+                        } else if (devType && devType.val === 401 && this.modelInfos[deviceId]["thinq2"] === "thinq1") {
+                            this.sendStaticRequestThinq1(deviceId, constants.API1_CLIENT_ID);
                         } else if (devType && devType.val === 401) {
                             this.sendStaticRequest(deviceId, "air", this.modelInfos[deviceId]["thinq2"]);
                         } else if (devType && devType.val === 406) {

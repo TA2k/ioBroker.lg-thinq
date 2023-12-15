@@ -55,7 +55,7 @@ Der Adapter erstellt alle Datenpunkte mit dem Template aus dem Datenpunkt `model
 -   `Aktualisierungsintervall in Sekunden für Thinq1 (pro Gerät 1 Sekunde)`: Intervall für thinq1 User
 -   `Land`: Land eingeben - Standard DE
 -   `Sprache`: Sprache eingeben - Standard de_DE
--   `Plattform`: Plattform eingeben - Default LGThinQ
+-   `Plattform`: Plattform eingeben - Standard LGThinQ
 
     ![instance_config_1.png](img/instance_config_1.png)
     ![instance_config_2.png](img/instance_config_2.png)

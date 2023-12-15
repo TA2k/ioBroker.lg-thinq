@@ -1,247 +1,234 @@
 {
-    "common": {
-        "name": "lg-thinq",
-        "version": "0.2.0",
-        "news": {
-            "0.2.0": {
-                "en": "Added automatic terms acceptance and 401/101 Thinq1 devices",
-                "de": "Automatische Annahme der AGBs und 401/101 Thinq1-Geräte hinzugefügt",
-                "ru": "Добавлено автоматическое принятие условий и устройства 401/101 Thinq1.",
-                "pt": "Adicionada aceitação automática de termos e dispositivos 401/101 Thinq1",
-                "nl": "Automatische acceptatie van voorwaarden en 401/101 Thinq1-apparaten toegevoegd",
-                "fr": "Ajout de l'acceptation automatique des conditions et des appareils 401/101 Thinq1",
-                "it": "Aggiunta l'accettazione automatica dei termini e i dispositivi 401/101 Thinq1",
-                "es": "Se agregó aceptación automática de términos y dispositivos 401/101 Thinq1.",
-                "pl": "Dodano automatyczną akceptację warunków i urządzenia 401/101 Thinq1",
-                "uk": "Додано автоматичне прийняття умов і пристрої 401/101 Thinq1",
-                "zh-cn": "添加了自动条款接受和 401/101 Thinq1 设备"
-            },
-            "0.1.4": {
-                "en": "Add warning for not supported devices.",
-                "de": "Warnung für nicht unterstützte Geräte hinzufügen.",
-                "ru": "Добавить предупреждение для не поддерживаемых устройств.",
-                "pt": "Adicione aviso para dispositivos não suportados.",
-                "nl": "Een waarschuwing voor geen ondersteunende apparaten.",
-                "fr": "Ajouter un avertissement pour les dispositifs non pris en charge.",
-                "it": "Aggiungi avviso per i dispositivi non supportati.",
-                "es": "Añadir aviso para dispositivos no compatibles.",
-                "pl": "Addd ostrzegał, że nie obsługują urządzeń.",
-                "uk": "Додати попередження не підтримуваних пристроїв.",
-                "zh-cn": "添加不支持装置的警告。."
-            },
-            "0.1.3": {
-                "en": "Added remote data point translation for device 201.",
-                "de": "Hinzugefügt Remote-Datenpunkt-Übersetzung für das Gerät 201.",
-                "ru": "Добавлен удаленный перевод точки данных для устройства 201.",
-                "pt": "Adicionado a tradução de ponto de dados remoto para dispositivo 201.",
-                "nl": "Voeg afstandsgegevens toe voor apparaat 201.",
-                "fr": "Ajout de la traduction du point de données à distance pour le dispositif 201.",
-                "it": "Aggiunto la traduzione del punto di dati remoto per il dispositivo 201.",
-                "es": "Añadido traducción remota punto de datos para el dispositivo 201.",
-                "pl": "Dodzielony punkt danych dla urządzeń 201.",
-                "uk": "Додано дистанційний переклад точки даних для пристрою 201.",
-                "zh-cn": "增加用于装置201的远程数据点。."
-            },
-            "0.1.2": {
-                "en": "Improved translation",
-                "de": "Verbesserte Übersetzung",
-                "ru": "Улучшенный перевод",
-                "pt": "Tradução melhorada",
-                "nl": "Verbeterde vertaling",
-                "fr": "Amélioration de la traduction",
-                "it": "Traduzione migliorata",
-                "es": "Mejor traducción",
-                "pl": "Poprawianie tłumaczenia",
-                "uk": "Покращений переклад",
-                "zh-cn": "改进翻译"
-            },
-            "0.1.1": {
-                "en": "Added device 401.",
-                "de": "Geräte 401 hinzugefügt.",
-                "ru": "Добавлено устройство 401.",
-                "pt": "Adicionado dispositivo 401.",
-                "nl": "Voeg apparaat 401 toe.",
-                "fr": "Ajout du dispositif 401.",
-                "it": "Aggiunto dispositivo 401.",
-                "es": "Dispositivo 401.",
-                "pl": "Użytkowniki dodane 401.",
-                "uk": "Додано пристрій 401.",
-                "zh-cn": "增加装置401。."
-            },
-            "0.1.0": {
-                "en": "Added MQTT connection for live status updates",
-                "de": "MQTT-Verbindung für Live-Status-Updates hinzugefügt",
-                "ru": "Добавлена связь MQTT для обновлений реального статуса",
-                "pt": "Adicionada conexão MQTT para atualizações de status ao vivo",
-                "nl": "Vermeldde MQT-connectie voor live status updates",
-                "fr": "Ajout de la connexion MQTT pour les mises à jour du statut",
-                "it": "Aggiunto connessione MQTT per aggiornamenti di stato dal vivo",
-                "es": "Añadido conexión MQTT para actualizaciones de estado en vivo",
-                "pl": "Added MQTT connection for live status updates",
-                "uk": "Додано підключення MQTT для оновлення стану",
-                "zh-cn": "增加生活状况最新资料的技转中心"
-            },
-            "0.0.7": {
-                "en": "Bug fixes",
-                "de": "Fehlerbehebungen",
-                "ru": "Исправления ошибок",
-                "pt": "Correções de bugs",
-                "nl": "Bug repareert",
-                "fr": "Corrections",
-                "it": "Correzioni di bug",
-                "es": "Corrección de errores",
-                "pl": "Bug",
-                "uk": "Виправлення помилок",
-                "zh-cn": "Bug fix"
-            },
-            "0.0.2": {
-                "en": "initial release",
-                "de": "Erstveröffentlichung",
-                "ru": "Начальная версия",
-                "pt": "lançamento inicial",
-                "nl": "Eerste uitgave",
-                "fr": "Première version",
-                "it": "Versione iniziale",
-                "es": "Versión inicial",
-                "pl": "Pierwsze wydanie",
-                "uk": "початковий реліз",
-                "zh-cn": "首次出版"
-            }
-        },
-        "titleLang": {
-            "en": "LG ThinQ",
-            "de": "LG ThinQ",
-            "ru": "LG ThinQ",
-            "pt": "LG ThinQ",
-            "nl": "LG ThinQ",
-            "fr": "LG ThinQ",
-            "it": "LG ThinQ",
-            "es": "LG ThinQ",
-            "pl": "LG ThinQ",
-            "uk": "LG ThinQ",
-            "zh-cn": "LG ThinQ"
-        },
-        "desc": {
-            "en": "Adapter for LG ThinQ",
-            "de": "Adapter für LG ThinQ",
-            "ru": "Адаптер для LG ThinQ",
-            "pt": "Adaptador para LG ThinQ",
-            "nl": "Adapter voor LG ThinQ",
-            "fr": "Adaptateur pour LG ThinQ",
-            "it": "Adattatore per LG ThinQ",
-            "es": "Adaptador para LG ThinQ",
-            "pl": "Adapter do LG ThinQ",
-            "uk": "Адаптер для LG Навігація",
-            "zh-cn": "LG ThinQ 适配器"
-        },
-        "authors": [
-            "TA2k <tombox2020@gmail.com>",
-            "Lucky-ESA <github@luckyskills.de>"
-        ],
-        "keywords": [
-            "lg",
-            "thinq"
-        ],
-        "license": "MIT",
-        "platform": "Javascript/Node.js",
-        "main": "main.js",
-        "icon": "lg-thinq.png",
-        "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/TA2k/ioBroker.lg-thinq/master/admin/lg-thinq.png",
-        "readme": "https://github.com/TA2k/ioBroker.lg-thinq/blob/master/README.md",
-        "loglevel": "info",
-        "mode": "daemon",
-        "type": "household",
-        "compact": true,
-        "connectionType": "cloud",
-        "dataSource": "poll",
-        "materialize": false,
-        "adminUI": {
-            "config": "json"
-        },
-        "plugins": {
-            "sentry": {
-                "dsn": "https://414a0c2632d7439a81cdeaff30884373@sentry.iobroker.net/157"
-            }
-        },
-        "messagebox": true,
-		"docs": {
-			"en": "docs/en/README.md",
-			"de": "docs/de/README.md"
-		},
-        "dependencies": [
-            {
-                "js-controller": ">=3.3.22"
-            }
-        ],
-        "globalDependencies": [
-            {
-                "admin": ">=5.1.13"
-            }
-        ]
+  "common": {
+    "name": "lg-thinq",
+    "version": "0.3.0",
+    "news": {
+      "0.3.0": {
+        "en": "Added device 406 (heat pump)\nAdded description\nAdded new thinq1 interval\nAdded statistic for thinq1 device 401\nBugfixe",
+        "de": "Zusatzeinrichtung 406 (Wärmepumpe)\nBeschreibung\nNeues Thiq1 Intervall hinzugefügt\nStatistik für Thinq1 Gerät 401 hinzugefügt\nBugfixes",
+        "ru": "Добавлено устройство 406 (теплый насос)\nДобавлено описание\nДобавлен новый интервал тонкой q1\nДобавлена статистика для тонкого 1 устройства 401\nБугфикс",
+        "pt": "Adicionado dispositivo 406 (bomba de calor)\nDescrição adicionada\nAdicionado novo intervalo thinq1\nAdicionado estatística para thinq1 dispositivo 401\nBugfixe",
+        "nl": "Vervoegd apparaat 406 (heat pomp)\nToegegeven beschrijving\nVertaling:\nVertaling:\nBugfix",
+        "fr": "Ajout du dispositif 406 (pompe à chaleur)\nAjout de description\nAjout d'un nouvel intervalle\nStatistiques supplémentaires pour appareil minceq1 401\nBugfixe",
+        "it": "Aggiunto dispositivo 406 (pompa di calore)\nDescrizione aggiuntiva\nAggiunto nuovo intervallo sottileq1\nAggiunto statistico per dispositivo sottileq1 401\nBugfixe",
+        "es": "Agregado dispositivo 406 (bomba de calor)\nDescripción adicional\nNuevo intervalo delgadaq1\nEstadística agregada para el dispositivo delgadaq1 401\nBugfixe",
+        "pl": "Added urządzenie 406 ( pompa termiczna)\nAdded description\nAdddukowane nowe cienkie przedziały q1\nAddwentystyczny dla cienkiego urządzenia 401\nBugfix",
+        "uk": "Додано пристрій 406 (тепловий насос)\nДодано опис\nДодано новий тонкийq1 інтервал\nДодано статичну для тонкогоq1 пристрою 401\nПомилки",
+        "zh-cn": "增加装置406(水泵)\n增加说明\n增加新的缺陷q1 间隔\n稀少的克1装置的统计 401\nBugfix"
+      },
+      "0.2.0": {
+        "en": "Added automatic terms acceptance and 401/101 Thinq1 devices",
+        "de": "Automatische Annahme der AGBs und 401/101 Thinq1-Geräte hinzugefügt",
+        "ru": "Добавлено автоматическое принятие условий и устройства 401/101 Thinq1.",
+        "pt": "Adicionada aceitação automática de termos e dispositivos 401/101 Thinq1",
+        "nl": "Automatische acceptatie van voorwaarden en 401/101 Thinq1-apparaten toegevoegd",
+        "fr": "Ajout de l'acceptation automatique des conditions et des appareils 401/101 Thinq1",
+        "it": "Aggiunta l'accettazione automatica dei termini e i dispositivi 401/101 Thinq1",
+        "es": "Se agregó aceptación automática de términos y dispositivos 401/101 Thinq1.",
+        "pl": "Dodano automatyczną akceptację warunków i urządzenia 401/101 Thinq1",
+        "uk": "Додано автоматичне прийняття умов і пристрої 401/101 Thinq1",
+        "zh-cn": "添加了自动条款接受和 401/101 Thinq1 设备"
+      },
+      "0.1.4": {
+        "en": "Add warning for not supported devices.",
+        "de": "Warnung für nicht unterstützte Geräte hinzufügen.",
+        "ru": "Добавить предупреждение для не поддерживаемых устройств.",
+        "pt": "Adicione aviso para dispositivos não suportados.",
+        "nl": "Een waarschuwing voor geen ondersteunende apparaten.",
+        "fr": "Ajouter un avertissement pour les dispositifs non pris en charge.",
+        "it": "Aggiungi avviso per i dispositivi non supportati.",
+        "es": "Añadir aviso para dispositivos no compatibles.",
+        "pl": "Addd ostrzegał, że nie obsługują urządzeń.",
+        "uk": "Додати попередження не підтримуваних пристроїв.",
+        "zh-cn": "添加不支持装置的警告。."
+      },
+      "0.1.3": {
+        "en": "Added remote data point translation for device 201.",
+        "de": "Hinzugefügt Remote-Datenpunkt-Übersetzung für das Gerät 201.",
+        "ru": "Добавлен удаленный перевод точки данных для устройства 201.",
+        "pt": "Adicionado a tradução de ponto de dados remoto para dispositivo 201.",
+        "nl": "Voeg afstandsgegevens toe voor apparaat 201.",
+        "fr": "Ajout de la traduction du point de données à distance pour le dispositif 201.",
+        "it": "Aggiunto la traduzione del punto di dati remoto per il dispositivo 201.",
+        "es": "Añadido traducción remota punto de datos para el dispositivo 201.",
+        "pl": "Dodzielony punkt danych dla urządzeń 201.",
+        "uk": "Додано дистанційний переклад точки даних для пристрою 201.",
+        "zh-cn": "增加用于装置201的远程数据点。."
+      },
+      "0.1.2": {
+        "en": "Improved translation",
+        "de": "Verbesserte Übersetzung",
+        "ru": "Улучшенный перевод",
+        "pt": "Tradução melhorada",
+        "nl": "Verbeterde vertaling",
+        "fr": "Amélioration de la traduction",
+        "it": "Traduzione migliorata",
+        "es": "Mejor traducción",
+        "pl": "Poprawianie tłumaczenia",
+        "uk": "Покращений переклад",
+        "zh-cn": "改进翻译"
+      },
+      "0.1.1": {
+        "en": "Added device 401.",
+        "de": "Geräte 401 hinzugefügt.",
+        "ru": "Добавлено устройство 401.",
+        "pt": "Adicionado dispositivo 401.",
+        "nl": "Voeg apparaat 401 toe.",
+        "fr": "Ajout du dispositif 401.",
+        "it": "Aggiunto dispositivo 401.",
+        "es": "Dispositivo 401.",
+        "pl": "Użytkowniki dodane 401.",
+        "uk": "Додано пристрій 401.",
+        "zh-cn": "增加装置401。."
+      },
+      "0.1.0": {
+        "en": "Added MQTT connection for live status updates",
+        "de": "MQTT-Verbindung für Live-Status-Updates hinzugefügt",
+        "ru": "Добавлена связь MQTT для обновлений реального статуса",
+        "pt": "Adicionada conexão MQTT para atualizações de status ao vivo",
+        "nl": "Vermeldde MQT-connectie voor live status updates",
+        "fr": "Ajout de la connexion MQTT pour les mises à jour du statut",
+        "it": "Aggiunto connessione MQTT per aggiornamenti di stato dal vivo",
+        "es": "Añadido conexión MQTT para actualizaciones de estado en vivo",
+        "pl": "Added MQTT connection for live status updates",
+        "uk": "Додано підключення MQTT для оновлення стану",
+        "zh-cn": "增加生活状况最新资料的技转中心"
+      }
     },
-    "encryptedNative": [
-        "password"
-    ],
-    "protectedNative": [
-        "password"
-    ],
-    "native": {
-        "user": "",
-        "password": "",
-        "interval": 5,
-        "interval_thinq1": 30,
-        "country": "DE",
-        "language": "de_DE",
-        "thinq1": false,
-        "platform": "LGThinQ"
+    "titleLang": {
+      "en": "LG ThinQ",
+      "de": "LG ThinQ",
+      "ru": "LG ThinQ",
+      "pt": "LG ThinQ",
+      "nl": "LG ThinQ",
+      "fr": "LG ThinQ",
+      "it": "LG ThinQ",
+      "es": "LG ThinQ",
+      "pl": "LG ThinQ",
+      "uk": "LG ThinQ",
+      "zh-cn": "LG ThinQ"
     },
-    "objects": [],
-    "instanceObjects": [
-        {
-            "_id": "info",
-            "type": "channel",
-            "common": {
-                "name": {
-                    "en": "Information",
-                    "de": "Informationen",
-                    "ru": "Информация",
-                    "pt": "Informação",
-                    "nl": "Informatie",
-                    "fr": "Information",
-                    "it": "Informazioni",
-                    "es": "Información",
-                    "pl": "Informacja",
-                    "uk": "Інформація",
-                    "zh-cn": "信息"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "info.connection",
-            "type": "state",
-            "common": {
-                "role": "indicator.connected",
-                "name": {
-                    "en": "Device or service connected",
-                    "de": "Geräte- oder Serviceanschluss",
-                    "ru": "Устройство или сервис подключены",
-                    "pt": "Dispositivo ou serviço conectado",
-                    "nl": "Device of dienst verbonden",
-                    "fr": "Appareil ou service connecté",
-                    "it": "Dispositivo o servizio collegato",
-                    "es": "Dispositivo o servicio conectado",
-                    "pl": "Device",
-                    "uk": "Пристрої або послуги підключені",
-                    "zh-cn": "证人或有关服务"
-                },
-                "type": "boolean",
-                "read": true,
-                "write": false,
-                "def": false
-            },
-            "native": {}
-        }
+    "desc": {
+      "en": "Adapter for LG ThinQ",
+      "de": "Adapter für LG ThinQ",
+      "ru": "Адаптер для LG ThinQ",
+      "pt": "Adaptador para LG ThinQ",
+      "nl": "Adapter voor LG ThinQ",
+      "fr": "Adaptateur pour LG ThinQ",
+      "it": "Adattatore per LG ThinQ",
+      "es": "Adaptador para LG ThinQ",
+      "pl": "Adapter do LG ThinQ",
+      "uk": "Адаптер для LG Навігація",
+      "zh-cn": "LG ThinQ 适配器"
+    },
+    "authors": [
+      "TA2k <tombox2020@gmail.com>",
+      "Lucky-ESA <github@luckyskills.de>"
+    ],
+    "keywords": [
+      "lg",
+      "thinq"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "main": "main.js",
+    "icon": "lg-thinq.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/TA2k/ioBroker.lg-thinq/master/admin/lg-thinq.png",
+    "readme": "https://github.com/TA2k/ioBroker.lg-thinq/blob/master/README.md",
+    "loglevel": "info",
+    "mode": "daemon",
+    "type": "household",
+    "compact": true,
+    "connectionType": "cloud",
+    "dataSource": "poll",
+    "materialize": false,
+    "adminUI": {
+      "config": "json"
+    },
+    "plugins": {
+      "sentry": {
+        "dsn": "https://414a0c2632d7439a81cdeaff30884373@sentry.iobroker.net/157"
+      }
+    },
+    "messagebox": true,
+    "docs": {
+      "en": "docs/en/README.md",
+      "de": "docs/de/README.md"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=3.3.22"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=5.1.13"
+      }
     ]
+  },
+  "encryptedNative": [
+    "password"
+  ],
+  "protectedNative": [
+    "password"
+  ],
+  "native": {
+    "user": "",
+    "password": "",
+    "interval": 5,
+    "interval_thinq1": 30,
+    "country": "DE",
+    "language": "de_DE",
+    "thinq1": false,
+    "platform": "LGThinQ"
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Information",
+          "de": "Informationen",
+          "ru": "Информация",
+          "pt": "Informação",
+          "nl": "Informatie",
+          "fr": "Information",
+          "it": "Informazioni",
+          "es": "Información",
+          "pl": "Informacja",
+          "uk": "Інформація",
+          "zh-cn": "信息"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": {
+          "en": "Device or service connected",
+          "de": "Geräte- oder Serviceanschluss",
+          "ru": "Устройство или сервис подключены",
+          "pt": "Dispositivo ou serviço conectado",
+          "nl": "Device of dienst verbonden",
+          "fr": "Appareil ou service connecté",
+          "it": "Dispositivo o servizio collegato",
+          "es": "Dispositivo o servicio conectado",
+          "pl": "Device",
+          "uk": "Пристрої або послуги підключені",
+          "zh-cn": "证人或有关服务"
+        },
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
 }

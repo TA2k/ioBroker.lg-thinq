@@ -50,6 +50,7 @@
         "admin{,/!(src)/**}/!(tsconfig|tsconfig.*|.eslintrc).json",
         "admin{,/!(src)/**}/*.{html,css,png,svg,jpg,js}",
         "lib/",
+        "docs/",
         "www/",
         "io-package.json",
         "LICENSE",

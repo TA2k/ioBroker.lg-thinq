@@ -164,6 +164,11 @@
                 "dsn": "https://414a0c2632d7439a81cdeaff30884373@sentry.iobroker.net/157"
             }
         },
+        "messagebox": true,
+		"docs": {
+			"en": "docs/en/README.md",
+			"de": "docs/de/README.md"
+		},
         "dependencies": [
             {
                 "js-controller": ">=3.3.22"

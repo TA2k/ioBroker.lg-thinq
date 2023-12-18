@@ -352,6 +352,8 @@ class LgThinq extends utils.Adapter {
             const result = await this.getMonResult(all_workids);
             if (result == null || !result.data || !result.data.lgedmRoot || !result.data.lgedmRoot.workList) {
                 this.log.debug(`Result is undefined`);
+                this.setThinq1Interval(0);
+                this.updatethinq1Run = false;
                 return;
             }
             this.log.debug("RESULTS: " + JSON.stringify(result.data));
@@ -399,18 +401,22 @@ class LgThinq extends utils.Adapter {
                     await this.startMonitor(data);
                 }
             }
-            this.setState("interval.last_update", Date.now(), true);
-            if (this.refreshCounter["interval.active"] != active) {
-                this.refreshCounter["interval.active"] = active;
-                this.setState("interval.active", active, true);
-            }
-            const inactive = this.thinq1Counter - active;
-            if (this.refreshCounter["interval.inactive"] != inactive) {
-                this.refreshCounter["interval.inactive"] = inactive;
-                this.setState("interval.inactive", inactive, true);
-            }
+            this.setThinq1Interval(active);
             this.updatethinq1Run = false;
         }, this.config.interval_thinq1 * 1000);
+    }
+
+    setThinq1Interval(active) {
+        this.setState("interval.last_update", Date.now(), true);
+        if (this.refreshCounter["interval.active"] != active) {
+            this.refreshCounter["interval.active"] = active;
+            this.setState("interval.active", active, true);
+        }
+        const inactive = this.thinq1Counter - active;
+        if (this.refreshCounter["interval.inactive"] != inactive) {
+            this.refreshCounter["interval.inactive"] = inactive;
+            this.setState("interval.inactive", inactive, true);
+        }
     }
 
     async getMonResult(work_id) {

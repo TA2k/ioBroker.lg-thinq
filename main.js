@@ -420,8 +420,9 @@ class LgThinq extends utils.Adapter {
             .post(this.gateway.thinq1Uri + "/" + "rti/rtiResult", { lgedmRoot: { workList: work_id } }, { headers })
             .then((resp) => resp)
             .catch((error) => {
-                this.log.error("getMonResult");
-                this.log.error(error);
+                this.log.debug("getMonResult");
+                this.log.debug(error);
+                return null;
             });
     }
 

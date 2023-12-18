@@ -96,6 +96,7 @@ class LgThinq extends utils.Adapter {
         this.remoteValue = {};
         this.mqtt_userID = "";
         this.isThinq2 = false;
+        this.thinq1Counter = 0;
         this.isRestart = true;
         this.isFinished = false;
     }
@@ -253,6 +254,7 @@ class LgThinq extends utils.Adapter {
                     }
                     if (element.platformType && element.platformType === "thinq1") {
                         isThinq1 = true;
+                        ++this.thinq1Counter;
                     }
                     if (element.deviceType) {
                         this.modelInfos[element.deviceId]["deviceType"] = element.deviceType;
@@ -321,40 +323,39 @@ class LgThinq extends utils.Adapter {
             this.log.debug("START MONITORING");
             this.log.debug("WORKID: " + Object.keys(this.workIds).length);
             this.log.debug("MODEL: " + Object.keys(this.modelInfos).length);
-            if (Object.keys(this.modelInfos).length != Object.keys(this.workIds).length) {
+            this.log.debug("Counter: " + this.thinq1Counter);
+            if (this.thinq1Counter != Object.keys(this.workIds).length) {
                 for (const model in this.modelInfos) {
                     this.log.debug("MODEL: " + JSON.stringify(model));
                     const devID = {};
-                    if (!(model in this.workIds)) {
+                    if (this.modelInfos[model] && this.modelInfos[model]["thinq2"] === "thinq1" && !(model in this.workIds)) {
                         devID.platformType = this.modelInfos[model]["thinq2"];
                         devID.deviceId = model;
-                        await this.pollMonitor(devID);
+                        await this.startMonitor(devID);
                         this.log.debug("Start Monitoring for " + model);
                     }
                 }
             }
             const all_workids = [];
             let active = 0;
-            let inactive = 0;
             for (const dev in this.workIds) {
                 if (this.workIds[dev] == null) {
                     const devID = {
                         platformType: this.modelInfos[dev]["thinq2"],
                         deviceId: dev,
                     };
-                    this.pollMonitor(devID);
-                    ++inactive;
+                    await this.startMonitor(devID);
                 }
                 this.log.debug("DEV: " + dev + " workid: " + this.workIds[dev]);
                 all_workids.push({"deviceId": dev, "workId": this.workIds[dev]});
             }
             const result = await this.getMonResult(all_workids);
-            this.log.debug("RESULTS: " + JSON.stringify(result));
-            if (result == null) {
+            if (result == null || !result.data || !result.data.lgedmRoot || !result.data.lgedmRoot.workList) {
                 this.log.debug(`Result is undefined`);
                 return;
             }
-            for (const device of result) {
+            this.log.debug("RESULTS: " + JSON.stringify(result.data));
+            for (const device of result.data.lgedmRoot.workList) {
                 if (device && device.returnData && device.returnCode === "0000") {
                     let resultConverted;
                     let unit = new Uint8Array(1024);
@@ -394,8 +395,8 @@ class LgThinq extends utils.Adapter {
                         platformType: "thinq1",
                         deviceId: device.deviceId,
                     };
+                    await this.stopMonitor(data);
                     await this.startMonitor(data);
-                    ++inactive;
                 }
             }
             this.setState("interval.last_update", Date.now(), true);
@@ -403,6 +404,7 @@ class LgThinq extends utils.Adapter {
                 this.refreshCounter["interval.active"] = active;
                 this.setState("interval.active", active, true);
             }
+            const inactive = this.thinq1Counter - active;
             if (this.refreshCounter["interval.inactive"] != inactive) {
                 this.refreshCounter["interval.inactive"] = inactive;
                 this.setState("interval.inactive", inactive, true);
@@ -412,31 +414,13 @@ class LgThinq extends utils.Adapter {
     }
 
     async getMonResult(work_id) {
-        const headers = Object.assign({}, this.defaultHeaders);
-        // @ts-ignore
+        const headers = JSON.parse(JSON.stringify(this.defaultHeaders));
         headers["x-client-id"] = constants.API1_CLIENT_ID;
         return await this.requestClient
             .post(this.gateway.thinq1Uri + "/" + "rti/rtiResult", { lgedmRoot: { workList: work_id } }, { headers })
-            .then((resp) => resp.data.lgedmRoot)
-            .then((data) => {
-                if ("returnCd" in data) {
-                    const code = data.returnCd;
-                    if (code === "0106") {
-                        return code;
-                    } else if (code !== "0000") {
-                        this.log.debug(code + " - " + data.returnMsg || "");
-                        return code;
-                    }
-                }
-                this.log.debug(JSON.stringify(data));
-                if (data.workList) {
-                    return data.workList;
-                } else {
-                    return "10000";
-                }
-            })
+            .then((resp) => resp)
             .catch((error) => {
-                this.log.error("GetMonitorResult");
+                this.log.error("getMonResult");
                 this.log.error(error);
             });
     }
@@ -563,7 +547,7 @@ class LgThinq extends utils.Adapter {
                 });
                 //this.pollMonitor(element);
                 if (Object.keys(this.workIds).length === 0 || this.config.interval_thinq1 === 0) {
-                    this.pollMonitor(element);
+                    await this.pollMonitor(element);
                 }
                 this.refreshRemote(element);
             });
@@ -595,8 +579,7 @@ class LgThinq extends utils.Adapter {
 
     async getDeviceEnergyThinq1(path, device) {
         this.log.debug("getDeviceEnergyThinq1: " + device);
-        const headers = Object.assign({}, this.defaultHeaders);
-        // @ts-ignore
+        const headers = JSON.parse(JSON.stringify(this.defaultHeaders));
         headers["x-client-id"] = constants.API1_CLIENT_ID;
         const deviceUrl = this.resolveUrl(this.gateway.thinq1Uri + "/", path);
         this.log.info(deviceUrl);
@@ -712,10 +695,10 @@ class LgThinq extends utils.Adapter {
             this.log.debug("start polling");
             let result = new Uint8Array(1024);
             try {
-                if (!(device.deviceId in this.workIds)) {
+                if (!this.workIds || !this.workIds[device.deviceId]) {
                     this.log.debug(device.deviceId + " is connecting");
                     await this.startMonitor(device);
-                    await this.sleep(5000);
+                    //await this.sleep(5000);
                 }
                 result = await this.getMonitorResult(device.deviceId, this.workIds[device.deviceId]);
                 if (result && typeof result === "object") {
@@ -762,9 +745,13 @@ class LgThinq extends utils.Adapter {
                     (data) => data.workId,
                 );
                 this.workIds[device.deviceId] = returnWorkId;
+                return true;
+            } else {
+                return false;
             }
         } catch (err) {
             this.log.debug("startMonitor: " + JSON.stringify(err));
+            return false;
         }
     }
 
@@ -773,8 +760,10 @@ class LgThinq extends utils.Adapter {
             try {
                 await this.sendMonitorCommand(device.deviceId, "Stop", this.workIds[device.deviceId]);
                 delete this.workIds[device.deviceId];
+                return true;
             } catch (err) {
                 this.log.debug("stopMonitor: " + JSON.stringify(err));
+                return false;
             }
         }
     }
@@ -908,8 +897,7 @@ class LgThinq extends utils.Adapter {
     }
 
     async sendMonitorCommand(deviceId, cmdOpt, workId) {
-        const headers = Object.assign({}, this.defaultHeaders);
-        // @ts-ignore
+        const headers = JSON.parse(JSON.stringify(this.defaultHeaders));
         headers["x-client-id"] = constants.API1_CLIENT_ID;
         const data = {
             cmd: "Mon",
@@ -939,8 +927,7 @@ class LgThinq extends utils.Adapter {
     }
 
     async getMonitorResult(device_id, work_id) {
-        const headers = Object.assign({}, this.defaultHeaders);
-        // @ts-ignore
+        const headers = JSON.parse(JSON.stringify(this.defaultHeaders));
         headers["x-client-id"] = constants.API1_CLIENT_ID;
         const workList = [{ deviceId: device_id, workId: work_id }];
         return await this.requestClient

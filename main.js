@@ -310,6 +310,7 @@ class LgThinq extends utils.Adapter {
     async startPollMonitor() {
         this.updateThinq1Interval && this.clearInterval(this.updateThinq1Interval);
         this.updateThinq1Interval = null;
+        this.updatethinq1Run = false;
         if (Object.keys(this.workIds).length < 1) {
             this.log.info("Found no workID`s");
             return;
@@ -350,19 +351,28 @@ class LgThinq extends utils.Adapter {
                 all_workids.push({"deviceId": dev, "workId": this.workIds[dev]});
             }
             const result = await this.getMonResult(all_workids);
-            if (result == null || !result.data || !result.data.lgedmRoot || !result.data.lgedmRoot.workList) {
+            if (result == null || !result.workList) {
                 this.log.debug(`Result is undefined`);
                 this.setThinq1Interval(0);
                 this.updatethinq1Run = false;
                 return;
             }
-            this.log.debug("RESULTS: " + JSON.stringify(result.data));
-            for (const device of result.data.lgedmRoot.workList) {
+            this.log.debug("RESULTS: " + JSON.stringify(result));
+            let device_array = [];
+            if (Object.keys(result.workList).length == 0) {
+                return;
+            } else if (Object.keys(result.workList).length == 1) {
+                device_array.push(result.workList);
+            } else {
+                device_array = result.workList;
+            }
+            this.log.debug("device_array: " + JSON.stringify(device_array));
+            for (const device of device_array) {
                 if (device && device.returnData && device.returnCode === "0000") {
                     let resultConverted;
                     let unit = new Uint8Array(1024);
-                    unit = Buffer.from(device.returnData, "base64");
                     if (this.modelInfos[device.deviceId].Monitoring.type === "BINARY(BYTE)") {
+                        unit = Buffer.from(device.returnData, "base64");
                         this.log.debug("result: " + JSON.stringify(device));
                         resultConverted = this.decodeMonitorBinary(
                             unit,
@@ -424,7 +434,8 @@ class LgThinq extends utils.Adapter {
         headers["x-client-id"] = constants.API1_CLIENT_ID;
         return await this.requestClient
             .post(this.gateway.thinq1Uri + "/" + "rti/rtiResult", { lgedmRoot: { workList: work_id } }, { headers })
-            .then((resp) => resp)
+            .then((resp) => resp.data.lgedmRoot)
+            .then((data) => data)
             .catch((error) => {
                 this.log.debug("getMonResult");
                 this.log.debug(error);

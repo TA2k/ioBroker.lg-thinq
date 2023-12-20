@@ -365,7 +365,7 @@ class LgThinq extends utils.Adapter {
             let device_array = [];
             if (Object.keys(result.workList).length == 0) {
                 return;
-            } else if (Object.keys(result.workList).length == 1) {
+            } else if (Object.keys(result.workList).length == 1 && !Array.isArray(result.workList)) {
                 device_array.push(result.workList);
             } else {
                 device_array = result.workList;

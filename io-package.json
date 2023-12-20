@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lg-thinq",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "news": {
+      "0.3.1": {
+        "en": "Fixed crash thinq1 interval",
+        "de": "Feste Crash-Dünnq1 Intervall",
+        "ru": "Исправлена сбой тоньк1 интервал",
+        "pt": "Intervalo de queda finoq1 fixo",
+        "nl": "Vertaling:",
+        "fr": "Intervalle de chute fixe fineq1",
+        "it": "Intervallo fisso di crash sottileq1",
+        "es": "Intervalo de bloqueo fijo delgadaq1",
+        "pl": "Fix rozbił się cienkim przedziałem przedziału k1",
+        "uk": "Фіксований аварійний інтервал Q1",
+        "zh-cn": "B. 固定的坠落微克1间互阀"
+      },
       "0.3.0": {
         "en": "Added device 406 (heat pump)\nAdded description\nAdded new thinq1 interval\nAdded statistic for thinq1 device 401\nBugfixe",
         "de": "Zusatzeinrichtung 406 (Wärmepumpe)\nBeschreibung\nNeues Thiq1 Intervall hinzugefügt\nStatistik für Thinq1 Gerät 401 hinzugefügt\nBugfixes",
@@ -80,19 +93,6 @@
         "pl": "Użytkowniki dodane 401.",
         "uk": "Додано пристрій 401.",
         "zh-cn": "增加装置401。."
-      },
-      "0.1.0": {
-        "en": "Added MQTT connection for live status updates",
-        "de": "MQTT-Verbindung für Live-Status-Updates hinzugefügt",
-        "ru": "Добавлена связь MQTT для обновлений реального статуса",
-        "pt": "Adicionada conexão MQTT para atualizações de status ao vivo",
-        "nl": "Vermeldde MQT-connectie voor live status updates",
-        "fr": "Ajout de la connexion MQTT pour les mises à jour du statut",
-        "it": "Aggiunto connessione MQTT per aggiornamenti di stato dal vivo",
-        "es": "Añadido conexión MQTT para actualizaciones de estado en vivo",
-        "pl": "Added MQTT connection for live status updates",
-        "uk": "Додано підключення MQTT для оновлення стану",
-        "zh-cn": "增加生活状况最新资料的技转中心"
       }
     },
     "titleLang": {

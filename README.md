@@ -42,7 +42,7 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.3.1 (2023-12-20)
 
 -   (Lucky-ESA) Fixed crash thinq1 interval
 

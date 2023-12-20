@@ -237,6 +237,10 @@ class LgThinq extends utils.Adapter {
                         firstload: true,
                     });
                     this.modelInfos[element.deviceId] = await this.getDeviceModelInfo(element);
+                    if (!this.modelInfos[element.deviceId]) {
+                        this.log.warn(`Missing Modelinfo for device - ${element.deviceId}`);
+                        this.modelInfos[element.deviceId] = {};
+                    }
                     this.modelInfos[element.deviceId]["thinq2"] = element.platformType;
                     this.modelInfos[element.deviceId]["signature"] = false;
                     if (element.platformType && element.platformType === "thinq2") {
@@ -368,12 +372,12 @@ class LgThinq extends utils.Adapter {
             }
             this.log.debug("device_array: " + JSON.stringify(device_array));
             for (const device of device_array) {
+                this.log.debug("device: " + JSON.stringify(device));
                 if (device && device.returnData && device.returnCode === "0000") {
                     let resultConverted;
                     let unit = new Uint8Array(1024);
+                    unit = Buffer.from(device.returnData, "base64");
                     if (this.modelInfos[device.deviceId].Monitoring.type === "BINARY(BYTE)") {
-                        unit = Buffer.from(device.returnData, "base64");
-                        this.log.debug("result: " + JSON.stringify(device));
                         resultConverted = this.decodeMonitorBinary(
                             unit,
                             this.modelInfos[device.deviceId].Monitoring.protocol,
@@ -411,6 +415,7 @@ class LgThinq extends utils.Adapter {
                     await this.startMonitor(data);
                 }
             }
+            this.log.debug("active: " + active);
             this.setThinq1Interval(active);
             this.updatethinq1Run = false;
         }, this.config.interval_thinq1 * 1000);

@@ -783,6 +783,7 @@ class LgThinq extends utils.Adapter {
             try {
                 await this.sendMonitorCommand(device.deviceId, "Stop", this.workIds[device.deviceId]);
                 delete this.workIds[device.deviceId];
+                this.log.debug(`Stop monitoring for device ${device.deviceId}`);
                 return true;
             } catch (err) {
                 this.log.debug("stopMonitor: " + JSON.stringify(err));
@@ -1784,7 +1785,13 @@ class LgThinq extends utils.Adapter {
             this.sleepTimer && this.clearTimeout(this.sleepTimer);
             this.updateThinq1Interval && this.clearInterval(this.updateThinq1Interval);
             for (const dev in this.workIds) {
-                await this.stopMonitor(dev);
+                if (this.modelInfos[dev] && this.modelInfos[dev]["thinq2"] === "thinq1") {
+                    const data = {
+                        platformType: "thinq1",
+                        deviceId: dev,
+                    };
+                    await this.stopMonitor(data);
+                }
             }
             callback();
         } catch (e) {

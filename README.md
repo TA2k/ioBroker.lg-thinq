@@ -42,6 +42,10 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+
+-   (Lucky-ESA) Added save modelJSON local
+
 ### 0.3.1 (2023-12-20)
 
 -   (Lucky-ESA) Fixed crash thinq1 interval

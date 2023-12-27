@@ -23,6 +23,7 @@ const awsIot = require("aws-iot-device-sdk").device;
 const forge = require("node-forge");
 const http = require("http");
 const https = require("https");
+const fs = require("fs");
 
 class LgThinq extends utils.Adapter {
     /**
@@ -191,6 +192,13 @@ class LgThinq extends utils.Adapter {
                 let isThinq1 = false;
                 for (const element of listDevices) {
                     this.log.info(`Create or update datapoints for ${element.deviceId}`);
+                    this.modelInfos[element.deviceId] = await this.getDeviceModelInfo(element);
+                    if (!this.modelInfos[element.deviceId]) {
+                        this.log.error(`Missing Modelinfo for device - ${element.deviceId}. Restart adapter please!!!`);
+                        continue;
+                    } else if (this.modelInfos[element.deviceId] === "NOK") {
+                        continue;
+                    }
                     this.subscribeStates(`${element.deviceId}.remote.*`);
                     this.subscribeStates(`${element.deviceId}.snapshot.*`);
                     await this.setObjectNotExistsAsync(element.deviceId, {
@@ -236,11 +244,6 @@ class LgThinq extends utils.Adapter {
                         checkType: true,
                         firstload: true,
                     });
-                    this.modelInfos[element.deviceId] = await this.getDeviceModelInfo(element);
-                    if (!this.modelInfos[element.deviceId]) {
-                        this.log.warn(`Missing Modelinfo for device - ${element.deviceId}`);
-                        this.modelInfos[element.deviceId] = {};
-                    }
                     this.modelInfos[element.deviceId]["thinq2"] = element.platformType;
                     this.modelInfos[element.deviceId]["signature"] = false;
                     if (element.platformType && element.platformType === "thinq2") {
@@ -1113,20 +1116,42 @@ class LgThinq extends utils.Adapter {
     }
 
     async getDeviceModelInfo(device) {
+        let uris = {};
+        try {
+            if (fs.existsSync(`${this.adapterDir}/lib/modelJsonUri`)) {
+                const data_uris = fs.readFileSync(`${this.adapterDir}/lib/modelJsonUri`, "utf-8");
+                uris = JSON.parse(data_uris);
+            } else {
+                uris["data"] = {};
+            }
+        } catch (err) {
+            uris["data"] = {};
+        }
         if (!device.modelJsonUri) {
-            return;
+            this.log.error(`Missing Modelinfo for device - ${device.deviceId}. Create a new issue on github please!!!`);
+            return "NOK";
         }
         this.log.debug("Get Device Model Info");
         this.log.debug(JSON.stringify(device));
         let stopp = false;
-        const deviceModel = await this.requestClient
+        let deviceModel = await this.requestClient
             .get(device.modelJsonUri)
             .then((res) => res.data)
             .catch((error) => {
                 this.log.error(error);
                 return;
             });
+        if (!deviceModel) {
+            if (uris.data[device.modelJsonUri]) {
+                this.log.info(`Use local modelJsonUri for device ${device.deviceId}`);
+                deviceModel = uris.data[device.modelJsonUri];
+            }
+        }
         if (deviceModel) {
+            if (!uris.data[device.modelJsonUri]) {
+                uris.data[device.modelJsonUri] = deviceModel;
+                fs.writeFileSync(`${this.adapterDir}/lib/modelJsonUri`, JSON.stringify(uris), "utf-8");
+            }
             await this.setObjectNotExistsAsync(device.deviceId + ".remote", {
                 type: "channel",
                 common: {

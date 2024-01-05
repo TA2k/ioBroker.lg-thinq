@@ -16,6 +16,10 @@
 
 Adapter for LG ThinQ
 
+## Requirement
+
+* Node >= 16
+
 ## Supported devices
 
 **DEVICE**: lg-thinq.0.xxx.deviceType -> e. g. 101</br>
@@ -45,6 +49,7 @@ Adapter for LG ThinQ
 ### **WORK IN PROGRESS**
 
 -   (Lucky-ESA) Added save modelJSON local
+-   (mcm1957) Node 16 checked
 
 ### 0.3.1 (2023-12-20)
 

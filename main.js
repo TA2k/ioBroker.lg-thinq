@@ -367,56 +367,67 @@ class LgThinq extends utils.Adapter {
             this.log.debug("RESULTS: " + JSON.stringify(result));
             let device_array = [];
             if (Object.keys(result.workList).length == 0) {
+                this.updatethinq1Run = false;
                 return;
             } else if (Object.keys(result.workList).length == 1 && !Array.isArray(result.workList)) {
                 device_array.push(result.workList);
-            } else {
+            } else if (Array.isArray(result.workList)) {
                 device_array = result.workList;
+            } else {
+                this.log.info("WRONG WORKLIST: " + JSON.stringify(device_array));
+                this.log.info("WRONG WORKLIST RESULT: " + JSON.stringify(result));
+                this.updatethinq1Run = false;
+                return;
             }
             this.log.debug("device_array: " + JSON.stringify(device_array));
-            for (const device of device_array) {
-                this.log.debug("device: " + JSON.stringify(device));
-                if (device && device.returnData && device.returnCode === "0000") {
-                    let resultConverted;
-                    let unit = new Uint8Array(1024);
-                    unit = Buffer.from(device.returnData, "base64");
-                    if (this.modelInfos[device.deviceId].Monitoring.type === "BINARY(BYTE)") {
-                        resultConverted = this.decodeMonitorBinary(
-                            unit,
-                            this.modelInfos[device.deviceId].Monitoring.protocol,
-                        );
-                    }
-                    if (this.modelInfos[device.deviceId].Monitoring.type === "JSON") {
-                        try {
-                            // @ts-ignore
-                            resultConverted = JSON.parse(unit.toString("utf-8"));
-                        } catch(e) {
-                            continue;
+            try {
+                for (const device of device_array) {
+                    this.log.debug("device: " + JSON.stringify(device));
+                    if (device && device.returnData && device.returnCode === "0000") {
+                        let resultConverted;
+                        let unit = new Uint8Array(1024);
+                        unit = Buffer.from(device.returnData, "base64");
+                        if (this.modelInfos[device.deviceId].Monitoring.type === "BINARY(BYTE)") {
+                            resultConverted = this.decodeMonitorBinary(
+                                unit,
+                                this.modelInfos[device.deviceId].Monitoring.protocol,
+                            );
                         }
+                        if (this.modelInfos[device.deviceId].Monitoring.type === "JSON") {
+                            try {
+                            // @ts-ignore
+                                resultConverted = JSON.parse(unit.toString("utf-8"));
+                            } catch(e) {
+                                continue;
+                            }
+                        }
+                        this.log.debug("resultConverted: " + JSON.stringify(resultConverted));
+                        if (this.modelInfos[device.deviceId].Info.productType === "REF") {
+                            this.refreshRemote(resultConverted, true, device.deviceId);
+                        }
+                        await this.json2iob.parse(`${device.deviceId}.snapshot`, resultConverted, {
+                            forceIndex: true,
+                            write: true,
+                            preferedArrayName: null,
+                            channelName: null,
+                            autoCast: true,
+                            checkvalue: this.isFinished,
+                            checkType: true,
+                        });
+                        ++active;
+                    } else {
+                        this.log.debug("No data:" + JSON.stringify(device) + " " + device.deviceId);
+                        const data = {
+                            platformType: "thinq1",
+                            deviceId: device.deviceId,
+                        };
+                        await this.stopMonitor(data);
+                        await this.startMonitor(data);
                     }
-                    this.log.debug("resultConverted: " + JSON.stringify(resultConverted));
-                    if (this.modelInfos[device.deviceId].Info.productType === "REF") {
-                        this.refreshRemote(resultConverted, true, device.deviceId);
-                    }
-                    await this.json2iob.parse(`${device.deviceId}.snapshot`, resultConverted, {
-                        forceIndex: true,
-                        write: true,
-                        preferedArrayName: null,
-                        channelName: null,
-                        autoCast: true,
-                        checkvalue: this.isFinished,
-                        checkType: true,
-                    });
-                    ++active;
-                } else {
-                    this.log.debug("No data:" + JSON.stringify(device) + " " + device.deviceId);
-                    const data = {
-                        platformType: "thinq1",
-                        deviceId: device.deviceId,
-                    };
-                    await this.stopMonitor(data);
-                    await this.startMonitor(data);
                 }
+            } catch (e) {
+                this.log.info("CATCH WORKLIST: " + JSON.stringify(device_array));
+                this.log.info("CATCH WORKLIST RESULT: " + JSON.stringify(result));
             }
             this.log.debug("active: " + active);
             this.setThinq1Interval(active);

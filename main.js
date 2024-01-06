@@ -369,7 +369,7 @@ class LgThinq extends utils.Adapter {
             if (Object.keys(result.workList).length == 0) {
                 this.updatethinq1Run = false;
                 return;
-            } else if (Object.keys(result.workList).length == 1 && !Array.isArray(result.workList)) {
+            } else if (Object.keys(result.workList).length == 1 && !Array.isArray(result.workList) && typeof result.workList === "object") {
                 device_array.push(result.workList);
             } else if (Array.isArray(result.workList)) {
                 device_array = result.workList;

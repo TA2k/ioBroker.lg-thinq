@@ -368,11 +368,13 @@ class LgThinq extends utils.Adapter {
             }
             this.log.debug("RESULTS: " + JSON.stringify(result));
             let device_array = [];
+            this.log.info(`Length: ${Object.keys(result.workList).length}`);
+            this.log.info(`Array: ${Array.isArray(result.workList)}`);
+            this.log.info(`Typeof: ${typeof result.workList}`);
             if (Object.keys(result.workList).length === 0) {
                 this.updatethinq1Run = false;
                 return;
             } else if (
-                Object.keys(result.workList).length === 1 &&
                 !Array.isArray(result.workList) &&
                 typeof result.workList === "object"
             ) {

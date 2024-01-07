@@ -352,10 +352,12 @@ class LgThinq extends utils.Adapter {
                         platformType: this.modelInfos[dev]["thinq2"],
                         deviceId: dev,
                     };
+                    this.log.debug("Restart DEV: " + dev + " workid: " + this.workIds[dev] + " thinq: " + this.modelInfos[dev]["thinq2"]);
                     await this.startMonitor(devID);
+                } else {
+                    this.log.debug("DEV: " + dev + " workid: " + this.workIds[dev]);
+                    all_workids.push({"deviceId": dev, "workId": this.workIds[dev]});
                 }
-                this.log.debug("DEV: " + dev + " workid: " + this.workIds[dev]);
-                all_workids.push({"deviceId": dev, "workId": this.workIds[dev]});
             }
             const result = await this.getMonResult(all_workids);
             if (result == null || !result.workList) {
@@ -366,10 +368,14 @@ class LgThinq extends utils.Adapter {
             }
             this.log.debug("RESULTS: " + JSON.stringify(result));
             let device_array = [];
-            if (Object.keys(result.workList).length == 0) {
+            if (Object.keys(result.workList).length === 0) {
                 this.updatethinq1Run = false;
                 return;
-            } else if (Object.keys(result.workList).length == 1 && !Array.isArray(result.workList) && typeof result.workList === "object") {
+            } else if (
+                Object.keys(result.workList).length === 1 &&
+                !Array.isArray(result.workList) &&
+                typeof result.workList === "object"
+            ) {
                 device_array.push(result.workList);
             } else if (Array.isArray(result.workList)) {
                 device_array = result.workList;
@@ -735,7 +741,7 @@ class LgThinq extends utils.Adapter {
                 if (!this.workIds || !this.workIds[device.deviceId]) {
                     this.log.debug(device.deviceId + " is connecting");
                     await this.startMonitor(device);
-                    //await this.sleep(5000);
+                    await this.sleep(5000);
                 }
                 result = await this.getMonitorResult(device.deviceId, this.workIds[device.deviceId]);
                 if (result && typeof result === "object") {
@@ -955,7 +961,7 @@ class LgThinq extends utils.Adapter {
                         this.log.debug(code + " - " + data.returnMsg || "");
                     }
                 }
-                this.log.debug(JSON.stringify(data));
+                this.log.debug("sendMonitorCommand: " + JSON.stringify(data));
                 return data;
             })
             .catch((error) => {

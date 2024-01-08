@@ -427,11 +427,17 @@ class LgThinq extends utils.Adapter {
                             checkvalue: this.isFinished,
                             checkType: true,
                         });
-                        ++active;
                         if (device.returnCode === "0000") {
                             device_status[device.deviceId] = "OK";
+                            ++active;
                         } else {
                             device_status[device.deviceId] = "Fail";
+                            const data = {
+                                platformType: "thinq1",
+                                deviceId: device.deviceId,
+                            };
+                            await this.stopMonitor(data);
+                            await this.startMonitor(data);
                         }
                     } else {
                         this.log.debug("No data:" + JSON.stringify(device) + " " + device.deviceId);

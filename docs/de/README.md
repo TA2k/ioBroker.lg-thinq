@@ -70,7 +70,7 @@ Der Adapter erstellt alle Datenpunkte mit dem Template aus dem Datenpunkt `model
 -   `interval.last_update` Letzte Update
 -   `interval.status_devices`
     -   `OK` Intervall OK
-    -   `Fail` Intervall Fail
+    -   `Fail` Intervall Fail - WorkID wird neu erstellt
     -   `Error` Fehlende WorkID - WorkID wird neu erstellt
     -   `Error <code>` Unbekannter Fehler - WorkID wird neu erstellt
 

@@ -70,7 +70,7 @@ The adapter creates all data points with the template from the data point `model
 -   `interval.last_update` Latest update
 -   `interval.status_devices`
     -   `OK` Interval OK
-    -   `Fail` Interval Fail
+    -   `Fail` Interval Fail - WorkID is recreated
     -   `Error` Missing WorkID - WorkID is recreated
     -   `Error <code>` Unknown error - WorkID is recreated
 

@@ -118,6 +118,8 @@ class LgThinq extends utils.Adapter {
         }
         this.refreshCounter["interval.active"] = null;
         this.refreshCounter["interval.inactive"] = null;
+        this.refreshCounter["interval.inactive"] = null;
+        this.refreshCounter["interval.status_devices"] = null;
         const data = await this.getForeignObjectAsync("system.config");
         if (data && data.common && data.common.language) {
             this.lang = data.common.language === this.lang ? this.lang : "en";
@@ -284,6 +286,7 @@ class LgThinq extends utils.Adapter {
                     this.setState("interval.active", 0, true);
                     this.setState("interval.active", 0, true);
                     this.setState("interval.last_update", 0, true);
+                    this.setState("interval.status_devices", JSON.stringify({}), true);
                     this.startPollMonitor();
                 }
                 this.updateInterval = this.setInterval(async () => {
@@ -344,6 +347,7 @@ class LgThinq extends utils.Adapter {
                 }
             }
             const all_workids = [];
+            const device_status = {};
             let active = 0;
             for (const dev in this.workIds) {
                 if (this.workIds[dev] == null) {
@@ -352,6 +356,7 @@ class LgThinq extends utils.Adapter {
                         deviceId: dev,
                     };
                     this.log.debug("Restart DEV: " + dev + " workid: " + this.workIds[dev] + " thinq: " + this.modelInfos[dev]["thinq2"]);
+                    device_status[dev] = "Error";
                     await this.startMonitor(devID);
                 } else {
                     this.log.debug("DEV: " + dev + " workid: " + this.workIds[dev]);
@@ -387,7 +392,11 @@ class LgThinq extends utils.Adapter {
             try {
                 for (const device of device_array) {
                     this.log.debug("device: " + JSON.stringify(device));
-                    if (device && device.returnData && device.returnCode === "0000") {
+                    if (
+                        device &&
+                        device.returnData &&
+                        (device.returnCode === "0000" || device.returnCode === "0100")
+                    ) {
                         let resultConverted;
                         let unit = new Uint8Array(1024);
                         unit = Buffer.from(device.returnData, "base64");
@@ -419,8 +428,14 @@ class LgThinq extends utils.Adapter {
                             checkType: true,
                         });
                         ++active;
+                        if (device.returnCode === "0000") {
+                            device_status[device.deviceId] = "OK";
+                        } else {
+                            device_status[device.deviceId] = "Fail";
+                        }
                     } else {
                         this.log.debug("No data:" + JSON.stringify(device) + " " + device.deviceId);
+                        device_status[device.deviceId] = "Error - " + device.returnCode;
                         const data = {
                             platformType: "thinq1",
                             deviceId: device.deviceId,
@@ -434,13 +449,17 @@ class LgThinq extends utils.Adapter {
                 this.log.info("CATCH WORKLIST RESULT: " + JSON.stringify(result));
             }
             this.log.debug("active: " + active);
-            this.setThinq1Interval(active);
+            this.setThinq1Interval(active, device_status);
             this.updatethinq1Run = false;
         }, this.config.interval_thinq1 * 1000);
     }
 
-    setThinq1Interval(active) {
+    setThinq1Interval(active, status) {
         this.setState("interval.last_update", Date.now(), true);
+        if (this.refreshCounter["interval.status_devices"] != JSON.stringify(status)) {
+            this.refreshCounter["interval.status_devices"] = JSON.stringify(status);
+            this.setState("interval.status_devices", JSON.stringify(status), true);
+        }
         if (this.refreshCounter["interval.active"] != active) {
             this.refreshCounter["interval.active"] = active;
             this.setState("interval.active", active, true);

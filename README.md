@@ -48,6 +48,9 @@ Adapter for LG ThinQ
 ## Changelog
 ### **WORK IN PROGRESS**
 
+-   (Lucky-ESA) Added data point interval.status_devices
+-   (Lucky-ESA) Fixed missing value for fridge
+-   (Lucky-ESA) Fixed thinq1 crash
 -   (Lucky-ESA) Added save modelJSON local
 -   (mcm1957) Node 16 checked
 

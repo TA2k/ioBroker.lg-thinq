@@ -68,6 +68,11 @@ The adapter creates all data points with the template from the data point `model
 -   `interval.inactive` How many devices are currently not receiving updates
 -   `interval.interval` Change interval from instance setting. After an adapter restart, the instance setting is applied.
 -   `interval.last_update` Latest update
+-   `interval.status_devices`
+    -   `OK` Interval OK
+    -   `Fail` Interval Fail
+    -   `Error` Missing WorkID - WorkID is recreated
+    -   `Error <code>` Unknown error - WorkID is recreated
 
     ![interval.png](img/interval.png)
 

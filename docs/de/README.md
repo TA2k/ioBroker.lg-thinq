@@ -68,6 +68,11 @@ Der Adapter erstellt alle Datenpunkte mit dem Template aus dem Datenpunkt `model
 -   `interval.inactive` Wie viele Geräte bekommen derzeit keine Updates
 -   `interval.interval` Intervall aus der Instanz Einstellung ändern. Nach einem Adapter Neustart wird die Instanz Einstellung angewendet.
 -   `interval.last_update` Letzte Update
+-   `interval.status_devices`
+    -   `OK` Intervall OK
+    -   `Fail` Intervall Fail
+    -   `Error` Fehlende WorkID - WorkID wird neu erstellt
+    -   `Error <code>` Unbekannter Fehler - WorkID wird neu erstellt
 
     ![interval.png](img/interval.png)
 

@@ -272,7 +272,6 @@ class LgThinq extends utils.Adapter {
                     this.log.info(`Update raw datapoints for ${element.deviceId}`);
                     await this.extractValues(element);
                 }
-                this.isFinished = true;
                 this.log.debug(JSON.stringify(listDevices));
                 if (this.isThinq2) {
                     this.start_mqtt();
@@ -577,8 +576,9 @@ class LgThinq extends utils.Adapter {
             return;
         }
         if (typeof listDevices == "object") {
-            listDevices.forEach(async (element) => {
-                this.json2iob.parse(element.deviceId, element, {
+            for (const element of listDevices) {
+                this.log.debug("UPDATE: " + JSON.stringify(element));
+                await this.json2iob.parse(element.deviceId, element, {
                     forceIndex: true,
                     write: true,
                     preferedArrayName: null,
@@ -592,7 +592,7 @@ class LgThinq extends utils.Adapter {
                     await this.pollMonitor(element);
                 }
                 this.refreshRemote(element);
-            });
+            }
             if (
                 this.updateThinq1Interval == null &&
                 Object.keys(this.workIds).length > 0 &&
@@ -601,6 +601,7 @@ class LgThinq extends utils.Adapter {
                 this.startPollMonitor();
             }
         }
+        this.isFinished = true;
         this.log.debug(JSON.stringify(listDevices));
     }
 
@@ -2307,7 +2308,7 @@ class LgThinq extends utils.Adapter {
             } else {
                 const idArray = id.split(".");
                 const lastElement = idArray.pop();
-                if (this.targetKeys[lastElement] && this.isFinished) {
+                if (this.targetKeys[lastElement]) {
                     if (id.indexOf(".remote.") === -1) {
                         this.targetKeys[lastElement].forEach((element) => {
                             this.setState(idArray.join(".") + "." + element, state.val, true);

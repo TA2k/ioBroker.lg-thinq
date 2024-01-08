@@ -46,7 +46,7 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.3.2 (2024-01-08)
 
 -   (Lucky-ESA) Added data point interval.status_devices
 -   (Lucky-ESA) Fixed missing value for fridge

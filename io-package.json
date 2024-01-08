@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lg-thinq",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "news": {
+      "0.3.2": {
+        "en": "Added data point interval.status_devices\nFixed missing value for fridge\nFixed thinq1 crash\nAdded save modelJSON local\nNode 16 checked",
+        "de": "Hinzugefügt Datenpunkt Intervall.status_devices\nFester fehlender Wert für Kühlschrank\nFester Thinq1 Crash\nHinzugefügt SpeichermodellJSON local\nNode 16 geprüft",
+        "ru": "Добавлен интервал.status_devices\nИсправленное недостающее значение для холодильника\nФиксированный крушение тонка1\nДобавлено Сохранить модельJSON\nНод 16 проверен",
+        "pt": "Adicionado intervalo de ponto de dados.status_devices\nValor perdido fixo para frigorífico\nCorrigido acidente thinq1\nAdicionado salvar modelJSON local\nNode 16 verificado",
+        "nl": "Gegevenspuntinterval.status_apparaten toegevoegd\nVaste ontbrekende waarde voor koelkast\nVaste thinq1-crash\nToegevoegd opslaan modelJSON lokaal\nKnooppunt 16 gecontroleerd",
+        "fr": "Ajout de données point interval.status_devices\nValeur fixe manquante pour le réfrigérateur\nCrash fixe shillq1\nAjout de la sauvegarde du modèleJSON local\nNoeud 16 vérifié",
+        "it": "Intervallo del punto di dati aggiunto.status_devices\nValore mancante fisso per frigo\nFisso crash sottileq1\nAggiunto salvare modelloJSON locale\nNode 16 controllato",
+        "es": "Intervalo de punto de datos añadido.status_devices\nValor fijo faltante para la nevera\nAccidente fijo delgadaq1\nAñadido modelo de ahorroJSON local\nNodo 16 revisado",
+        "pl": "Dodano punkt danych interval.status _ devices\nNaprawiono brakującą wartość dla lodówki\nNaprawiono awarię thinq1\nDodano save modelJSON lokalne\nSprawdzony węzeł 16",
+        "uk": "Додано інтервал точки даних.status_devices\nФіксований відсутній значення для холодильника\nФіксована патрона1\nДоданий економити модельJSON локальний\nNode 16 зареєстрований",
+        "zh-cn": "添加数据点间隔. status_devices\n冰箱的固定缺失值\n固定薄q1坠毁\n添加本地保存模型JSON\n检查节点 16"
+      },
       "0.3.1": {
         "en": "Fixed crash thinq1 interval",
         "de": "Feste Crash-Dünnq1 Intervall",
@@ -80,19 +93,6 @@
         "pl": "Poprawianie tłumaczenia",
         "uk": "Покращений переклад",
         "zh-cn": "改进翻译"
-      },
-      "0.1.1": {
-        "en": "Added device 401.",
-        "de": "Geräte 401 hinzugefügt.",
-        "ru": "Добавлено устройство 401.",
-        "pt": "Adicionado dispositivo 401.",
-        "nl": "Voeg apparaat 401 toe.",
-        "fr": "Ajout du dispositif 401.",
-        "it": "Aggiunto dispositivo 401.",
-        "es": "Dispositivo 401.",
-        "pl": "Użytkowniki dodane 401.",
-        "uk": "Додано пристрій 401.",
-        "zh-cn": "增加装置401。."
       }
     },
     "titleLang": {

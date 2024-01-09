@@ -366,7 +366,7 @@ class LgThinq extends utils.Adapter {
             const result = await this.getMonResult(all_workids);
             if (result == null || !result.workList) {
                 this.log.debug(`Result is undefined`);
-                this.setThinq1Interval(0);
+                this.setThinq1Interval(0, device_status);
                 this.updatethinq1Run = false;
                 return;
             }

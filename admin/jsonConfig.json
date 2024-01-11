@@ -31,7 +31,7 @@
         "interval_thinq1": {
             "type": "number",
             "label": "Update thinq1 interval in minutes",
-            "min":1,
+            "min":0,
             "max":1440,
             "newLine": true,
             "sm": 3,

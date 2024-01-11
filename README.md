@@ -46,6 +46,12 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+
+-   (Lucky-ESA) Fixed thinq1 crash
+-   (Lucky-ESA) Preparation weather request
+-   (Lucky-ESA) Bugfixe
+
 ### 0.3.2 (2024-01-08)
 
 -   (Lucky-ESA) Added data point interval.status_devices

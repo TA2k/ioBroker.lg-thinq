@@ -54,7 +54,7 @@ class LgThinq extends utils.Adapter {
         this.session = {};
         this.modelInfos = {};
         this.auth = {};
-        this.workIds = [];
+        this.workIds = {};
         this.deviceControls = {};
         this.json2iob = new Json2iob(this);
         this.targetKeys = {};
@@ -69,6 +69,7 @@ class LgThinq extends utils.Adapter {
         this.setCourse = helper.setCourse;
         this.setFavoriteCourse = helper.setFavoriteCourse;
         this.checkdate = helper.checkdate;
+        this.createWeather = helper.createWeather;
         this.sendStaticRequest = helper.sendStaticRequest;
         this.sendStaticRequestThinq1 = helper.sendStaticRequestThinq1;
         this.createCourse = helper.createCourse;
@@ -100,12 +101,20 @@ class LgThinq extends utils.Adapter {
         this.thinq1Counter = 0;
         this.isRestart = true;
         this.isFinished = false;
+        this.jsessionId = null;
+        this.client_id = null;
+        this.svc = constants.SVC_CODE;
+        this.lge = "LGE";
+        this.app_agent = "";
+        this.app_device = "";
     }
 
     /**
      * Is called when databases are connected and adapter received configuration.
      */
     async onReady() {
+        this.app_agent = constants.APP_AGENT[Math.floor(Math.random()*constants.APP_AGENT.length)];
+        this.app_device = constants.APP_DEVICE[Math.floor(Math.random()*constants.APP_DEVICE.length)];
         await this.setStateAsync("info.connection", false, true);
         await this.cleanOldVersion();
         if (this.config.interval < 0.5) {
@@ -150,6 +159,7 @@ class LgThinq extends utils.Adapter {
             .catch((error) => {
                 this.log.error(error);
             });
+        this.log.debug(JSON.stringify(this.gateway));
         if (this.gateway) {
             this.lgeapi_url = `https://${this.gateway.countryCode.toLowerCase()}.lgeapi.com/`;
 
@@ -157,6 +167,17 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
             });
             if (this.session && this.session.access_token) {
+                try {
+                    if (!this.jsessionId) {
+                        const jsessionId = await this.getJSessionId();
+                        if (jsessionId && jsessionId.jsessionId) {
+                            this.jsessionId = jsessionId.jsessionId;
+                        }
+                    }
+                    this.log.debug(JSON.stringify(this.jsessionId));
+                } catch (e) {
+                    this.log.debug(`Cannot load sessionID`);
+                }
                 this.log.debug(JSON.stringify(this.session));
                 this.setState("info.connection", true, true);
                 this.log.info("Login successful");
@@ -192,6 +213,11 @@ class LgThinq extends utils.Adapter {
                 }
                 this.log.info("Found: " + listDevices.length + " devices");
                 let isThinq1 = false;
+                const area = {};
+                if (this.userNumber) {
+                    const hash = crypto.createHash("sha256");
+                    this.client_id = hash.update(this.userNumber + (new Date()).getTime()).digest("hex");
+                }
                 for (const element of listDevices) {
                     this.log.info(`Create or update datapoints for ${element.deviceId}`);
                     this.modelInfos[element.deviceId] = await this.getDeviceModelInfo(element);
@@ -236,6 +262,9 @@ class LgThinq extends utils.Adapter {
                         },
                         native: {},
                     });
+                    if (element.area != null) {
+                        area[element.area] = element.deviceId;
+                    }
                     await this.json2iob.parse(element.deviceId, element, {
                         forceIndex: true,
                         write: true,
@@ -289,6 +318,8 @@ class LgThinq extends utils.Adapter {
                     this.setState("interval.status_devices", JSON.stringify({}), true);
                     this.startPollMonitor();
                 }
+                this.log.debug(`AREA: ${JSON.stringify(area)}`);
+                //this.createWeather(area);
                 this.updateInterval = this.setInterval(async () => {
                     await this.updateDevices();
                 }, this.config.interval * 60 * 1000);
@@ -297,6 +328,31 @@ class LgThinq extends utils.Adapter {
                 }, 60 * 60 * 24 * 1000);
             }
         }
+    }
+
+    async getJSessionId() {
+        const memberLoginUrl = this.gateway.thinq1Uri + "/member/login";
+        const headers = {
+            "x-thinq-application-key": "wideq",
+            "x-thinq-security-key": "nuts_securitykey",
+            "Accept": "application/json",
+            "x-thinq-token": this.session.access_token,
+        };
+        const data = {
+            countryCode: this.gateway.countryCode,
+            langCode: this.gateway.languageCode,
+            loginType: "EMP",
+            token: this.session.access_token,
+        };
+        return await this.requestClient
+            .post(memberLoginUrl, { lgedmRoot: data }, { headers })
+            .then((res) => res.data.lgedmRoot)
+            .then((data) => data)
+            .catch((error) => {
+                error.message && this.log.debug("getJSessionId message: " + error.message);
+                this.log.debug("getJSessionId: " + error);
+                return null;
+            });
     }
 
     getSecondsConversionTime(s) {
@@ -316,18 +372,184 @@ class LgThinq extends utils.Adapter {
         };
     }
 
-    async startPollMonitor() {
+    monitorHeader() {
+        const headers = {
+            "User-Agent": this.app_agent,
+            "x-model-name": this.app_device,
+            "x-thinq-app-ver": "5.0.1000",
+            "x-thinq-app-type": "NUTS",
+            "x-language-code": this.gateway.languageCode,
+            "x-thinq-app-logintype": this.lge,
+            "x-os-version": "16.7.2",
+            "x-client-id": this.client_id,
+            "x-thinq-app-level": "PRD",
+            "x-app-version": "5.0.11861",
+            "x-user-no": this.userNumber,
+            "Connection": "keep-alive",
+            "x-service-code": this.svc,
+            "Accept-Language": `${this.gateway.languageCode};q=1`,
+            "x-message-id": this.uuidv4(),
+            "x-emp-token": this.session.access_token,
+            "x-origin": "app-native",
+            "Accept": "application/json",
+            "Content-Type": "application/json;charset=UTF-8",
+            "x-api-key": constants.API_KEY,
+            "x-thinq-app-os": "IOS",
+            "x-country-code": this.gateway.countryCode,
+            "x-service-phase": "OP"
+        };
+        if (this.jsessionId) {
+            //headers["x-thinq-jsessionId"] = this.jsessionId;
+        }
+        this.log.debug("HEADER: " + JSON.stringify(headers));
+        return headers;
+    }
+
+    async startSinglePollMonitor() {
         this.updateThinq1Interval && this.clearInterval(this.updateThinq1Interval);
         this.updateThinq1Interval = null;
         this.updatethinq1Run = false;
         if (Object.keys(this.workIds).length < 1) {
-            this.log.info("Found no workID`s");
+            this.log.warn("Found no workID`s. Please restart adapter!");
             return;
         }
         this.updateThinq1Interval = this.setInterval(async () => {
             this.log.debug("Status ongoing: " + this.updatethinq1Run);
             if (this.updatethinq1Run) {
                 this.log.debug("Update thinq1 ongoing!");
+                return;
+            }
+            this.updatethinq1Run = true;
+            this.log.debug("START MONITORING");
+            this.log.debug("WORKID: " + Object.keys(this.workIds).length);
+            this.log.debug("MODEL: " + Object.keys(this.modelInfos).length);
+            this.log.debug("Counter: " + this.thinq1Counter);
+            this.log.debug("workIds: " + JSON.stringify(this.workIds));
+            if (this.thinq1Counter != Object.keys(this.workIds).length) {
+                for (const model in this.modelInfos) {
+                    this.log.debug("Check deviceID: " + JSON.stringify(model));
+                    const devID = {};
+                    if (this.modelInfos[model] && this.modelInfos[model]["thinq2"] === "thinq1" && !this.workIds[model]) {
+                        devID.platformType = this.modelInfos[model]["thinq2"];
+                        devID.deviceId = model;
+                        await this.startMonitor(devID);
+                        this.log.debug("Start Monitoring for " + model);
+                    }
+                }
+            }
+            const device_status = {};
+            let active = 0;
+            for (const dev in this.workIds) {
+                const data = {
+                    platformType: "thinq1",
+                    deviceId: dev,
+                };
+                if (this.workIds[dev] == null) {
+                    this.log.debug("Restart DEV: " + dev + " workid: " + this.workIds[dev] + " thinq: " + this.modelInfos[dev]["thinq2"]);
+                    device_status[dev] = "Error";
+                    await this.startMonitor(data);
+                    continue;
+                } else {
+                    this.log.debug("DEV: " + dev + " workid: " + this.workIds[dev]);
+                    const result = await this.getMonResult([{"deviceId": dev, "workId": this.workIds[dev]}]);
+                    this.log.debug("RESULTS: " + JSON.stringify(result));
+                    if (result == null || !result.workList) {
+                        this.log.debug(`Result is undefined! Stop Monitoring!`);
+                        device_status[dev] = "Result Error";
+                        await this.stopMonitor(data);
+                        continue;
+                    }
+                    const device = result.workList;
+                    try {
+                        if (
+                            device &&
+                            device.returnData &&
+                            (device.returnCode === "0000" ||
+                            device.returnCode === "0100" ||
+                            device.returnCode === "0106")
+                        ) {
+                            let resultConverted;
+                            let unit = new Uint8Array(1024);
+                            unit = Buffer.from(device.returnData, "base64");
+                            if (this.modelInfos[device.deviceId].Monitoring.type === "BINARY(BYTE)") {
+                                resultConverted = this.decodeMonitorBinary(
+                                    unit,
+                                    this.modelInfos[device.deviceId].Monitoring.protocol,
+                                );
+                            }
+                            if (this.modelInfos[device.deviceId].Monitoring.type === "JSON") {
+                                try {
+                                    // @ts-ignore
+                                    resultConverted = JSON.parse(unit.toString("utf-8"));
+                                } catch(e) {
+                                    this.log.debug(`Parse error! Stop Monitoring!`);
+                                    device_status[dev] = "Parse error";
+                                    await this.stopMonitor(data);
+                                    continue;
+                                }
+                            }
+                            this.log.debug("resultConverted: " + JSON.stringify(resultConverted));
+                            if (this.modelInfos[device.deviceId].Info.productType === "REF") {
+                                this.refreshRemote(resultConverted, true, device.deviceId);
+                            }
+                            await this.json2iob.parse(`${device.deviceId}.snapshot`, resultConverted, {
+                                forceIndex: true,
+                                write: true,
+                                preferedArrayName: null,
+                                channelName: null,
+                                autoCast: true,
+                                checkvalue: this.isFinished,
+                                checkType: true,
+                            });
+                            if (device.returnCode === "0000") {
+                                device_status[device.deviceId] = "OK";
+                                ++active;
+                            } else if (device.returnCode === "0100") {
+                                device_status[device.deviceId] = "Fail - 0100";
+                                this.log.debug(`Fail! Stop Monitoring!`);
+                                await this.stopMonitor(data);
+                                await this.startMonitor(data);
+                            } else if (device.returnCode === "0106") {
+                                device_status[device.deviceId] = "Fail - 0106";
+                                this.log.debug(`Not connected device! Stop Monitoring!`);
+                                await this.stopMonitor(data);
+                                await this.startMonitor(data);
+                            } else {
+                                device_status[device.deviceId] = `Error - ${device.returnCode}`;
+                                this.log.debug(`Unknown`);
+                                await this.stopMonitor(data);
+                                await this.startMonitor(data);
+                            }
+                        } else {
+                            this.log.debug("No data:" + JSON.stringify(device) + " " + device.deviceId);
+                            device_status[device.deviceId] = "Error - " + device.returnCode;
+                            await this.stopMonitor(data);
+                            await this.startMonitor(data);
+                        }
+                    } catch (e) {
+                        this.log.debug("CATCH RESULT: " + JSON.stringify(result));
+                    }
+                }
+            }
+            this.log.debug("active: " + active);
+            this.setThinq1Interval(active, device_status);
+            this.updatethinq1Run = false;
+        }, this.config.interval_thinq1 * 1000);
+    }
+
+    async startPollMonitor() {
+        this.updateThinq1Interval && this.clearInterval(this.updateThinq1Interval);
+        this.updateThinq1Interval = null;
+        this.updatethinq1Run = false;
+        if (Object.keys(this.workIds).length < 1) {
+            this.log.warn("Found no workID`s. Please restart adapter!");
+            return;
+        }
+        this.updateThinq1Interval = this.setInterval(async () => {
+            this.log.debug("Status ongoing: " + this.updatethinq1Run);
+            if (this.updatethinq1Run) {
+                this.log.debug("Update thinq1 ongoing!");
+                return;
             }
             this.updatethinq1Run = true;
             this.log.debug("START MONITORING");
@@ -336,9 +558,9 @@ class LgThinq extends utils.Adapter {
             this.log.debug("Counter: " + this.thinq1Counter);
             if (this.thinq1Counter != Object.keys(this.workIds).length) {
                 for (const model in this.modelInfos) {
-                    this.log.debug("MODEL: " + JSON.stringify(model));
+                    this.log.debug("Check deviceID: " + JSON.stringify(model));
                     const devID = {};
-                    if (this.modelInfos[model] && this.modelInfos[model]["thinq2"] === "thinq1" && !(model in this.workIds)) {
+                    if (this.modelInfos[model] && this.modelInfos[model]["thinq2"] === "thinq1" && !this.workIds[model]) {
                         devID.platformType = this.modelInfos[model]["thinq2"];
                         devID.deviceId = model;
                         await this.startMonitor(devID);
@@ -392,10 +614,16 @@ class LgThinq extends utils.Adapter {
             try {
                 for (const device of device_array) {
                     this.log.debug("device: " + JSON.stringify(device));
+                    const data = {
+                        platformType: "thinq1",
+                        deviceId: device.deviceId,
+                    };
                     if (
                         device &&
                         device.returnData &&
-                        (device.returnCode === "0000" || device.returnCode === "0100")
+                        (device.returnCode === "0000" ||
+                        device.returnCode === "0100" ||
+                        device.returnCode === "0106")
                     ) {
                         let resultConverted;
                         let unit = new Uint8Array(1024);
@@ -408,9 +636,12 @@ class LgThinq extends utils.Adapter {
                         }
                         if (this.modelInfos[device.deviceId].Monitoring.type === "JSON") {
                             try {
-                            // @ts-ignore
+                                // @ts-ignore
                                 resultConverted = JSON.parse(unit.toString("utf-8"));
                             } catch(e) {
+                                this.log.debug(`Parse error! Stop Monitoring!`);
+                                device_status[device.deviceId] = "Parse error";
+                                await this.stopMonitor(data);
                                 continue;
                             }
                         }
@@ -430,34 +661,66 @@ class LgThinq extends utils.Adapter {
                         if (device.returnCode === "0000") {
                             device_status[device.deviceId] = "OK";
                             ++active;
+                        } else if (device.returnCode === "0100") {
+                            device_status[device.deviceId] = "Fail - 0100";
+                            this.log.debug(`Fail! Stop Monitoring!`);
+                            await this.stopMonitor(data);
+                            await this.startMonitor(data);
+                        } else if (device.returnCode === "0106") {
+                            device_status[device.deviceId] = "Fail - 0106";
+                            this.log.debug(`Not connected device! Stop Monitoring!`);
+                            await this.stopMonitor(data);
+                            await this.startMonitor(data);
                         } else {
-                            device_status[device.deviceId] = "Fail";
-                            const data = {
-                                platformType: "thinq1",
-                                deviceId: device.deviceId,
-                            };
+                            device_status[device.deviceId] = `Error - ${device.returnCode}`;
+                            this.log.debug(`Not connected device! Stop Monitoring!`);
                             await this.stopMonitor(data);
                             await this.startMonitor(data);
                         }
                     } else {
                         this.log.debug("No data:" + JSON.stringify(device) + " " + device.deviceId);
                         device_status[device.deviceId] = "Error - " + device.returnCode;
-                        const data = {
-                            platformType: "thinq1",
-                            deviceId: device.deviceId,
-                        };
                         await this.stopMonitor(data);
                         await this.startMonitor(data);
                     }
                 }
             } catch (e) {
-                this.log.info("CATCH WORKLIST: " + JSON.stringify(device_array));
-                this.log.info("CATCH WORKLIST RESULT: " + JSON.stringify(result));
+                this.log.debug("CATCH WORKLIST: " + JSON.stringify(device_array));
+                this.log.debug("CATCH WORKLIST RESULT: " + JSON.stringify(result));
             }
             this.log.debug("active: " + active);
             this.setThinq1Interval(active, device_status);
             this.updatethinq1Run = false;
         }, this.config.interval_thinq1 * 1000);
+    }
+
+    async getWeather() {
+        const unit_value = await this.getStateAsync("weather.unit");
+        const area_value = await this.getStateAsync("weather.device");
+        if (!unit_value || unit_value.val == null || (unit_value.val != "C" && unit_value.val != "F")) {
+            this.log.info(`Missing unit`);
+            return;
+        }
+        if (!area_value || area_value.val == null) {
+            this.log.info(`Missing area`);
+            return;
+        }
+        const req = `service/application/weather/daily?area=${area_value.val}&unit=${unit_value.val}`;
+        this.log.debug(req);
+        const weather = await this.getDeviceEnergy(req);
+        this.log.debug(JSON.stringify(weather));
+        if (weather.temperature != null) {
+            const temp = typeof weather.temperature === "string"
+                ? weather.temperature
+                : weather.temperature.toString();
+            this.setState("weather.temperature", temp, true);
+        }
+        if (weather.humidity != null) {
+            const humi = typeof weather.humidity === "string"
+                ? weather.humidity
+                : weather.humidity.toString();
+            this.setState("weather.humidity", humi, true);
+        }
     }
 
     setThinq1Interval(active, status) {
@@ -478,8 +741,9 @@ class LgThinq extends utils.Adapter {
     }
 
     async getMonResult(work_id) {
-        const headers = JSON.parse(JSON.stringify(this.defaultHeaders));
-        headers["x-client-id"] = constants.API1_CLIENT_ID;
+        //const headers = JSON.parse(JSON.stringify(this.defaultHeaders));
+        //headers["x-client-id"] = constants.API1_CLIENT_ID;
+        const headers = this.monitorHeader();
         return await this.requestClient
             .post(this.gateway.thinq1Uri + "/" + "rti/rtiResult", { lgedmRoot: { workList: work_id } }, { headers })
             .then((resp) => resp.data.lgedmRoot)
@@ -612,7 +876,6 @@ class LgThinq extends utils.Adapter {
                     checkvalue: this.isFinished,
                     checkType: true,
                 });
-                //this.pollMonitor(element);
                 if (Object.keys(this.workIds).length === 0 || this.config.interval_thinq1 === 0) {
                     await this.pollMonitor(element);
                 }
@@ -628,6 +891,7 @@ class LgThinq extends utils.Adapter {
         }
         this.isFinished = true;
         this.log.debug(JSON.stringify(listDevices));
+        this.updatethinq1Run = false;
     }
 
     async getDeviceEnergy(path) {
@@ -769,6 +1033,7 @@ class LgThinq extends utils.Adapter {
                     await this.sleep(5000);
                 }
                 result = await this.getMonitorResult(device.deviceId, this.workIds[device.deviceId]);
+                this.log.debug("resultMonitor: " + JSON.stringify(result));
                 if (result && typeof result === "object") {
                     let resultConverted;
                     if (this.modelInfos[device.deviceId].Monitoring.type === "BINARY(BYTE)") {
@@ -892,6 +1157,15 @@ class LgThinq extends utils.Adapter {
         }
         if (this.session && resp && resp.access_token) {
             this.session.access_token = resp.access_token;
+            try {
+                const jsessionId = await this.getJSessionId();
+                if (jsessionId && jsessionId.jsessionId) {
+                    this.jsessionId = jsessionId.jsessionId;
+                }
+                this.log.debug(JSON.stringify(this.jsessionId));
+            } catch (e) {
+                this.log.debug(`Cannot load sessionID`);
+            }
             // @ts-ignore
             this.defaultHeaders["x-emp-token"] = this.session.access_token;
             if (this.isThinq2) {
@@ -930,6 +1204,25 @@ class LgThinq extends utils.Adapter {
             });
         if (!resp) {
             return;
+        }
+        if (
+            resp &&
+            resp.account &&
+            resp.account.serviceList
+        ) {
+            const svc = resp.account.serviceList.find((val) => val.svcName === "LG ThinQ");
+            if (svc && svc.svcCode) {
+                this.svc = svc.svcCode;
+                this.log.debug(`SVC: ${svc.svcCode}`);
+            }
+        }
+        if (
+            resp &&
+            resp.account &&
+            resp.account.userIDType
+        ) {
+            this.lge = resp.account.userIDType;
+            this.log.debug(`LGE: ${this.lge}`);
         }
         await this.json2iob.parse("general", resp, {
             forceIndex: true,
@@ -1788,6 +2081,16 @@ class LgThinq extends utils.Adapter {
             });
     }
 
+    uuidv4() {
+        const hex = crypto.randomBytes(16).toString("hex");
+        const uuidv4 = hex.substring(0,8) + "-" +
+            hex.substring(8,12) + "-" +
+            hex.substring(12,16) + "-" +
+            hex.substring(16,20) + "-" +
+            hex.substring(20);
+        return uuidv4.toUpperCase();
+    }
+
     async getUser(uri_value, data) {
         const userUrl = this.resolveUrl(this.gateway.thinq2Uri + "/", uri_value);
         const headers = this.defaultHeaders;
@@ -1925,6 +2228,19 @@ class LgThinq extends utils.Adapter {
                             });
                         this.log.info(JSON.stringify(sendJ));
                         this.setAckFlag(id);
+                        return;
+                    }
+                    if (secsplit === "weather") {
+                        if (lastsplit === "device") {
+                            this.setAckFlag(id);
+                        } else if (lastsplit === "unit") {
+                            const units = state.val === "C" ? "°C" : "F";
+                            this.extendObject(`weather.temperature`, { common: { unit: units } });
+                            this.setAckFlag(id);
+                        } else if (lastsplit === "update") {
+                            this.getWeather();
+                            this.setAckFlag(id, { val: false });
+                        }
                         return;
                     }
                     let response = null;
@@ -2289,7 +2605,7 @@ class LgThinq extends utils.Adapter {
                             data = {
                                 lgedmRoot: {
                                     deviceId: deviceId,
-                                    workId: this.workIds[deviceId] ? this.workIds[deviceId] : uuid.v4(),
+                                    workId: uuid.v4(),
                                     cmd: rawData.cmd,
                                     cmdOpt: "Set",
                                     value: rawData.value,

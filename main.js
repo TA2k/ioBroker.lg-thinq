@@ -48,6 +48,7 @@ class LgThinq extends utils.Adapter {
         this.qualityInterval = null;
         this.refreshTokenInterval = null;
         this.updateThinq1Interval = null;
+        this.updateThinq1SingleInterval = null;
         this.updatethinq1Run = false;
         this.refreshTimeout = null;
         this.refreshCounter = {};
@@ -179,7 +180,6 @@ class LgThinq extends utils.Adapter {
                     this.log.debug(`Cannot load sessionID`);
                 }
                 this.log.debug(JSON.stringify(this.session));
-                this.setState("info.connection", true, true);
                 this.log.info("Login successful");
                 this.refreshTokenInterval = this.setInterval(() => {
                     this.refreshNewToken();
@@ -406,14 +406,14 @@ class LgThinq extends utils.Adapter {
     }
 
     async startSinglePollMonitor() {
-        this.updateThinq1Interval && this.clearInterval(this.updateThinq1Interval);
-        this.updateThinq1Interval = null;
+        this.updateThinq1SingleInterval && this.clearInterval(this.updateThinq1SingleInterval);
+        this.updateThinq1SingleInterval = null;
         this.updatethinq1Run = false;
         if (Object.keys(this.workIds).length < 1) {
             this.log.warn("Found no workID`s. Please restart adapter!");
             return;
         }
-        this.updateThinq1Interval = this.setInterval(async () => {
+        this.updateThinq1SingleInterval = this.setInterval(async () => {
             this.log.debug("Status ongoing: " + this.updatethinq1Run);
             if (this.updatethinq1Run) {
                 this.log.debug("Update thinq1 ongoing!");
@@ -581,9 +581,16 @@ class LgThinq extends utils.Adapter {
                     device_status[dev] = "Error";
                     await this.startMonitor(devID);
                 } else {
+                    device_status[dev] = "Request";
                     this.log.debug("DEV: " + dev + " workid: " + this.workIds[dev]);
                     all_workids.push({"deviceId": dev, "workId": this.workIds[dev]});
                 }
+            }
+            if (all_workids.length === 0) {
+                this.log.debug(`WorkID for request is empty!`);
+                this.setThinq1Interval(0, device_status);
+                this.updatethinq1Run = false;
+                return;
             }
             const result = await this.getMonResult(all_workids);
             if (result == null || !result.workList) {
@@ -1018,7 +1025,9 @@ class LgThinq extends utils.Adapter {
         }
 
         this.lgeapi_url = token.oauth2_backend_url || this.lgeapi_url;
-
+        if (token && token.access_token) {
+            this.setState("info.connection", true, true);
+        }
         return token;
     }
 
@@ -1149,7 +1158,7 @@ class LgThinq extends utils.Adapter {
                 return;
             });
         this.log.debug(JSON.stringify(resp));
-        if (!resp.access_token) {
+        if (!resp || !resp.access_token) {
             this.log.warn("refresh token failed, start relogin");
             this.session = await this.login(this.config.user, this.config.password).catch((error) => {
                 this.log.error(error);
@@ -2154,6 +2163,7 @@ class LgThinq extends utils.Adapter {
             this.refreshTimeout && this.clearTimeout(this.refreshTimeout);
             this.sleepTimer && this.clearTimeout(this.sleepTimer);
             this.updateThinq1Interval && this.clearInterval(this.updateThinq1Interval);
+            this.updateThinq1SingleInterval && this.clearInterval(this.updateThinq1SingleInterval);
             for (const dev in this.workIds) {
                 if (this.modelInfos[dev] && this.modelInfos[dev]["thinq2"] === "thinq1") {
                     const data = {

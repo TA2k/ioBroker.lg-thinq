@@ -747,10 +747,26 @@ class LgThinq extends utils.Adapter {
         }
     }
 
+    monitorHeaders() {
+        const monitorHeaders = {
+            "Accept": "application/json",
+            "x-thinq-application-key": "wideq",
+            "x-thinq-security-key": "nuts_securitykey",
+        };
+        if (this.session.access_token) {
+            monitorHeaders["x-thinq-token"] = this.session.access_token;
+        }
+        if (this.jsessionId) {
+            monitorHeaders["x-thinq-jsessionId"] = this.jsessionId;
+        }
+        return monitorHeaders;
+    }
+
     async getMonResult(work_id) {
         //const headers = JSON.parse(JSON.stringify(this.defaultHeaders));
         //headers["x-client-id"] = constants.API1_CLIENT_ID;
-        const headers = this.monitorHeader();
+        //const headers = this.monitorHeader();
+        const headers = this.monitorHeaders();
         return await this.requestClient
             .post(this.gateway.thinq1Uri + "/" + "rti/rtiResult", { lgedmRoot: { workList: work_id } }, { headers })
             .then((resp) => resp.data.lgedmRoot)

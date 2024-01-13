@@ -49,7 +49,7 @@ Adapter for LG ThinQ
 
 -   (Lucky-ESA) Fixed thinq1 crash
 -   (Lucky-ESA) Fixed crash when internet fails (refreshToken)
--   (Lucky-ESA) Preparation weather request
+-   (Lucky-ESA) Added weather request
 -   (Lucky-ESA) Bugfixe
 
 ### 0.3.2 (2024-01-08)

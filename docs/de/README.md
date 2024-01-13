@@ -42,6 +42,7 @@ Der Adapter erstellt alle Datenpunkte mit dem Template aus dem Datenpunkt `model
         -   [Remote Basis Befehle](#406-remote-basicctrl-thinq2)
         -   [Remote Zeitplan](#406-remote-reservationctrl-thinq2)
         -   [Snapshot](#406-snapshot-thinq2)
+    -   [Wetter](#wetter)
 
 # Instanz Einstellungen
 
@@ -77,6 +78,8 @@ Der Adapter erstellt alle Datenpunkte mit dem Template aus dem Datenpunkt `model
     -   `Result Error` Receive Fehler - WorkID wird neu erstellt
     -   `Parse error` Parse Fehler - WorkID wird neu erstellt
     -   `Unknown` Unbekannter Fehler - WorkID wird neu erstellt
+    -   `Request` LG antwortet nicht - WorkID wird neu erstellt
+    -   `{}` Unbekannt - WorkID wird neu erstellt
 
     ![interval.png](img/interval.png)
 
@@ -704,3 +707,17 @@ lg-thinq.0.xxx.remote.SetWDirLeftRight -> {"`WDirLeftRight`":"{{WDirLeftRight}}"
 
 ![406_snapshot_1.png](../en/img/406_snapshot_1.png)
 ![406_snapshot_2.png](../en/img/406_snapshot_2.png)
+
+### Wetter
+
+[Zusammenfassung](#zusammenfassung)
+
+lg-thinq.0.xxx.area muss gefüllt sein!
+
+-   `weather.device` Area auswählen. Haben alle Geräte die gleiche Area wird nur ein Gerät angezeigt.
+-   `weather.humidity` Luftfeuchtigkeit
+-   `weather.temperature` Temperatur
+-   `weather.unit` Auswahl Celsius oder Fahrenheit
+-   `weather.update` Send request to LG (device and unit must be filled!)
+
+    ![weather.png](img/weather.png)

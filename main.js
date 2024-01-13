@@ -171,11 +171,11 @@ class LgThinq extends utils.Adapter {
                 try {
                     if (!this.jsessionId) {
                         const jsessionId = await this.getJSessionId();
+                        this.log.debug(JSON.stringify(this.jsessionId));
                         if (jsessionId && jsessionId.jsessionId) {
                             this.jsessionId = jsessionId.jsessionId;
                         }
                     }
-                    this.log.debug(JSON.stringify(this.jsessionId));
                 } catch (e) {
                     this.log.debug(`Cannot load sessionID`);
                 }
@@ -319,7 +319,7 @@ class LgThinq extends utils.Adapter {
                     this.startPollMonitor();
                 }
                 this.log.debug(`AREA: ${JSON.stringify(area)}`);
-                //this.createWeather(area);
+                this.createWeather(area);
                 this.updateInterval = this.setInterval(async () => {
                     await this.updateDevices();
                 }, this.config.interval * 60 * 1000);
@@ -372,6 +372,7 @@ class LgThinq extends utils.Adapter {
         };
     }
 
+    // Original APP header request
     monitorHeader() {
         const headers = {
             "User-Agent": this.app_agent,
@@ -388,7 +389,7 @@ class LgThinq extends utils.Adapter {
             "Connection": "keep-alive",
             "x-service-code": this.svc,
             "Accept-Language": `${this.gateway.languageCode};q=1`,
-            "x-message-id": this.uuidv4(),
+            "x-message-id": uuid.v4(),
             "x-emp-token": this.session.access_token,
             "x-origin": "app-native",
             "Accept": "application/json",
@@ -399,12 +400,13 @@ class LgThinq extends utils.Adapter {
             "x-service-phase": "OP"
         };
         if (this.jsessionId) {
-            //headers["x-thinq-jsessionId"] = this.jsessionId;
+            headers["x-thinq-jsessionId"] = this.jsessionId;
         }
         this.log.debug("HEADER: " + JSON.stringify(headers));
         return headers;
     }
 
+    // Original APP request
     async startSinglePollMonitor() {
         this.updateThinq1SingleInterval && this.clearInterval(this.updateThinq1SingleInterval);
         this.updateThinq1SingleInterval = null;
@@ -763,10 +765,8 @@ class LgThinq extends utils.Adapter {
     }
 
     async getMonResult(work_id) {
-        //const headers = JSON.parse(JSON.stringify(this.defaultHeaders));
-        //headers["x-client-id"] = constants.API1_CLIENT_ID;
-        //const headers = this.monitorHeader();
-        const headers = this.monitorHeaders();
+        const headers = this.monitorHeader();
+        //const headers = this.monitorHeaders();
         return await this.requestClient
             .post(this.gateway.thinq1Uri + "/" + "rti/rtiResult", { lgedmRoot: { workList: work_id } }, { headers })
             .then((resp) => resp.data.lgedmRoot)
@@ -1184,10 +1184,10 @@ class LgThinq extends utils.Adapter {
             this.session.access_token = resp.access_token;
             try {
                 const jsessionId = await this.getJSessionId();
+                this.log.debug(JSON.stringify(this.jsessionId));
                 if (jsessionId && jsessionId.jsessionId) {
                     this.jsessionId = jsessionId.jsessionId;
                 }
-                this.log.debug(JSON.stringify(this.jsessionId));
             } catch (e) {
                 this.log.debug(`Cannot load sessionID`);
             }

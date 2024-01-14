@@ -171,7 +171,7 @@ class LgThinq extends utils.Adapter {
                 try {
                     if (!this.jsessionId) {
                         const jsessionId = await this.getJSessionId();
-                        this.log.debug(JSON.stringify(this.jsessionId));
+                        this.log.debug(JSON.stringify(`jsessionId: ${this.jsessionId}`));
                         if (jsessionId && jsessionId.jsessionId) {
                             this.jsessionId = jsessionId.jsessionId;
                         }
@@ -614,8 +614,7 @@ class LgThinq extends utils.Adapter {
             } else if (Array.isArray(result.workList)) {
                 device_array = result.workList;
             } else {
-                this.log.info("WRONG WORKLIST: " + JSON.stringify(device_array));
-                this.log.info("WRONG WORKLIST RESULT: " + JSON.stringify(result));
+                this.log.debug("WRONG WORKLIST: " + JSON.stringify(device_array));
                 this.updatethinq1Run = false;
                 return;
             }
@@ -937,7 +936,7 @@ class LgThinq extends utils.Adapter {
         const headers = JSON.parse(JSON.stringify(this.defaultHeaders));
         headers["x-client-id"] = constants.API1_CLIENT_ID;
         const deviceUrl = this.resolveUrl(this.gateway.thinq1Uri + "/", path);
-        this.log.info(deviceUrl);
+        this.log.debug(deviceUrl);
         return this.requestClient
             .get(deviceUrl, { headers })
             .then((res) => res)
@@ -2394,8 +2393,8 @@ class LgThinq extends utils.Adapter {
                                 this.log.info("Cannot found dataKey!");
                                 return;
                             }
-                            this.log.info(JSON.stringify(obj));
-                            this.log.info(obj.native["dataKey"]);
+                            this.log.debug(JSON.stringify(obj));
+                            this.log.debug(obj.native["dataKey"]);
                             if (
                                 lastsplit === "opMode" ||
                                 lastsplit === "hotWaterTarget" ||
@@ -2434,7 +2433,6 @@ class LgThinq extends utils.Adapter {
                                         this.refrigerator(deviceId, "TempRefrigerator", state.val, uuid.v4());
                                         return;
                                     } else {
-                                        this.log.info("TEST2: " + this.modelInfos[deviceId]["thinq2"]);
                                         rawData.data = { refState: { fridgeTemp: state.val, tempUnit: dataTemp.val } };
                                         action = "basicCtrl";
                                         rawData.command = "Set";

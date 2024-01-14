@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lg-thinq",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "news": {
+      "0.3.3": {
+        "en": "Fixed thinq1 crash\nFixed crash when internet fails (refreshToken)\nAdded weather request\nBugfixe",
+        "de": "Fester Thinq1 Crash\nBehobener Absturz bei Ausfall des Internets (refreshToken)\nZusätzliche Wetteranfrage\nBugfixes",
+        "ru": "Фиксированный крушение тонка1\nФиксированная авария, когда интернет терпит неудачу (refreshToken)\nДобавить запрос погоды\nBugfixe",
+        "pt": "Corrigido acidente thinq1\nAcidente fixo quando a internet falha (refreshToken)\nAdicionado pedido de tempo\nBugfixe",
+        "nl": "Vaste thinq1-crash\nVaste crash wanneer internet mislukt (refreshToken)\nToegevoegde weeraanvraag\nBugfixe",
+        "fr": "Crash fixe shillq1\nCrash corrigé lorsque Internet échoue (refreshToken)\nDemande météorologique supplémentaire\nBugfixe",
+        "it": "Fisso crash sottileq1\nRisolto crash quando internet non riesce (refreshToken)\nAggiunto la richiesta del tempo\nBugfixe",
+        "es": "Accidente fijo delgadaq1\nAccidente fijo cuando el Internet falla (refreshToken)\nSolicitud de tiempo adicional\nBugfixe",
+        "pl": "Naprawiono awarię thinq1\nNaprawiono awarię, gdy internet nie działa (reveaToken)\nDodano żądanie pogodowe\nBugfixe",
+        "uk": "Фіксована патрона1\nВиправлено помилку при відмові в Інтернеті (RereshToken)\nЗапит погоди\nПомилки",
+        "zh-cn": "固定薄q1坠毁\n互联网失败时的固定崩溃( 重新托肯)\n添加天气请求\n错误修正"
+      },
       "0.3.2": {
         "en": "Added data point interval.status_devices\nFixed missing value for fridge\nFixed thinq1 crash\nAdded save modelJSON local\nNode 16 checked",
         "de": "Hinzugefügt Datenpunkt Intervall.status_devices\nFester fehlender Wert für Kühlschrank\nFester Thinq1 Crash\nHinzugefügt SpeichermodellJSON local\nNode 16 geprüft",
@@ -80,19 +93,6 @@
         "pl": "Dodzielony punkt danych dla urządzeń 201.",
         "uk": "Додано дистанційний переклад точки даних для пристрою 201.",
         "zh-cn": "增加用于装置201的远程数据点。."
-      },
-      "0.1.2": {
-        "en": "Improved translation",
-        "de": "Verbesserte Übersetzung",
-        "ru": "Улучшенный перевод",
-        "pt": "Tradução melhorada",
-        "nl": "Verbeterde vertaling",
-        "fr": "Amélioration de la traduction",
-        "it": "Traduzione migliorata",
-        "es": "Mejor traducción",
-        "pl": "Poprawianie tłumaczenia",
-        "uk": "Покращений переклад",
-        "zh-cn": "改进翻译"
       }
     },
     "titleLang": {

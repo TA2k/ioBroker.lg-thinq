@@ -45,7 +45,7 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 0.3.3 (2024-01-14)
 
 -   (Lucky-ESA) Fixed thinq1 crash
 -   (Lucky-ESA) Fixed crash when internet fails (refreshToken)

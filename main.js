@@ -167,7 +167,12 @@ class LgThinq extends utils.Adapter {
             this.session = await this.login(this.config.user, this.config.password).catch((error) => {
                 this.log.error(error);
             });
-            if (this.session && this.session.access_token) {
+            if (
+                this.session != null &&
+                this.session.access_token != null &&
+                this.session.expires_in != null &&
+                this.session.refresh_token != null
+            ) {
                 try {
                     if (!this.jsessionId) {
                         const jsessionId = await this.getJSessionId();
@@ -294,7 +299,7 @@ class LgThinq extends utils.Adapter {
                         isThinq1 = true;
                         ++this.thinq1Counter;
                     }
-                    if (element.deviceType) {
+                    if (element.deviceType != null) {
                         this.modelInfos[element.deviceId]["deviceType"] = element.deviceType;
                         //this.isThinq2 = true;
                     }
@@ -326,6 +331,8 @@ class LgThinq extends utils.Adapter {
                 this.qualityInterval = this.setInterval(() => {
                     this.cleanupQuality();
                 }, 60 * 60 * 24 * 1000);
+            } else {
+                this.log.warn(`Missing Session Infos!`);
             }
         }
     }
@@ -574,6 +581,10 @@ class LgThinq extends utils.Adapter {
             const device_status = {};
             let active = 0;
             for (const dev in this.workIds) {
+                if (!this.modelInfos[dev] || !this.modelInfos[dev]["thinq2"]) {
+                    this.log.warn(`Missing Modelinfos for ${dev}. Please restart this adapter!`);
+                    continue;
+                }
                 if (this.workIds[dev] == null) {
                     const devID = {
                         platformType: this.modelInfos[dev]["thinq2"],
@@ -1144,6 +1155,18 @@ class LgThinq extends utils.Adapter {
     async refreshNewToken() {
         this.log.debug("refreshToken");
         const tokenUrl = this.lgeapi_url + "oauth/1.0/oauth2/token";
+        if (!this.session.refresh_token) {
+            await this.setStateAsync("info.connection", false, true);
+            this.updateInterval && this.clearInterval(this.updateInterval);
+            this.qualityInterval && this.clearInterval(this.qualityInterval);
+            this.refreshTokenInterval && this.clearInterval(this.refreshTokenInterval);
+            this.refreshTimeout && this.clearTimeout(this.refreshTimeout);
+            this.sleepTimer && this.clearTimeout(this.sleepTimer);
+            this.updateThinq1Interval && this.clearInterval(this.updateThinq1Interval);
+            this.updateThinq1SingleInterval && this.clearInterval(this.updateThinq1SingleInterval);
+            this.log.warn(`Missing refreshtoken. Please restart this adapter!!`);
+            return;
+        }
         const data = {
             grant_type: "refresh_token",
             refresh_token: this.session.refresh_token,
@@ -2037,7 +2060,11 @@ class LgThinq extends utils.Adapter {
                 this.isRestart = true;
                 this.log.debug("packet: " + JSON.stringify(packet));
                 for (const subscription of this.mqttdata.subscriptions) {
-                    this.mqttC.subscribe(subscription);
+                    if (subscription != null) {
+                        this.mqttC.subscribe(subscription);
+                    } else {
+                        this.log.warn(`Cannot find subscription - ${JSON.stringify(this.mqttdata)}`);
+                    }
                 }
             });
 

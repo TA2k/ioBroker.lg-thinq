@@ -45,6 +45,12 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+-   (Lucky-ESA) Changed airState.quality.odor max value
+-   (Lucky-ESA) Fixed sentry messages
+
 ### 0.3.3 (2024-01-14)
 
 -   (Lucky-ESA) Fixed thinq1 crash

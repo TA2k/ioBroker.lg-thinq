@@ -1791,8 +1791,8 @@ class LgThinq extends utils.Adapter {
                                 common.max = 200;
                             } else if (state === "timeSetting") {
                                 common.max = 360;
-                            } else if (state === "airState.quality.odor") {
-                                common.max = 20000;
+                            } else if (state === "AirPolution" || state === "airState.quality.odor") {
+                                common.max = 2000000;
                             } else if (
                                 this.modelInfos[device.deviceId]["signature"] &&
                                 (state === "reserveTimeMinute" ||
@@ -1886,9 +1886,7 @@ class LgThinq extends utils.Adapter {
                                 common.max = 200;
                             } else if (state === "timeSetting") {
                                 common.max = 360;
-                            } else if (state === "airState.quality.odor") {
-                                common.max = 20000;
-                            } else if (state === "AirPolution") {
+                            } else if (state === "AirPolution" || state === "airState.quality.odor") {
                                 common.max = 2000000;
                             } else {
                                 if (valueDefault != null && valueDefault > valueObject.max) {

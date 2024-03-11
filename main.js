@@ -2254,6 +2254,7 @@ class LgThinq extends utils.Adapter {
                         this.setNewInterval(state.val);
                         return;
                     }
+                    let no_for = false;
                     if (lastsplit === "sendJSON") {
                         const headers = this.defaultHeaders;
                         const controlUrl = this.resolveUrl(
@@ -2330,7 +2331,7 @@ class LgThinq extends utils.Adapter {
                         this.setAckFlag(id);
                         return;
                     } else if (id.indexOf(".remote.") !== -1) {
-                        let no_for = true;
+                        no_for = true;
                         let action = id.split(".")[4];
                         let data = {};
                         let onoff = "";
@@ -2371,8 +2372,16 @@ class LgThinq extends utils.Adapter {
                                 rawData["dataGetList"] = null;
                                 this.setAckFlag(id);
                             } else if (checkRemote && checkRemote.dataSetList) {
-                                this.log.info("The command is not implemented: " + secsplit);
-                                return;
+                                if (lastsplit === "jet" || lastsplit === "airClean") {
+                                    action = secsplit;
+                                    rawData["command"] = "Set";
+                                    rawData["data"] = {};
+                                    rawData["dataGetList"] = null;
+                                    rawData["data"][obj.native.dataKey] = state.val;
+                                } else {
+                                    this.log.info("The command is not implemented: " + secsplit);
+                                    return;
+                                }
                             } else {
                                 this.log.info("The command is not implemented");
                                 return;

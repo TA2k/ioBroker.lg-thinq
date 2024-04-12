@@ -2432,10 +2432,11 @@ class LgThinq extends utils.Adapter {
                             if (
                                 lastsplit === "opMode" ||
                                 lastsplit === "hotWaterTarget" ||
+                                lastsplit === "operation" ||
                                 lastsplit === "schedule"
                             ) {
                                 action = secsplit;
-                                rawData["command"] = "Set";
+                                rawData["command"] = lastsplit === "operation" ? "Operation" : "Set";
                                 rawData["dataKey"] = obj.native.dataKey;
                                 rawData["dataValue"] = state.val;
                                 rawData["dataSetList"] = null;

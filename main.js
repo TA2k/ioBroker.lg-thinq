@@ -176,7 +176,7 @@ class LgThinq extends utils.Adapter {
                 try {
                     if (!this.jsessionId) {
                         const jsessionId = await this.getJSessionId();
-                        this.log.debug(JSON.stringify(`jsessionId: ${this.jsessionId}`));
+                        this.log.debug(`jsessionId: ${JSON.stringify(jsessionId)}`);
                         if (jsessionId && jsessionId.jsessionId) {
                             this.jsessionId = jsessionId.jsessionId;
                         }
@@ -2170,6 +2170,7 @@ class LgThinq extends utils.Adapter {
             data = values;
         }
         this.log.debug("sendCommandToDevice: " + JSON.stringify(data));
+        this.log.debug("sendCommandToDevice URL: " + JSON.stringify(controlUrl));
 
         return this.requestClient
             .post(controlUrl, data, { headers })
@@ -2255,11 +2256,15 @@ class LgThinq extends utils.Adapter {
                         return;
                     }
                     let no_for = false;
-                    if (lastsplit === "sendJSON") {
+                    if (lastsplit === "sendJSON" || lastsplit === "sendJSONNoSync") {
+                        let controlsync = "/control-sync";
+                        if (lastsplit === "sendJSONNoSync") {
+                            controlsync = "/control";
+                        }
                         const headers = this.defaultHeaders;
                         const controlUrl = this.resolveUrl(
                             this.gateway.thinq2Uri + "/",
-                            "service/devices/" + deviceId + "/control-sync",
+                            "service/devices/" + deviceId + controlsync,
                         );
                         const js = state.val != null ? state.val.toString() : "";
                         let sendData;

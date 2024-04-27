@@ -189,7 +189,6 @@ class LgThinq extends utils.Adapter {
                 this.log.info("Login successful");
                 this.refreshTokenInterval = this.setInterval(() => {
                     this.refreshNewToken();
-                    this.maskingTimer();
                 }, (this.session.expires_in - 100) * 1000);
                 this.userNumber = await this.getUserNumber();
                 const hash = crypto.createHash("sha256");
@@ -333,7 +332,6 @@ class LgThinq extends utils.Adapter {
                 this.qualityInterval = this.setInterval(() => {
                     this.cleanupQuality();
                 }, 60 * 60 * 24 * 1000);
-                this.maskingTimer();
             } else {
                 this.log.warn(`Missing Session Infos!`);
             }
@@ -354,7 +352,7 @@ class LgThinq extends utils.Adapter {
                         command: "Set",
                         ctrlKey: "allEventEnable",
                         dataKey: "airState.mon.timeout",
-                        dataValue: "70"
+                        dataValue: 70
                     };
                     this.log.debug(`Set timeout for device ${model}`);
                     this.isAdapterUpdateFor406 = true;
@@ -2093,6 +2091,7 @@ class LgThinq extends utils.Adapter {
                         this.log.warn(`Cannot find subscription - ${JSON.stringify(this.mqttdata)}`);
                     }
                 }
+                this.maskingTimer();
             });
 
             this.mqttC.on("reconnect", () => this.log.info("Thinq MQTT reconnect"));

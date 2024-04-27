@@ -108,6 +108,7 @@ class LgThinq extends utils.Adapter {
         this.lge = "LGE";
         this.app_agent = "";
         this.app_device = "";
+        this.isAdapterUpdateFor406 = false;
     }
 
     /**
@@ -188,6 +189,7 @@ class LgThinq extends utils.Adapter {
                 this.log.info("Login successful");
                 this.refreshTokenInterval = this.setInterval(() => {
                     this.refreshNewToken();
+                    this.maskingTimer();
                 }, (this.session.expires_in - 100) * 1000);
                 this.userNumber = await this.getUserNumber();
                 const hash = crypto.createHash("sha256");
@@ -232,8 +234,7 @@ class LgThinq extends utils.Adapter {
                     } else if (this.modelInfos[element.deviceId] === "NOK") {
                         continue;
                     }
-                    this.subscribeStates(`${element.deviceId}.remote.*`);
-                    this.subscribeStates(`${element.deviceId}.snapshot.*`);
+                    this.subscribeStates("*");
                     await this.setObjectNotExistsAsync(element.deviceId, {
                         type: "device",
                         common: {
@@ -282,6 +283,8 @@ class LgThinq extends utils.Adapter {
                     });
                     this.modelInfos[element.deviceId]["thinq2"] = element.platformType;
                     this.modelInfos[element.deviceId]["signature"] = false;
+                    this.modelInfos[element.deviceId]["deviceState"] = element.deviceState;
+                    this.modelInfos[element.deviceId]["deviceType"] = 0;
                     if (element.platformType && element.platformType === "thinq2") {
                         this.isThinq2 = true;
                         if (
@@ -316,7 +319,6 @@ class LgThinq extends utils.Adapter {
                     await this.sleep(2000);
                     await this.createInterval();
                     this.setState("interval.interval", this.config.interval_thinq1, true);
-                    this.subscribeStates("interval.interval");
                     this.setState("interval.active", 0, true);
                     this.setState("interval.active", 0, true);
                     this.setState("interval.last_update", 0, true);
@@ -331,8 +333,35 @@ class LgThinq extends utils.Adapter {
                 this.qualityInterval = this.setInterval(() => {
                     this.cleanupQuality();
                 }, 60 * 60 * 24 * 1000);
+                this.maskingTimer();
             } else {
                 this.log.warn(`Missing Session Infos!`);
+            }
+        }
+    }
+
+    async maskingTimer() {
+        if (typeof this.modelInfos === "object") {
+            for (const model in this.modelInfos) {
+                if (
+                    this.modelInfos &&
+                    this.modelInfos[model] &&
+                    this.modelInfos[model]["deviceState"] === "E" &&
+                    this.modelInfos[model]["thinq2"] === "thinq2" &&
+                    this.modelInfos[model]["deviceType"]
+                ) {
+                    const deviceState = {
+                        command: "Set",
+                        ctrlKey: "allEventEnable",
+                        dataKey: "airState.mon.timeout",
+                        dataValue: "70"
+                    };
+                    this.log.debug(`Set timeout for device ${model}`);
+                    this.isAdapterUpdateFor406 = true;
+                    this.sendCommandToDevice(model, deviceState, null, true);
+                    await this.sleep(3000);
+                    this.isAdapterUpdateFor406 = false;
+                }
             }
         }
     }
@@ -2098,7 +2127,7 @@ class LgThinq extends utils.Adapter {
                             (monitoring.data.state.reported.static.deviceType == "406" ||
                             monitoring.data.state.reported.static.deviceType == "101")) {
                             this.refreshRemote(monitoring);
-                            if (monitoring.data.state.reported["airState.preHeat.schedule"] != null) {
+                            if (monitoring.data.state.reported["airState.preHeat.schedule"] != null && !this.isAdapterUpdateFor406) {
                                 this.updateHeat(monitoring.deviceId);
                             }
                         }
@@ -2176,8 +2205,17 @@ class LgThinq extends utils.Adapter {
             .post(controlUrl, data, { headers })
             .then((resp) => resp.data)
             .catch((error) => {
-                this.log.error("Send failed");
-                this.log.error(error);
+                if (
+                    error.response &&
+                    error.response.status === 400 &&
+                    data.ctrlKey === "reservationCtrl" &&
+                    data.command === "Get"
+                ) {
+                    this.log.debug(`Bad Request: ${error.message}`);
+                } else {
+                    this.log.error("Send failed");
+                    this.log.error(error);
+                }
             });
     }
 

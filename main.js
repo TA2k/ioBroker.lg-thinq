@@ -352,7 +352,7 @@ class LgThinq extends utils.Adapter {
                         command: "Set",
                         ctrlKey: "allEventEnable",
                         dataKey: "airState.mon.timeout",
-                        dataValue: 70
+                        dataValue: "70"
                     };
                     this.log.debug(`Set timeout for device ${model}`);
                     this.isAdapterUpdateFor406 = true;

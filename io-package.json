@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lg-thinq",
-    "version": "0.3.3",
+    "version": "1.0.0",
     "news": {
+      "1.0.0": {
+        "en": "Changed airState.quality.odor max value\nFixed sentry messages\nAdded jet & airclean for device 401\nAdded Mqtt wakeup for device 406\nNode 18 required\nJS-Controller >= 5.0.19 required\nAdmin >=6.13.16 required",
+        "de": "Änderung der LuftState.quality.odor max. Wert\nFeste gesendete Nachrichten\nJet & Airclean für Gerät 401 hinzugefügt\nMqtt Wakeup für Gerät 406 hinzugefügt\nNode 18 erforderlich\nJS-Controller >= 5.0.19 erforderlich\nAdmin >=6.13.16 erforderlich",
+        "ru": "Изменение состояния воздуха.quality.odor max\nИсправленные сообщения\nДобавленный реактивный и воздухоочиститель для устройства 401\nДобавлено пробуждение Mqtt для устройства 406\nНод 18 требуется\n JS 5.0.19\n>=6.13.16",
+        "pt": "Alterado airState.quality.odor valor máximo\nMensagens de envio fixas\nAdicionado jato & airclean para dispositivo 401\nAdicionado Mqtt acorde para dispositivo 406\nNode 18 necessário\nJS-Controller >= 5.0.19 necessário\nAdmin >=6.13.16 necessário",
+        "nl": "Changed airState.quality.odor max waarde\nVaste wachtberichten\nToegevoegd jet & airclean voor apparaat 401\nToegevoegd Mqtt wakeup voor apparaat 406\nNode 18 vereist\nJS-Controller < 5.01.19 vereist\nAdmin < 6.13.16 vereist",
+        "fr": "Changement d'airÉtat.quality.odor valeur max\nMessages de sentinelle corrigés\nAjouté jet & airclean pour l'appareil 401\nAjout du réveil Mqtt pour l'appareil 406\nNoeud 18 requis\nJS-Contrôleur >= 5.0.19 requis\nAdmin >=6.13.16 requis",
+        "it": "AirState.quality.odor valore massimo\nMessaggi inviati fissi\nAggiunto jet & airclean per dispositivo 401\nAggiunto Mqtt sveglia per dispositivo 406\nNodo 18 richiesto\nJS-Controller >= 5.0.19 richiesto\nAdmin >=6.13.16 richiesto",
+        "es": "Cambio de aireEstado.calidad.odor valor máximo\nMensajes enviados fijos\nAgregado jet & airclean para el dispositivo 401\nDespertador Mqtt añadido para el dispositivo 406\nNodo 18 requerido\nJS-Controller ≤ 5.0.19 requerido\nPersonal obligatorio",
+        "pl": "Zmieniono airState.quality.odor max value\nPoprawione wiadomości wartownicze\nDodano jet & airclean dla urządzenia 401\nDodano obudzenie Mqtt dla urządzenia 406\nWymagany węzeł 18\nJS- Controller > = 5.0.19 wymagane\nWymagany dodatek > = 6.13.16",
+        "uk": "Змінений AirState.quality.odor макс. значення\nВиправлено надіслані повідомлення\nДодано струменевий і повітряний очищення для пристрою 401\nДодано Mqtt пробудження для пристрою 406\nNode 18 потрібно\nJS-Controller >=5.0.19 потрібно\nAdmin >=6.13.16 потрібно",
+        "zh-cn": "改变空气状态. 质地. 气味最大值\n固定哨兵信息\n为设备401添加了喷气式飞机和空气净化\n为设备406添加了 Mqtt 醒目\n需要18号节点\n联合来文主计长\n所需行政经费"
+      },
       "0.3.3": {
         "en": "Fixed thinq1 crash\nFixed crash when internet fails (refreshToken)\nAdded weather request\nBugfixe",
         "de": "Fester Thinq1 Crash\nBehobener Absturz bei Ausfall des Internets (refreshToken)\nZusätzliche Wetteranfrage\nBugfixes",
@@ -80,19 +93,6 @@
         "pl": "Addd ostrzegał, że nie obsługują urządzeń.",
         "uk": "Додати попередження не підтримуваних пристроїв.",
         "zh-cn": "添加不支持装置的警告。."
-      },
-      "0.1.3": {
-        "en": "Added remote data point translation for device 201.",
-        "de": "Hinzugefügt Remote-Datenpunkt-Übersetzung für das Gerät 201.",
-        "ru": "Добавлен удаленный перевод точки данных для устройства 201.",
-        "pt": "Adicionado a tradução de ponto de dados remoto para dispositivo 201.",
-        "nl": "Voeg afstandsgegevens toe voor apparaat 201.",
-        "fr": "Ajout de la traduction du point de données à distance pour le dispositif 201.",
-        "it": "Aggiunto la traduzione del punto di dati remoto per il dispositivo 201.",
-        "es": "Añadido traducción remota punto de datos para el dispositivo 201.",
-        "pl": "Dodzielony punkt danych dla urządzeń 201.",
-        "uk": "Додано дистанційний переклад точки даних для пристрою 201.",
-        "zh-cn": "增加用于装置201的远程数据点。."
       }
     },
     "titleLang": {

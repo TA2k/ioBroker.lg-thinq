@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lg-thinq",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "news": {
+      "1.0.1": {
+        "en": "Fixed Mqtt wakeup for device 406 only\nFixed TypeError",
+        "de": "Feste Mqt Weckung für Gerät 406 nur\nFeste ArtError",
+        "ru": "Исправленное пробуждение Mqtt только для устройства 406\nFixed TypeError",
+        "pt": "Acordo Mqtt fixo para dispositivo 406 apenas\nTipo fixoError",
+        "nl": "Alleen vaste Mqtt wakeup voor apparaat 406\nFixed TypeError",
+        "fr": "Réveil fixe Mqtt pour le dispositif 406 seulement\nType fixeErreur",
+        "it": "Risolto Mqt sveglia per dispositivo 406 solo\nTipo di errore fisso",
+        "es": "Despertamiento de Mqtt fijo para el dispositivo 406 sólo\nTipo fijoError",
+        "pl": "Naprawiono obudzenie Mqtt tylko dla urządzenia 406\nNaprawiono błąd typu",
+        "uk": "Виправлено Mqtt прокидання для пристрою 406 тільки\nФіксований TypeError",
+        "zh-cn": "仅用于设备406的固定 Mqtt 醒悟\n固定类型错误"
+      },
       "1.0.0": {
         "en": "Changed airState.quality.odor max value\nFixed sentry messages\nAdded jet & airclean for device 401\nAdded Mqtt wakeup for device 406\nNode 18 required\nJS-Controller >= 5.0.19 required\nAdmin >=6.13.16 required",
         "de": "Änderung der LuftState.quality.odor max. Wert\nFeste gesendete Nachrichten\nJet & Airclean für Gerät 401 hinzugefügt\nMqtt Wakeup für Gerät 406 hinzugefügt\nNode 18 erforderlich\nJS-Controller >= 5.0.19 erforderlich\nAdmin >=6.13.16 erforderlich",
@@ -80,19 +93,6 @@
         "pl": "Dodano automatyczną akceptację warunków i urządzenia 401/101 Thinq1",
         "uk": "Додано автоматичне прийняття умов і пристрої 401/101 Thinq1",
         "zh-cn": "添加了自动条款接受和 401/101 Thinq1 设备"
-      },
-      "0.1.4": {
-        "en": "Add warning for not supported devices.",
-        "de": "Warnung für nicht unterstützte Geräte hinzufügen.",
-        "ru": "Добавить предупреждение для не поддерживаемых устройств.",
-        "pt": "Adicione aviso para dispositivos não suportados.",
-        "nl": "Een waarschuwing voor geen ondersteunende apparaten.",
-        "fr": "Ajouter un avertissement pour les dispositifs non pris en charge.",
-        "it": "Aggiungi avviso per i dispositivi non supportati.",
-        "es": "Añadir aviso para dispositivos no compatibles.",
-        "pl": "Addd ostrzegał, że nie obsługują urządzeń.",
-        "uk": "Додати попередження не підтримуваних пристроїв.",
-        "zh-cn": "添加不支持装置的警告。."
       }
     },
     "titleLang": {

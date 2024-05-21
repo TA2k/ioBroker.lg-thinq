@@ -424,7 +424,7 @@ class LgThinq extends utils.Adapter {
             "x-service-code": this.svc,
             "Accept-Language": `${this.gateway.languageCode};q=1`,
             "x-message-id": uuid.v4(),
-            "x-emp-token": this.session.access_token,
+            "x-emp-token": this.session ? this.session.access_token : "",
             "x-origin": "app-native",
             "Accept": "application/json",
             "Content-Type": "application/json;charset=UTF-8",
@@ -1182,7 +1182,7 @@ class LgThinq extends utils.Adapter {
     async refreshNewToken() {
         this.log.debug("refreshToken");
         const tokenUrl = this.lgeapi_url + "oauth/1.0/oauth2/token";
-        if (!this.session.refresh_token) {
+        if (!this.session || !this.session.refresh_token) {
             await this.setStateAsync("info.connection", false, true);
             this.updateInterval && this.clearInterval(this.updateInterval);
             this.qualityInterval && this.clearInterval(this.qualityInterval);

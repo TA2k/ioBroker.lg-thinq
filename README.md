@@ -47,6 +47,10 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+
+-   (Lucky-ESA) Fixed Mqtt wakeup for device 406 only
+
 ### 1.0.0 (2024-05-20)
 
 -   (Lucky-ESA) Changed airState.quality.odor max value

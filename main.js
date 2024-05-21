@@ -346,7 +346,7 @@ class LgThinq extends utils.Adapter {
                     this.modelInfos[model] &&
                     this.modelInfos[model]["deviceState"] === "E" &&
                     this.modelInfos[model]["thinq2"] === "thinq2" &&
-                    this.modelInfos[model]["deviceType"]
+                    this.modelInfos[model]["deviceType"] === 406
                 ) {
                     const deviceState = {
                         command: "Set",

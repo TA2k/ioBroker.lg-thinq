@@ -47,6 +47,10 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+
+-   (Lucky-ESA) Update dependencies
+
 ### 1.0.1 (2024-05-21)
 
 -   (Lucky-ESA) Fixed Mqtt wakeup for device 406 only

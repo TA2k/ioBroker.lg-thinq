@@ -10,7 +10,8 @@
   "license": "MIT",
   "keywords": [
     "lg",
-    "thinq"
+    "thinq",
+    "ioBroker"
   ],
   "repository": {
     "type": "git",

@@ -135,7 +135,6 @@
     },
     "tier": 2,
     "platform": "Javascript/Node.js",
-    "main": "main.js",
     "icon": "lg-thinq.png",
     "enabled": true,
     "extIcon": "https://raw.githubusercontent.com/TA2k/ioBroker.lg-thinq/master/admin/lg-thinq.png",

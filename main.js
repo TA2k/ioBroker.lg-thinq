@@ -969,6 +969,82 @@ class LgThinq extends utils.Adapter {
             });
     }
 
+    async ownRequestThinq1(data, deviceId) {
+        this.log.debug("ownRequestThinq1: " + data);
+        const headers = JSON.parse(JSON.stringify(this.defaultHeaders));
+        headers["x-client-id"] = constants.API1_CLIENT_ID;
+        let reqData = null;
+        try {
+            reqData = JSON.parse(data);
+        } catch(e) {
+            this.log.warn(`Oqn Request error: ${e}`);
+            return;
+        }
+        const axiosOption = {
+            method: reqData.method,
+            url: reqData.url,
+            baseURL: this.gateway.thinq1Uri + "/",
+            params: reqData.params,
+            data: reqData.data
+        };
+        if (axiosOption.params) {
+            if (axiosOption.params.deviceId === null) {
+                axiosOption.params.deviceId = deviceId;
+            }
+            if (axiosOption.params.workId === null) {
+                axiosOption.params.workId = uuid.v4();
+            }
+        }
+        if (axiosOption.data) {
+            if (axiosOption.data.deviceId === null) {
+                axiosOption.data.deviceId = deviceId;
+            }
+            if (axiosOption.data.workId === null) {
+                axiosOption.data.workId = uuid.v4();
+            }
+        }
+        this.log.debug(`Own request: ${JSON.stringify(axiosOption)}`);
+        if (reqData && reqData.method) {
+            const resp = await this.requestClient({
+                ...axiosOption,
+                ...headers
+            })
+                .then(async (res) => {
+                    if (res.data) {
+                        this.log.debug(`DATA: ${res.data}`);
+                        return res.data;
+                    } else {
+                        this.log.debug(`STATUS: ${res.status}`);
+                        this.log.debug(`TEXT: ${res.statusText}`);
+                        this.log.debug(`HEADER: ${res.headers}`);
+                        this.log.debug(`CONFIG: ${res.config}`);
+                        return res;
+                    }
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        this.log.debug(`DATA: ${error.response.data}`);
+                        this.log.debug(`STATUS: ${error.response.status}`);
+                        this.log.debug(`HEADER: ${error.response.headers}`);
+                    } else if (error.request) {
+                        this.log.debug(`REQUEST: ${error.request}`);
+                    } else {
+                        this.log.debug(`MESSAGE: ${error.message}`);
+                    }
+                    console.log(error.config);
+                    return error;
+                });
+            if (resp && resp.data) {
+                await this.setState(`${deviceId}.remote.Statistic.ownresponse`, {
+                    val: JSON.stringify(resp.data),
+                    ack: true,
+                });
+            } else {
+                this.log.warn(`Own request failed: ${resp}`);
+            }
+        }
+    }
+
     async getDeviceEnergyThinq1(path, device) {
         this.log.debug("getDeviceEnergyThinq1: " + device);
         const headers = JSON.parse(JSON.stringify(this.defaultHeaders));
@@ -1559,7 +1635,13 @@ class LgThinq extends utils.Adapter {
         if (deviceModel) {
             if (!uris.data[device.modelJsonUri]) {
                 uris.data[device.modelJsonUri] = deviceModel;
-                fs.writeFileSync(`${this.adapterDir}/lib/modelJsonUri`, JSON.stringify(uris), "utf-8");
+                fs.writeFile(`${this.adapterDir}/lib/modelJsonUri`, JSON.stringify(uris), err => {
+                    if (err) {
+                        this.log.info(`Write file error: ${err}`);
+                    } else {
+                        this.log.info(`File written successfully`);
+                    }
+                });
             }
             await this.setObjectNotExistsAsync(device.deviceId + ".remote", {
                 type: "channel",
@@ -2297,6 +2379,10 @@ class LgThinq extends utils.Adapter {
                         return;
                     }
                     let no_for = false;
+                    if (lastsplit === "ownreqest") {
+                        this.ownRequestThinq1(state.val, deviceId);
+                        this.setAckFlag(id);
+                    }
                     if (lastsplit === "sendJSON" || lastsplit === "sendJSONNoSync") {
                         let controlsync = "/control-sync";
                         if (lastsplit === "sendJSONNoSync") {

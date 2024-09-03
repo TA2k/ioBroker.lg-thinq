@@ -977,13 +977,14 @@ class LgThinq extends utils.Adapter {
         try {
             reqData = JSON.parse(data);
         } catch(e) {
-            this.log.warn(`Oqn Request error: ${e}`);
+            this.log.warn(`Own Request error: ${e}`);
             return;
         }
         const axiosOption = {
             method: reqData.method,
             url: reqData.url,
             baseURL: this.gateway.thinq1Uri + "/",
+            headers: headers,
             params: reqData.params,
             data: reqData.data
         };
@@ -1006,8 +1007,7 @@ class LgThinq extends utils.Adapter {
         this.log.info(`Own request: ${JSON.stringify(axiosOption)}`);
         if (reqData && reqData.method) {
             const resp = await this.requestClient({
-                ...axiosOption,
-                ...headers
+                ...axiosOption
             })
                 .then(async (res) => {
                     if (res.data) {

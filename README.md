@@ -49,7 +49,7 @@ Adapter for LG ThinQ
 ## Changelog
 ### **WORK IN PROGRESS**
 
--   (Lucky-ESA) Update dependencies
+-   (Lucky-ESA) Dependencies updated
 -   (Lucky-ESA) Changed autoDryRemainTime max value
 
 ### 1.0.1 (2024-05-21)

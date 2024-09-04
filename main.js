@@ -224,6 +224,7 @@ class LgThinq extends utils.Adapter {
                     const hash = crypto.createHash("sha256");
                     this.client_id = hash.update(this.userNumber + (new Date()).getTime()).digest("hex");
                 }
+                this.subscribeStates("*");
                 for (const element of listDevices) {
                     this.log.info(`Create or update datapoints for ${element.deviceId}`);
                     this.modelInfos[element.deviceId] = await this.getDeviceModelInfo(element);
@@ -233,7 +234,6 @@ class LgThinq extends utils.Adapter {
                     } else if (this.modelInfos[element.deviceId] === "NOK") {
                         continue;
                     }
-                    this.subscribeStates("*");
                     await this.setObjectNotExistsAsync(element.deviceId, {
                         type: "device",
                         common: {

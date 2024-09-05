@@ -303,10 +303,10 @@ class LgThinq extends utils.Adapter {
                     }
                     if (element.deviceType != null) {
                         this.modelInfos[element.deviceId]["deviceType"] = element.deviceType;
-                        //this.isThinq2 = true;
+                        this.isThinq2 = true;
                     }
                     await this.pollMonitor(element);
-                    //await this.sleep(2000);
+                    await this.sleep(2000);
                     this.log.info(`Update raw datapoints for ${element.deviceId}`);
                     await this.extractValues(element);
                 }
@@ -322,12 +322,14 @@ class LgThinq extends utils.Adapter {
                     this.setState("interval.active", 0, true);
                     this.setState("interval.last_update", 0, true);
                     this.setState("interval.status_devices", JSON.stringify({}), true);
-                    this.startPollMonitor();
+                    //ACHTUNG
+                    //this.startPollMonitor();
                 }
                 this.log.debug(`AREA: ${JSON.stringify(area)}`);
                 this.createWeather(area);
                 this.updateInterval = this.setInterval(async () => {
-                    await this.updateDevices();
+                    //ACHTUNG
+                    //await this.updateDevices();
                 }, this.config.interval * 60 * 1000);
                 this.qualityInterval = this.setInterval(() => {
                     this.cleanupQuality();
@@ -971,8 +973,7 @@ class LgThinq extends utils.Adapter {
 
     async ownRequestThinq1(data, deviceId) {
         this.log.info("ownRequestThinq1: " + data);
-        const headers = JSON.parse(JSON.stringify(this.defaultHeaders));
-        headers["x-client-id"] = constants.API1_CLIENT_ID;
+        const header = this.defaultHeaders;
         let reqData = null;
         try {
             reqData = JSON.parse(data);
@@ -980,38 +981,40 @@ class LgThinq extends utils.Adapter {
             this.log.warn(`Own Request error: ${e}`);
             return;
         }
+        this.log.info("reqDatahinq1: " + JSON.stringify(reqData));
         const axiosOption = {
-            method: reqData.method,
-            url: reqData.url,
-            baseURL: this.gateway.thinq1Uri + "/",
-            headers: headers,
             params: reqData.params,
             data: reqData.data
         };
-        if (axiosOption.params) {
-            if (axiosOption.params.deviceId === null) {
-                axiosOption.params.deviceId = deviceId;
+        this.log.info("axiosOptionhinq1: " + JSON.stringify(axiosOption));
+        if (axiosOption.params && axiosOption.params.lgedmRoot) {
+            if (axiosOption.params.lgedmRoot.deviceId === null) {
+                axiosOption.params.lgedmRoot.deviceId = deviceId;
             }
-            if (axiosOption.params.workId === null) {
-                axiosOption.params.workId = uuid.v4();
+            if (axiosOption.params.lgedmRoot.workId === null) {
+                axiosOption.params.lgedmRoot.workId = uuid.v4();
             }
         }
-        if (axiosOption.data) {
-            if (axiosOption.data.deviceId === null) {
-                axiosOption.data.deviceId = deviceId;
+        if (axiosOption.data && axiosOption.data.lgedmRoot) {
+            if (axiosOption.data.lgedmRoot.deviceId === null) {
+                axiosOption.data.lgedmRoot.deviceId = deviceId;
             }
-            if (axiosOption.data.workId === null) {
-                axiosOption.data.workId = uuid.v4();
+            if (axiosOption.data.lgedmRoot.workId === null) {
+                axiosOption.data.lgedmRoot.workId = uuid.v4();
             }
         }
         this.log.info(`Own request: ${JSON.stringify(axiosOption)}`);
         if (reqData && reqData.method) {
             const resp = await this.requestClient({
+                method: reqData.method,
+                url: reqData.url,
+                baseURL: this.gateway.thinq1Uri + "/",
+                headers: header,
                 ...axiosOption
             })
                 .then(async (res) => {
                     if (res.data) {
-                        this.log.info(`DATA: ${res.data}`);
+                        this.log.info(`DATA: ${JSON.stringify(res.data)}`);
                         return res.data;
                     } else {
                         this.log.info(`STATUS: ${res.status}`);
@@ -1034,9 +1037,11 @@ class LgThinq extends utils.Adapter {
                     console.log(error.config);
                     return error;
                 });
-            if (resp && resp.data) {
+            if (resp && resp.lgedmRoot && resp.lgedmRoot.returnData) {
+                const unit = Buffer.from(resp.lgedmRoot.returnData, "base64").toString();
+                this.log.debug("UNIT: " + unit);
                 await this.setState(`${deviceId}.remote.Statistic.ownresponse`, {
-                    val: JSON.stringify(resp.data),
+                    val: unit,
                     ack: true,
                 });
             } else {

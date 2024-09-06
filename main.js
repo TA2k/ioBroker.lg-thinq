@@ -303,10 +303,10 @@ class LgThinq extends utils.Adapter {
                     }
                     if (element.deviceType != null) {
                         this.modelInfos[element.deviceId]["deviceType"] = element.deviceType;
-                        this.isThinq2 = true;
+                        //this.isThinq2 = true;
                     }
                     await this.pollMonitor(element);
-                    await this.sleep(2000);
+                    //await this.sleep(2000);
                     this.log.info(`Update raw datapoints for ${element.deviceId}`);
                     await this.extractValues(element);
                 }
@@ -322,14 +322,12 @@ class LgThinq extends utils.Adapter {
                     this.setState("interval.active", 0, true);
                     this.setState("interval.last_update", 0, true);
                     this.setState("interval.status_devices", JSON.stringify({}), true);
-                    //ACHTUNG
-                    //this.startPollMonitor();
+                    this.startPollMonitor();
                 }
                 this.log.debug(`AREA: ${JSON.stringify(area)}`);
                 this.createWeather(area);
                 this.updateInterval = this.setInterval(async () => {
-                    //ACHTUNG
-                    //await this.updateDevices();
+                    await this.updateDevices();
                 }, this.config.interval * 60 * 1000);
                 this.qualityInterval = this.setInterval(() => {
                     this.cleanupQuality();

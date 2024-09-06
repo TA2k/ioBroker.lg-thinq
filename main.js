@@ -1038,9 +1038,20 @@ class LgThinq extends utils.Adapter {
                     console.log(error.config);
                     return error;
                 });
+            let unit;
             if (resp && resp.lgedmRoot && resp.lgedmRoot.returnData) {
-                const unit = Buffer.from(resp.lgedmRoot.returnData, "base64").toString();
-                this.log.debug("UNIT: " + unit);
+                if (this.modelInfos[deviceId].Monitoring.type === "BINARY(BYTE)") {
+                    unit = Buffer.from(resp.lgedmRoot.returnData, "base64").toString();
+                    this.log.debug("UNIT: " + unit);
+                }
+                if (this.modelInfos[deviceId].Monitoring.type === "JSON") {
+                    try {
+                        unit = JSON.parse(resp.lgedmRoot.returnData.toString());
+                    } catch(e) {
+                        this.log.debug(`Parse error!`);
+                        return;
+                    }
+                }
                 await this.setState(`${deviceId}.remote.Statistic.ownresponse`, {
                     val: unit,
                     ack: true,

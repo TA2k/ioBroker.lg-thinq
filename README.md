@@ -51,6 +51,7 @@ Adapter for LG ThinQ
 
 -   (Lucky-ESA) Dependencies updated
 -   (Lucky-ESA) Changed autoDryRemainTime max value
+-   (Lucky-ESA) Added own request for 401 thinq1
 
 ### 1.0.1 (2024-05-21)
 

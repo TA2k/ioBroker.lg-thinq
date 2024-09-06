@@ -76,6 +76,7 @@ class LgThinq extends utils.Adapter {
         this.createCourse = helper.createCourse;
         this.refreshRemote = helper.refreshRemote;
         this.refrigerator = helper.refrigerator;
+        this.getSummary = air.getSummary;
         this.createAirRemoteStates = air.createAirRemoteStates;
         this.createAirRemoteThinq1States = air.createAirRemoteThinq1States;
         this.sendCommandThinq1AC = air.sendCommandThinq1AC;
@@ -971,7 +972,9 @@ class LgThinq extends utils.Adapter {
 
     async ownRequestThinq1(data, deviceId) {
         this.log.info("ownRequestThinq1: " + data);
-        const header = this.defaultHeaders;
+        const header = JSON.parse(JSON.stringify(this.defaultHeaders));
+        header["x-client-id"] = this.mqtt_userID != null ? this.mqtt_userID : constants.API1_CLIENT_ID;
+        header["x-message-id"] = this.random_string(22);
         let reqData = null;
         try {
             reqData = JSON.parse(data);

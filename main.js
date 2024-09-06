@@ -971,7 +971,7 @@ class LgThinq extends utils.Adapter {
     }
 
     async ownRequestThinq1(data, deviceId) {
-        this.log.info("ownRequestThinq1: " + data);
+        this.log.debug("ownRequestThinq1: " + data);
         const header = JSON.parse(JSON.stringify(this.defaultHeaders));
         header["x-client-id"] = this.mqtt_userID != null ? this.mqtt_userID : constants.API1_CLIENT_ID;
         header["x-message-id"] = this.random_string(22);
@@ -982,12 +982,12 @@ class LgThinq extends utils.Adapter {
             this.log.warn(`Own Request error: ${e}`);
             return;
         }
-        this.log.info("reqDatahinq1: " + JSON.stringify(reqData));
+        this.log.debug("reqDatahinq1: " + JSON.stringify(reqData));
         const axiosOption = {
             params: reqData.params,
             data: reqData.data
         };
-        this.log.info("axiosOptionhinq1: " + JSON.stringify(axiosOption));
+        this.log.debug("axiosOptionhinq1: " + JSON.stringify(axiosOption));
         if (axiosOption.params && axiosOption.params.lgedmRoot) {
             if (axiosOption.params.lgedmRoot.deviceId === null) {
                 axiosOption.params.lgedmRoot.deviceId = deviceId;
@@ -1004,7 +1004,7 @@ class LgThinq extends utils.Adapter {
                 axiosOption.data.lgedmRoot.workId = uuid.v4();
             }
         }
-        this.log.info(`Own request: ${JSON.stringify(axiosOption)}`);
+        this.log.debug(`Own request: ${JSON.stringify(axiosOption)}`);
         if (reqData && reqData.method) {
             const resp = await this.requestClient({
                 method: reqData.method,
@@ -1015,40 +1015,38 @@ class LgThinq extends utils.Adapter {
             })
                 .then(async (res) => {
                     if (res.data) {
-                        this.log.info(`DATA: ${JSON.stringify(res.data)}`);
+                        this.log.debug(`DATA: ${JSON.stringify(res.data)}`);
                         return res.data;
                     } else {
-                        this.log.info(`STATUS: ${res.status}`);
-                        this.log.info(`TEXT: ${res.statusText}`);
-                        this.log.info(`HEADER: ${res.headers}`);
-                        this.log.info(`CONFIG: ${res.config}`);
+                        this.log.debug(`STATUS: ${res.status}`);
+                        this.log.debug(`TEXT: ${res.statusText}`);
+                        this.log.debug(`HEADER: ${res.headers}`);
+                        this.log.debug(`CONFIG: ${res.config}`);
                         return res;
                     }
                 })
                 .catch((error) => {
                     if (error.response) {
-                        this.log.info(`DATA: ${error.response.data}`);
-                        this.log.info(`STATUS: ${error.response.status}`);
-                        this.log.info(`HEADER: ${error.response.headers}`);
+                        this.log.debug(`DATA: ${error.response.data}`);
+                        this.log.debug(`STATUS: ${error.response.status}`);
+                        this.log.debug(`HEADER: ${error.response.headers}`);
                     } else if (error.request) {
                         this.log.info(`REQUEST: ${error.request}`);
                     } else {
                         this.log.info(`MESSAGE: ${error.message}`);
                     }
-                    console.log(error.config);
                     return error;
                 });
             let unit;
             if (resp && resp.lgedmRoot && resp.lgedmRoot.returnData) {
-                if (this.modelInfos[deviceId].Monitoring.type === "BINARY(BYTE)") {
+                if (resp.lgedmRoot.format === "B64") {
                     unit = Buffer.from(resp.lgedmRoot.returnData, "base64").toString();
                     this.log.debug("UNIT: " + unit);
-                }
-                if (this.modelInfos[deviceId].Monitoring.type === "JSON") {
+                } else {
                     try {
                         unit = JSON.parse(resp.lgedmRoot.returnData.toString());
                     } catch(e) {
-                        this.log.debug(`Parse error!`);
+                        this.log.warn(`Parse error!`);
                         return;
                     }
                 }

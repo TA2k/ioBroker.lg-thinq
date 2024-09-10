@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lg-thinq",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "news": {
+      "1.0.2": {
+        "en": "Dependencies updated\nChanged autoDryRemainTime max value\nAdded own request for 401 thinq1",
+        "de": "Ausgaben aktualisiert\nAutoDryRemain geändert Zeit max Wert\nZusätzliche eigene Anfrage für 401 thinq1",
+        "ru": "Обновленные данные о зависимостях\nИзменение autoDryRemain Время макс. значение\nДобавлен собственный запрос на 401 тонкий q1",
+        "pt": "Dependências atualizadas\nMudança de autoDryRemain Valor máximo de tempo\nAdicionado próprio pedido para 401 thinq1",
+        "nl": "Afhankelijkheden bijgewerkt\nAutoDryRemain gewijzigd Maximumtijd\nToegevoegd eigen aanvraag voor 401 thinq1",
+        "fr": "Dépendances actualisées\nChangement d'autoDryRemain Durée maximale\nAjout d'une demande propre pour 401 thinq1",
+        "it": "Dipendenze aggiornate\nCambio automaticoDryRemain Tempo massimo valore\nAggiunto proprio richiesta per 401 sottileq1",
+        "es": "Actualización de las dependencias\nAutoDryRemain cambiado Valor máximo\nSe agregó su propia solicitud para 401 delgadaq1",
+        "pl": "Aktualizacja zależności\nZmieniony autoDryRemain Maksymalna wartość czasu\nDodano własne życzenie dla 401 thinq1",
+        "uk": "Залежність оновлено\nЗмінено autoDryRemain Максимальне значення часу\nДодано власний запит на 401 тонкийq1",
+        "zh-cn": "更新的依赖关系\n已更改自动干线 时间最大值\n401 薄q1 自行请求添加"
+      },
       "1.0.1": {
         "en": "Fixed Mqtt wakeup for device 406 only\nFixed TypeError",
         "de": "Feste Mqt Weckung für Gerät 406 nur\nFeste ArtError",
@@ -80,19 +93,6 @@
         "pl": "Added urządzenie 406 ( pompa termiczna)\nAdded description\nAdddukowane nowe cienkie przedziały q1\nAddwentystyczny dla cienkiego urządzenia 401\nBugfix",
         "uk": "Додано пристрій 406 (тепловий насос)\nДодано опис\nДодано новий тонкийq1 інтервал\nДодано статичну для тонкогоq1 пристрою 401\nПомилки",
         "zh-cn": "增加装置406(水泵)\n增加说明\n增加新的缺陷q1 间隔\n稀少的克1装置的统计 401\nBugfix"
-      },
-      "0.2.0": {
-        "en": "Added automatic terms acceptance and 401/101 Thinq1 devices",
-        "de": "Automatische Annahme der AGBs und 401/101 Thinq1-Geräte hinzugefügt",
-        "ru": "Добавлено автоматическое принятие условий и устройства 401/101 Thinq1.",
-        "pt": "Adicionada aceitação automática de termos e dispositivos 401/101 Thinq1",
-        "nl": "Automatische acceptatie van voorwaarden en 401/101 Thinq1-apparaten toegevoegd",
-        "fr": "Ajout de l'acceptation automatique des conditions et des appareils 401/101 Thinq1",
-        "it": "Aggiunta l'accettazione automatica dei termini e i dispositivi 401/101 Thinq1",
-        "es": "Se agregó aceptación automática de términos y dispositivos 401/101 Thinq1.",
-        "pl": "Dodano automatyczną akceptację warunków i urządzenia 401/101 Thinq1",
-        "uk": "Додано автоматичне прийняття умов і пристрої 401/101 Thinq1",
-        "zh-cn": "添加了自动条款接受和 401/101 Thinq1 设备"
       }
     },
     "titleLang": {

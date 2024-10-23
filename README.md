@@ -47,6 +47,10 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+
+-   (Lucky-ESA) Added hotwater for device 406 & 401
+
 ### 1.0.2 (2024-09-10)
 
 -   (Lucky-ESA) Dependencies updated

@@ -5,19 +5,31 @@
         "_headerAdapter": {
             "type": "header",
             "text": "Adapter settings for lg-thinq",
-            "size": 2
+            "xs": 12,
+            "sm": 12,
+            "md": 6,
+            "lg": 4,
+            "xl": 4
         },
         "user": {
             "type": "text",
             "label": "LG ThinQ Email",
             "newLine": true,
-            "sm": 3
+            "xs": 12,
+            "sm": 12,
+            "md": 6,
+            "lg": 4,
+            "xl": 4
         },
         "password": {
             "type": "password",
             "label": "LG ThinQ Password",
             "newLine": true,
-            "sm": 3
+            "xs": 12,
+            "sm": 12,
+            "md": 6,
+            "lg": 4,
+            "xl": 4
         },
         "interval": {
             "type": "number",
@@ -25,7 +37,11 @@
             "min":0.5,
             "max":150,
             "newLine": true,
-            "sm": 3,
+            "xs": 12,
+            "sm": 12,
+            "md": 6,
+            "lg": 4,
+            "xl": 4,
             "default": 5
         },
         "interval_thinq1": {
@@ -34,28 +50,44 @@
             "min":0,
             "max":1440,
             "newLine": true,
-            "sm": 3,
+            "xs": 12,
+            "sm": 12,
+            "md": 6,
+            "lg": 4,
+            "xl": 4,
             "default": 30
         },
         "country": {
             "type": "text",
             "label": "Country",
             "newLine": true,
-            "sm": 3,
+            "xs": 12,
+            "sm": 12,
+            "md": 6,
+            "lg": 4,
+            "xl": 4,
             "default": "DE"
         },
         "language": {
             "type": "text",
             "label": "Language",
             "newLine": true,
-            "sm": 3,
+            "xs": 12,
+            "sm": 12,
+            "md": 6,
+            "lg": 4,
+            "xl": 4,
             "default": "de_DE"
         },
         "platform": {
             "type": "text",
             "label": "Platform",
             "newLine": true,
-            "sm": 3,
+            "xs": 12,
+            "sm": 12,
+            "md": 6,
+            "lg": 4,
+            "xl": 4,
             "default": "LGThinQ"
         }
     }

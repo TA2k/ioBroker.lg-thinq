@@ -486,8 +486,11 @@ Wenn einer der 3 Datenpunkte gefüllt wird, wird das ausgewählt Programm in den
 
 [Zusammenfassung](#zusammenfassung)
 
--   `remote.basicCtrl.operation` 0 für Aus
--   `remote.basicCtrl.operation` 1 für Ein
+-   `remote.basicCtrl.operation` 0 für Aus und 1 für Ein
+-   `remote.basicCtrl.opMode` 0 für Aus und 4 für Ein
+-   `remote.basicCtrl.hotWater` 0 für Aus und 1 für Ein
+-   `remote.basicCtrl.hotWaterTarget` gewünschte Temperatur
+-   `remote.basicCtrl.powerHotWater` Boost 0 für Aus und 1 für Ein
 -   `remote.basicCtrl.target` gewünschte Temperatur
 
 -   Kommt im Log die Fehlermeldung 400, dann ist dieser Datenpunkt nicht für das Geräte kompatibel.

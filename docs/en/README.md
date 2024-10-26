@@ -486,8 +486,11 @@ When one of the 3 data points is filled, the selected program is written to the 
 
 [Summary](#summary)
 
--   `remote.basicCtrl.operation` 0 for off
--   `remote.basicCtrl.operation` 1 for on
+-   `remote.basicCtrl.operation` 0 for off and 1 for on
+-   `remote.basicCtrl.opMode` 0 for off and 4 for on
+-   `remote.basicCtrl.hotWater` 0 for off and 1 for on
+-   `remote.basicCtrl.hotWaterTarget` desired temperature
+-   `remote.basicCtrl.powerHotWater` Boost 0 for off and 1 for on
 -   `remote.basicCtrl.target` desired temperature
 
 -   If the error message 400 appears in the log, then this data point is not compatible with the device.

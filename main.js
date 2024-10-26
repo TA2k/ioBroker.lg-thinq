@@ -2225,6 +2225,7 @@ class LgThinq extends utils.Adapter {
                             monitoring.data.state.reported.static &&
                             monitoring.data.state.reported.static.deviceType &&
                             (monitoring.data.state.reported.static.deviceType == "406" ||
+                            monitoring.data.state.reported.static.deviceType == "401" ||
                             monitoring.data.state.reported.static.deviceType == "101")) {
                             this.refreshRemote(monitoring);
                             if (monitoring.data.state.reported["airState.preHeat.schedule"] != null && !this.isAdapterUpdateFor406) {

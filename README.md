@@ -50,6 +50,7 @@ Adapter for LG ThinQ
 ### **WORK IN PROGRESS**
 
 -   (Lucky-ESA) Added hotwater for device 406 & 401
+-   (Lucky-ESA) Dependencies updated
 
 ### 1.0.2 (2024-09-10)
 

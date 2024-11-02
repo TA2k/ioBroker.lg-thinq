@@ -2531,6 +2531,13 @@ class LgThinq extends utils.Adapter {
                                     this.log.info("The command is not implemented: " + secsplit);
                                     return;
                                 }
+                            } else if (secsplit === "2nd") {
+                                action = "basicCtrl";
+                                rawData["command"] = lastsplit === "operation" ? "Operation" : "Set";
+                                rawData["dataKey"] = obj.native.dataKey;
+                                rawData["dataValue"] = state.val;
+                                rawData["dataSetList"] = null;
+                                rawData["dataGetList"] = null;
                             } else {
                                 this.log.info("The command is not implemented");
                                 return;

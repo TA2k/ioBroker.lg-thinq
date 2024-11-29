@@ -118,7 +118,7 @@ class LgThinq extends utils.Adapter {
     async onReady() {
         this.app_agent = constants.APP_AGENT[Math.floor(Math.random()*constants.APP_AGENT.length)];
         this.app_device = constants.APP_DEVICE[Math.floor(Math.random()*constants.APP_DEVICE.length)];
-        await this.setStateAsync("info.connection", false, true);
+        await this.setState("info.connection", false, true);
         await this.cleanOldVersion();
         if (this.config.interval < 0.5) {
             this.log.info("Set interval to minimum 0.5");
@@ -1274,7 +1274,7 @@ class LgThinq extends utils.Adapter {
         this.log.debug("refreshToken");
         const tokenUrl = this.lgeapi_url + "oauth/1.0/oauth2/token";
         if (!this.session || !this.session.refresh_token) {
-            await this.setStateAsync("info.connection", false, true);
+            await this.setState("info.connection", false, true);
             this.updateInterval && this.clearInterval(this.updateInterval);
             this.qualityInterval && this.clearInterval(this.qualityInterval);
             this.refreshTokenInterval && this.clearInterval(this.refreshTokenInterval);
@@ -2738,7 +2738,7 @@ class LgThinq extends utils.Adapter {
                                     }
                                     rawData = await this.createCourse(state, deviceId, action);
                                     this.log.debug(JSON.stringify(rawData));
-                                    await this.setStateAsync(deviceId + ".remote.WMDownload_Select", {
+                                    await this.setState(deviceId + ".remote.WMDownload_Select", {
                                         val: "NOT_SELECTED",
                                         ack: true,
                                     });
@@ -2950,7 +2950,7 @@ class LgThinq extends utils.Adapter {
                                         role = null;
                                     }
                                     if (quality[states.q] === "0x20 - substitute initial value") {
-                                        await this.setStateAsync(`${dp.id}`, {
+                                        await this.setState(`${dp.id}`, {
                                             ack: true,
                                             ...role,
                                         });
@@ -2962,7 +2962,7 @@ class LgThinq extends utils.Adapter {
                         }
                     }
                 }
-                await this.setStateAsync(`${deviceId}.quality`, {
+                await this.setState(`${deviceId}.quality`, {
                     val:
                         Object.keys(dp_array).length > 0
                             ? JSON.stringify(dp_array)
@@ -3013,8 +3013,8 @@ class LgThinq extends utils.Adapter {
             });
             this.log.info("Done with cleaning");
         }
-        // @ts-ignore
-        await this.setStateAsync("oldVersionCleaned", this.version, true);
+        if (this.version == null) this.version = "1.0.2";
+        await this.setState("oldVersionCleaned", this.version, true);
     }
 }
 

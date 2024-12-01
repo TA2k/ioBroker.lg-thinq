@@ -30,3 +30,14 @@
 ### 0.0.3
 
 -   (TA2k) initial release
+## 0.3.2 (2024-01-08)
+
+-   (Lucky-ESA) Added data point interval.status_devices
+-   (Lucky-ESA) Fixed missing value for fridge
+-   (Lucky-ESA) Fixed thinq1 crash
+-   (Lucky-ESA) Added save modelJSON local
+-   (mcm1957) Node 16 checked
+
+## 0.3.1 (2023-12-20)
+
+-   (Lucky-ESA) Fixed crash thinq1 interval

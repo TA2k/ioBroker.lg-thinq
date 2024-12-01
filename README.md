@@ -17,20 +17,20 @@ Adapter for LG ThinQ
 
 ## Requirement
 
-* Node >= 18
-* JS-Controller >= 5.0.19
-* Admin >= 6.13.16
+-   Node >= 18
+-   JS-Controller >= 5.0.19
+-   Admin >= 6.13.16
 
 ## Supported devices
 
 **DEVICE**: lg-thinq.0.xxx.deviceType -> e. g. 101</br>
 **PLATFORM**: lg-thinq.0.xxx.platformType -> e. g. thinq2
 
-* Device -> 101 Refrigerator -> thinq2 + thinq1
-* Device -> 201 Washer + signature -> thinq2 + thinq1
-* Device -> 202 Dryer -> thinq2 + thinq1
-* Device -> 401 AC -> thinq2 + thinq1
-* Device -> 406 Heatpump -> thinq2
+-   Device -> 101 Refrigerator -> thinq2 + thinq1
+-   Device -> 201 Washer + signature -> thinq2 + thinq1
+-   Device -> 202 Dryer -> thinq2 + thinq1
+-   Device -> 401 AC -> thinq2 + thinq1
+-   Device -> 406 Heatpump -> thinq2
 
 ## Description
 
@@ -47,8 +47,10 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
 
+### 1.0.3 (2024-12-01)
+
+-   Login fixed
 -   (Lucky-ESA) Added hotwater for device 406 & 401
 -   (Lucky-ESA) Dependencies updated
 
@@ -79,18 +81,6 @@ Adapter for LG ThinQ
 -   (Lucky-ESA) Fixed crash when internet fails (refreshToken)
 -   (Lucky-ESA) Added weather request
 -   (Lucky-ESA) Bugfixe
-
-### 0.3.2 (2024-01-08)
-
--   (Lucky-ESA) Added data point interval.status_devices
--   (Lucky-ESA) Fixed missing value for fridge
--   (Lucky-ESA) Fixed thinq1 crash
--   (Lucky-ESA) Added save modelJSON local
--   (mcm1957) Node 16 checked
-
-### 0.3.1 (2023-12-20)
-
--   (Lucky-ESA) Fixed crash thinq1 interval
 
 ## License
 

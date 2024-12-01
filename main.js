@@ -1219,7 +1219,7 @@ class LgThinq extends utils.Adapter {
                 loginSessionID: accountInfo.account.loginSessionID,
                 additionalInfo: encodeURIComponent(JSON.stringify(additionalInfo)),
                 autoYn: "N",
-                deviceId: "18f00ed4a6d2f6a2c11398559fc6ae4b",
+                deviceId: this.random_string(32),
                 ipadYn: "N",
                 local_country: "DE",
                 local_lang: "de",
@@ -1308,8 +1308,37 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
+        const tokenUrl = "https://de.lgeapi.com/oauth/1.0/oauth2/token";
+        const timestamp = DateTime.utc().toRFC2822();
+        const data = {
+            code: codeResponse.code,
+            grant_type: "authorization_code",
+            redirect_uri: "lgaccount.lgsmartthinq:/",
+        };
+        const requestUrl = "/oauth/1.0/oauth2/token" + qs.stringify(data, { addQueryPrefix: true });
+        const signature = this.signature(`${requestUrl}\n${timestamp}`, constants.OAUTH_SECRET_KEY);
 
+        const headers = {
+            "x-lge-app-os": "IOS",
+            "x-lge-appkey": constants.CLIENT_ID,
+            "x-lge-oauth-signature": signature,
+            "x-lge-oauth-date": timestamp,
+            Accept: "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
+        };
+        this.log.debug(JSON.stringify(tokenUrl));
+        this.log.debug(JSON.stringify(headers));
+        this.log.debug(JSON.stringify(data));
+        const resp = await this.requestClient
+            .post(tokenUrl, qs.stringify(data), { headers })
+            .then((resp) => resp.data)
+            .catch((error) => {
+                this.log.error(error);
+                return;
+            });
+        this.log.debug(JSON.stringify(resp));
         this.log.debug(JSON.stringify(codeResponse));
+        return resp;
     }
     plainTextToRSA(plainTxt) {
         var pubkey =

@@ -42,7 +42,7 @@ class LgThinq extends utils.Adapter {
             httpAgent: new http.Agent({ keepAlive: true }),
             httpsAgent: new https.Agent({ keepAlive: true }),
             maxRedirects: 10,
-            maxContentLength: 50 * 1000 * 1000
+            maxContentLength: 50 * 1000 * 1000,
         });
         this.updateInterval = null;
         this.qualityInterval = null;
@@ -116,8 +116,8 @@ class LgThinq extends utils.Adapter {
      * Is called when databases are connected and adapter received configuration.
      */
     async onReady() {
-        this.app_agent = constants.APP_AGENT[Math.floor(Math.random()*constants.APP_AGENT.length)];
-        this.app_device = constants.APP_DEVICE[Math.floor(Math.random()*constants.APP_DEVICE.length)];
+        this.app_agent = constants.APP_AGENT[Math.floor(Math.random() * constants.APP_AGENT.length)];
+        this.app_device = constants.APP_DEVICE[Math.floor(Math.random() * constants.APP_DEVICE.length)];
         await this.setState("info.connection", false, true);
         await this.cleanOldVersion();
         if (this.config.interval < 0.5) {
@@ -166,9 +166,10 @@ class LgThinq extends utils.Adapter {
         if (this.gateway) {
             this.lgeapi_url = `https://${this.gateway.countryCode.toLowerCase()}.lgeapi.com/`;
 
-            this.session = await this.login(this.config.user, this.config.password).catch((error) => {
-                this.log.error(error);
-            });
+            //   this.session = await this.login(this.config.user, this.config.password).catch((error) => {
+            //     this.log.error(error);
+            //   });
+            this.session = await this.loginNew();
             if (
                 this.session != null &&
                 this.session.access_token != null &&
@@ -223,7 +224,7 @@ class LgThinq extends utils.Adapter {
                 const area = {};
                 if (this.userNumber) {
                     const hash = crypto.createHash("sha256");
-                    this.client_id = hash.update(this.userNumber + (new Date()).getTime()).digest("hex");
+                    this.client_id = hash.update(this.userNumber + new Date().getTime()).digest("hex");
                 }
                 this.subscribeStates("*");
                 for (const element of listDevices) {
@@ -353,7 +354,7 @@ class LgThinq extends utils.Adapter {
                         command: "Set",
                         ctrlKey: "allEventEnable",
                         dataKey: "airState.mon.timeout",
-                        dataValue: "70"
+                        dataValue: "70",
                     };
                     this.log.debug(`Set timeout for device ${model}`);
                     this.isAdapterUpdateFor406 = true;
@@ -370,7 +371,7 @@ class LgThinq extends utils.Adapter {
         const headers = {
             "x-thinq-application-key": "wideq",
             "x-thinq-security-key": "nuts_securitykey",
-            "Accept": "application/json",
+            Accept: "application/json",
             "x-thinq-token": this.session.access_token,
         };
         const data = {
@@ -392,18 +393,21 @@ class LgThinq extends utils.Adapter {
 
     getSecondsConversionTime(s) {
         const num = typeof s !== "number" ? parseInt(s) : s;
-        const result = {day: 0, hour: 0, min: 0};
+        const result = { day: 0, hour: 0, min: 0 };
         result.day = num / 86400;
-        result.hour = num % 86400 / 3600;
-        result.min = Math.ceil(num % 86400 % 3600 / 60);
+        result.hour = (num % 86400) / 3600;
+        result.min = Math.ceil(((num % 86400) % 3600) / 60);
         return result;
     }
 
     getMinConversionTime(m) {
         return {
             day: Math.floor(parseInt(m) / (24 * 60)),
-            hour: (Math.floor(parseInt(m) / (24 * 60)) > 0) ? (Math.floor(parseInt(m) / 60) - (Math.floor(parseInt(m) / (24 * 60)) * 24)) : Math.floor(parseInt(m) / 60),
-            min: parseInt(m) - (Math.floor(parseInt(m) / 60) * 60)
+            hour:
+                Math.floor(parseInt(m) / (24 * 60)) > 0
+                    ? Math.floor(parseInt(m) / 60) - Math.floor(parseInt(m) / (24 * 60)) * 24
+                    : Math.floor(parseInt(m) / 60),
+            min: parseInt(m) - Math.floor(parseInt(m) / 60) * 60,
         };
     }
 
@@ -421,18 +425,18 @@ class LgThinq extends utils.Adapter {
             "x-thinq-app-level": "PRD",
             "x-app-version": "5.0.11861",
             "x-user-no": this.userNumber,
-            "Connection": "keep-alive",
+            Connection: "keep-alive",
             "x-service-code": this.svc,
             "Accept-Language": `${this.gateway.languageCode};q=1`,
             "x-message-id": uuid.v4(),
             "x-emp-token": this.session ? this.session.access_token : "",
             "x-origin": "app-native",
-            "Accept": "application/json",
+            Accept: "application/json",
             "Content-Type": "application/json;charset=UTF-8",
             "x-api-key": constants.API_KEY,
             "x-thinq-app-os": "IOS",
             "x-country-code": this.gateway.countryCode,
-            "x-service-phase": "OP"
+            "x-service-phase": "OP",
         };
         if (this.jsessionId) {
             headers["x-thinq-jsessionId"] = this.jsessionId;
@@ -466,7 +470,11 @@ class LgThinq extends utils.Adapter {
                 for (const model in this.modelInfos) {
                     this.log.debug("Check deviceID: " + JSON.stringify(model));
                     const devID = {};
-                    if (this.modelInfos[model] && this.modelInfos[model]["thinq2"] === "thinq1" && !this.workIds[model]) {
+                    if (
+                        this.modelInfos[model] &&
+                        this.modelInfos[model]["thinq2"] === "thinq1" &&
+                        !this.workIds[model]
+                    ) {
                         devID.platformType = this.modelInfos[model]["thinq2"];
                         devID.deviceId = model;
                         await this.startMonitor(devID);
@@ -482,13 +490,20 @@ class LgThinq extends utils.Adapter {
                     deviceId: dev,
                 };
                 if (this.workIds[dev] == null) {
-                    this.log.debug("Restart DEV: " + dev + " workid: " + this.workIds[dev] + " thinq: " + this.modelInfos[dev]["thinq2"]);
+                    this.log.debug(
+                        "Restart DEV: " +
+                            dev +
+                            " workid: " +
+                            this.workIds[dev] +
+                            " thinq: " +
+                            this.modelInfos[dev]["thinq2"],
+                    );
                     device_status[dev] = "Error";
                     await this.startMonitor(data);
                     continue;
                 } else {
                     this.log.debug("DEV: " + dev + " workid: " + this.workIds[dev]);
-                    const result = await this.getMonResult([{"deviceId": dev, "workId": this.workIds[dev]}]);
+                    const result = await this.getMonResult([{ deviceId: dev, workId: this.workIds[dev] }]);
                     this.log.debug("RESULTS: " + JSON.stringify(result));
                     if (result == null || !result.workList) {
                         this.log.debug(`Result is undefined! Stop Monitoring!`);
@@ -502,8 +517,8 @@ class LgThinq extends utils.Adapter {
                             device &&
                             device.returnData &&
                             (device.returnCode === "0000" ||
-                            device.returnCode === "0100" ||
-                            device.returnCode === "0106")
+                                device.returnCode === "0100" ||
+                                device.returnCode === "0106")
                         ) {
                             let resultConverted;
                             let unit = new Uint8Array(1024);
@@ -518,7 +533,7 @@ class LgThinq extends utils.Adapter {
                                 try {
                                     // @ts-ignore
                                     resultConverted = JSON.parse(unit.toString("utf-8"));
-                                } catch(e) {
+                                } catch (e) {
                                     this.log.debug(`Parse error! Stop Monitoring!`);
                                     device_status[dev] = "Parse error";
                                     await this.stopMonitor(data);
@@ -597,7 +612,11 @@ class LgThinq extends utils.Adapter {
                 for (const model in this.modelInfos) {
                     this.log.debug("Check deviceID: " + JSON.stringify(model));
                     const devID = {};
-                    if (this.modelInfos[model] && this.modelInfos[model]["thinq2"] === "thinq1" && !this.workIds[model]) {
+                    if (
+                        this.modelInfos[model] &&
+                        this.modelInfos[model]["thinq2"] === "thinq1" &&
+                        !this.workIds[model]
+                    ) {
                         devID.platformType = this.modelInfos[model]["thinq2"];
                         devID.deviceId = model;
                         await this.startMonitor(devID);
@@ -618,13 +637,20 @@ class LgThinq extends utils.Adapter {
                         platformType: this.modelInfos[dev]["thinq2"],
                         deviceId: dev,
                     };
-                    this.log.debug("Restart DEV: " + dev + " workid: " + this.workIds[dev] + " thinq: " + this.modelInfos[dev]["thinq2"]);
+                    this.log.debug(
+                        "Restart DEV: " +
+                            dev +
+                            " workid: " +
+                            this.workIds[dev] +
+                            " thinq: " +
+                            this.modelInfos[dev]["thinq2"],
+                    );
                     device_status[dev] = "Error";
                     await this.startMonitor(devID);
                 } else {
                     device_status[dev] = "Request";
                     this.log.debug("DEV: " + dev + " workid: " + this.workIds[dev]);
-                    all_workids.push({"deviceId": dev, "workId": this.workIds[dev]});
+                    all_workids.push({ deviceId: dev, workId: this.workIds[dev] });
                 }
             }
             if (all_workids.length === 0) {
@@ -645,10 +671,7 @@ class LgThinq extends utils.Adapter {
             if (Object.keys(result.workList).length === 0) {
                 this.updatethinq1Run = false;
                 return;
-            } else if (
-                !Array.isArray(result.workList) &&
-                typeof result.workList === "object"
-            ) {
+            } else if (!Array.isArray(result.workList) && typeof result.workList === "object") {
                 device_array.push(result.workList);
             } else if (Array.isArray(result.workList)) {
                 device_array = result.workList;
@@ -668,9 +691,7 @@ class LgThinq extends utils.Adapter {
                     if (
                         device &&
                         device.returnData &&
-                        (device.returnCode === "0000" ||
-                        device.returnCode === "0100" ||
-                        device.returnCode === "0106")
+                        (device.returnCode === "0000" || device.returnCode === "0100" || device.returnCode === "0106")
                     ) {
                         let resultConverted;
                         let unit = new Uint8Array(1024);
@@ -685,7 +706,7 @@ class LgThinq extends utils.Adapter {
                             try {
                                 // @ts-ignore
                                 resultConverted = JSON.parse(unit.toString("utf-8"));
-                            } catch(e) {
+                            } catch (e) {
                                 this.log.debug(`Parse error! Stop Monitoring!`);
                                 device_status[device.deviceId] = "Parse error";
                                 await this.stopMonitor(data);
@@ -757,15 +778,11 @@ class LgThinq extends utils.Adapter {
         const weather = await this.getDeviceEnergy(req);
         this.log.debug(JSON.stringify(weather));
         if (weather.temperature != null) {
-            const temp = typeof weather.temperature === "string"
-                ? weather.temperature
-                : weather.temperature.toString();
+            const temp = typeof weather.temperature === "string" ? weather.temperature : weather.temperature.toString();
             this.setState("weather.temperature", temp, true);
         }
         if (weather.humidity != null) {
-            const humi = typeof weather.humidity === "string"
-                ? weather.humidity
-                : weather.humidity.toString();
+            const humi = typeof weather.humidity === "string" ? weather.humidity : weather.humidity.toString();
             this.setState("weather.humidity", humi, true);
         }
     }
@@ -789,7 +806,7 @@ class LgThinq extends utils.Adapter {
 
     monitorHeaders() {
         const monitorHeaders = {
-            "Accept": "application/json",
+            Accept: "application/json",
             "x-thinq-application-key": "wideq",
             "x-thinq-security-key": "nuts_securitykey",
         };
@@ -978,14 +995,14 @@ class LgThinq extends utils.Adapter {
         let reqData = null;
         try {
             reqData = JSON.parse(data);
-        } catch(e) {
+        } catch (e) {
             this.log.warn(`Own Request error: ${e}`);
             return;
         }
         this.log.debug("reqDatahinq1: " + JSON.stringify(reqData));
         const axiosOption = {
             params: reqData.params,
-            data: reqData.data
+            data: reqData.data,
         };
         this.log.debug("axiosOptionhinq1: " + JSON.stringify(axiosOption));
         if (axiosOption.params && axiosOption.params.lgedmRoot) {
@@ -1011,7 +1028,7 @@ class LgThinq extends utils.Adapter {
                 url: reqData.url,
                 baseURL: this.gateway.thinq1Uri + "/",
                 headers: header,
-                ...axiosOption
+                ...axiosOption,
             })
                 .then(async (res) => {
                     if (res.data) {
@@ -1045,7 +1062,7 @@ class LgThinq extends utils.Adapter {
                 } else {
                     try {
                         unit = JSON.parse(resp.lgedmRoot.returnData.toString());
-                    } catch(e) {
+                    } catch (e) {
                         this.log.warn(`Parse error!`);
                         return;
                     }
@@ -1076,6 +1093,242 @@ class LgThinq extends utils.Adapter {
                 this.log.debug("getDeviceEnergy: " + error);
                 return 500;
             });
+    }
+
+    async loginNew() {
+        const sessionCookie = await this.requestClient({
+            method: "get",
+            maxBodyLength: Infinity,
+            url: "https://de.lgemembers.com/lgacc/service/v1/signin",
+            headers: {
+                accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "cache-control": "max-age=0",
+                "user-agent":
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+                "accept-language": "de-DE,de;q=0.9",
+            },
+            params: {
+                callback_url: "lgaccount.lgsmartthinq:/",
+                client_id: "LGAO221A02",
+                close_type: "0",
+                country: "DE",
+                language: "de",
+                pre_login: "",
+                redirect_url: "lgaccount.lgsmartthinq:/",
+                state: "signin",
+                svc_code: "SVC202",
+                svc_integrated: "Y",
+                ui_mode: "light",
+                webview_yn: "Y",
+            },
+        })
+            .then((res) => {
+                this.log.debug(res);
+                //return session cookie
+                return res.headers["set-cookie"][0].split(";")[0];
+            })
+            .catch((error) => {
+                this.log.error(error);
+                error.response && this.log.error(error.response.data);
+            });
+        const hashedPassword = await this.requestClient({
+            method: "post",
+            url: "https://de.lgemembers.com/lgacc/front/v1/signin/signInPre",
+            headers: {
+                "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+                accept: "*/*",
+                "x-requested-with": "XMLHttpRequest",
+                "accept-language": "de-DE,de;q=0.9",
+                origin: "https://de.lgemembers.com",
+                "user-agent":
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+                cookie: sessionCookie,
+            },
+            //hash sha512 from password
+            data: { userAuth2: crypto.createHash("sha512").update(this.config.password).digest("hex") },
+        })
+            .then((res) => {
+                return res.data;
+            })
+            .catch((error) => {
+                this.log.error(error);
+                error.response && this.log.error(error.response.data);
+            });
+        const accountInfo = await this.requestClient({
+            method: "post",
+            url: "https://de.lgemembers.com/lgacc/front/v1/signin/signInAct",
+            headers: {
+                "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+                accept: "*/*",
+                "x-requested-with": "XMLHttpRequest",
+                "accept-language": "de-DE,de;q=0.9",
+                origin: "https://de.lgemembers.com",
+                "user-agent":
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+                cookie: sessionCookie,
+            },
+
+            data: {
+                clientId: "LGAO221A02",
+                doneYn: "",
+                ipadYn: "N",
+                itgTermsUseFlag: "Y",
+                itgUserType: "A",
+                local_country: "DE",
+                local_lang: "de",
+                skipYn: "N",
+                svcCode: "SVC202",
+                svc_code: "SVC202",
+                userId: encodeURIComponent(this.plainTextToRSA(this.config.user)),
+                userPw: hashedPassword,
+            },
+        })
+            .then((res) => {
+                return res.data;
+            })
+            .catch((error) => {
+                this.log.error(error);
+                error.response && this.log.error(error.response.data);
+            });
+        if (!accountInfo) {
+            this.log.error("Login failed");
+            return;
+        }
+        const uuid = this.uuidv4();
+        var additionalInfo = {
+            uuid: uuid,
+            user_id: accountInfo.account.userID,
+            user_id_type: accountInfo.account.userIDType,
+            svc_integrated: "Y", //queryMap.svc_integrated
+        };
+        const sessionCookieV2 = await this.requestClient({
+            method: "post",
+            url: "https://de.lgemembers.com/lgacc/front/v1/signin/signInComplete",
+            headers: {
+                "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+                accept: "*/*",
+                "x-requested-with": "XMLHttpRequest",
+                "accept-language": "de-DE,de;q=0.9",
+                origin: "https://de.lgemembers.com",
+                "user-agent":
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+                cookie: sessionCookie,
+            },
+
+            data: {
+                loginSessionID: accountInfo.account.loginSessionID,
+                additionalInfo: encodeURIComponent(JSON.stringify(additionalInfo)),
+                autoYn: "N",
+                deviceId: "18f00ed4a6d2f6a2c11398559fc6ae4b",
+                ipadYn: "N",
+                local_country: "DE",
+                local_lang: "de",
+                serviceYn: "Y",
+                svcCode: "SVC202",
+                svc_code: "SVC202'",
+                uuid: uuid,
+            },
+        })
+            .then((res) => {
+                if (res.data.code !== "SUCCESS") {
+                    this.log.error(res.data);
+                    return;
+                }
+                return res.headers["set-cookie"][0].split(";")[0];
+            })
+            .catch((error) => {
+                this.log.error(error);
+                error.response && this.log.error(error.response.data);
+            });
+        await this.requestClient({
+            method: "post",
+            url: "https://de.lgemembers.com/lgacc/front/v1/signin/token",
+            headers: {
+                "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+                accept: "*/*",
+                "x-requested-with": "XMLHttpRequest",
+                "accept-language": "de-DE,de;q=0.9",
+                origin: "https://de.lgemembers.com",
+                "user-agent":
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+                cookie: sessionCookieV2,
+            },
+
+            data: {
+                loginSessionID: accountInfo.account.loginSessionID,
+
+                uuid: uuid,
+            },
+        })
+            .then((res) => {
+                if (res.data !== "SUCCESS") {
+                    this.log.error(res.data);
+                    return;
+                }
+            })
+            .catch((error) => {
+                this.log.error(error);
+                error.response && this.log.error(error.response.data);
+            });
+        const codeResponse = await this.requestClient({
+            method: "post",
+            url: "https://de.lgemembers.com/lgacc/front/v1/signin/oauth",
+            headers: {
+                "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+                accept: "*/*",
+                "x-requested-with": "XMLHttpRequest",
+                "accept-language": "de-DE,de;q=0.9",
+                origin: "https://de.lgemembers.com",
+                "user-agent":
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+                cookie: sessionCookieV2,
+            },
+
+            data: {
+                loginSessionID: accountInfo.account.loginSessionID,
+                accountType: "LGE",
+                clientId: "LGAO221A02",
+                countryCode: "DE",
+                local_country: "DE",
+                local_lang: "de",
+                redirectUri: "lgaccount.lgsmartthinq:/",
+                state: "signin",
+                svc_code: "SVC202",
+                userName: this.config.user,
+            },
+        })
+            .then((res) => {
+                if (!res.data.redirect_uri) {
+                    this.log.error(JSON.stringify(res.data));
+                    return;
+                }
+                return qs.parse(decodeURIComponent(res.data.redirect_uri).split("?")[1]);
+            })
+            .catch((error) => {
+                this.log.error(error);
+                error.response && this.log.error(error.response.data);
+            });
+
+        this.log.debug(JSON.stringify(codeResponse));
+    }
+    plainTextToRSA(plainTxt) {
+        var pubkey =
+            "-----BEGIN PUBLIC KEY-----\r\n" +
+            "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkb2bcfvV5Q2Ag0UI6Mj3\r\n" +
+            "oDmS0b2I9RTIRFhIVqrO47FRKQaFQpjiKkgxMcbLqK+ACTORrt6eA6srX/HKGtN9\r\n" +
+            "aJvM/8ZzqAe1tztli/yQtm6MezKExTtSAxYkawaV2s+pj7RkOes+BsJ0ahL/HC1x\r\n" +
+            "divxU4M0DN7AKdOyQM3XJnAfIimb1yhI5VeQkSBLDeAY9OTjRdAn4N6aRXaIwtck\r\n" +
+            "hQYDs7t120uhRvtRX8WVY+YiROCKTgK9PPcvaGgWublxLnSPFFb4BGYDan2Ro0DL\r\n" +
+            "b0DD1It4vqePBDWZD9MByhRJ67mQGXOJ/u3EEbctHB7TZkejjWn5sArU6K1jP0LB\r\n" +
+            "hwIDAQAB\r\n" +
+            "-----END PUBLIC KEY-----";
+
+        const pk = forge.pki.publicKeyFromPem(pubkey);
+        const encrypted = pk.encrypt(plainTxt + "");
+        //to base64
+        const b64 = forge.util.encode64(encrypted);
+
+        return b64.trim();
     }
 
     async login(username, password) {
@@ -1316,9 +1569,10 @@ class LgThinq extends utils.Adapter {
         this.log.debug(JSON.stringify(resp));
         if (!resp || !resp.access_token) {
             this.log.warn("refresh token failed, start relogin");
-            this.session = await this.login(this.config.user, this.config.password).catch((error) => {
-                this.log.error(error);
-            });
+            this.session = await this.loginNew();
+            //   this.session = await this.login(this.config.user, this.config.password).catch((error) => {
+            //     this.log.error(error);
+            //   });
         }
         if (this.session && resp && resp.access_token) {
             this.session.access_token = resp.access_token;
@@ -1370,22 +1624,14 @@ class LgThinq extends utils.Adapter {
         if (!resp) {
             return;
         }
-        if (
-            resp &&
-            resp.account &&
-            resp.account.serviceList
-        ) {
+        if (resp && resp.account && resp.account.serviceList) {
             const svc = resp.account.serviceList.find((val) => val.svcName === "LG ThinQ");
             if (svc && svc.svcCode) {
                 this.svc = svc.svcCode;
                 this.log.debug(`SVC: ${svc.svcCode}`);
             }
         }
-        if (
-            resp &&
-            resp.account &&
-            resp.account.userIDType
-        ) {
+        if (resp && resp.account && resp.account.userIDType) {
             this.lge = resp.account.userIDType;
             this.log.debug(`LGE: ${this.lge}`);
         }
@@ -1650,7 +1896,7 @@ class LgThinq extends utils.Adapter {
         if (deviceModel) {
             if (!uris.data[device.modelJsonUri]) {
                 uris.data[device.modelJsonUri] = deviceModel;
-                fs.writeFile(`${this.adapterDir}/lib/modelJsonUri`, JSON.stringify(uris), err => {
+                fs.writeFile(`${this.adapterDir}/lib/modelJsonUri`, JSON.stringify(uris), (err) => {
                     if (err) {
                         this.log.info(`Write file error: ${err}`);
                     } else {
@@ -1783,7 +2029,7 @@ class LgThinq extends utils.Adapter {
                                 role: "switch",
                                 write: true,
                                 read: true,
-                                def: false
+                                def: false,
                             };
                             if (
                                 control === "WMDownload" ||
@@ -2225,10 +2471,14 @@ class LgThinq extends utils.Adapter {
                             monitoring.data.state.reported.static &&
                             monitoring.data.state.reported.static.deviceType &&
                             (monitoring.data.state.reported.static.deviceType == "406" ||
-                            monitoring.data.state.reported.static.deviceType == "401" ||
-                            monitoring.data.state.reported.static.deviceType == "101")) {
+                                monitoring.data.state.reported.static.deviceType == "401" ||
+                                monitoring.data.state.reported.static.deviceType == "101")
+                        ) {
                             this.refreshRemote(monitoring);
-                            if (monitoring.data.state.reported["airState.preHeat.schedule"] != null && !this.isAdapterUpdateFor406) {
+                            if (
+                                monitoring.data.state.reported["airState.preHeat.schedule"] != null &&
+                                !this.isAdapterUpdateFor406
+                            ) {
                                 this.updateHeat(monitoring.deviceId);
                             }
                         }
@@ -2262,10 +2512,15 @@ class LgThinq extends utils.Adapter {
 
     uuidv4() {
         const hex = crypto.randomBytes(16).toString("hex");
-        const uuidv4 = hex.substring(0,8) + "-" +
-            hex.substring(8,12) + "-" +
-            hex.substring(12,16) + "-" +
-            hex.substring(16,20) + "-" +
+        const uuidv4 =
+            hex.substring(0, 8) +
+            "-" +
+            hex.substring(8, 12) +
+            "-" +
+            hex.substring(12, 16) +
+            "-" +
+            hex.substring(16, 20) +
+            "-" +
             hex.substring(20);
         return uuidv4.toUpperCase();
     }
@@ -2556,7 +2811,7 @@ class LgThinq extends utils.Adapter {
                                 id.indexOf("_end") !== -1 ||
                                 id.indexOf("_start") !== -1 ||
                                 id.indexOf("_state") !== -1
-                            ){
+                            ) {
                                 this.check_reservationCtrl(id, deviceId, lastsplit, state.val);
                                 this.setAckFlag(id);
                                 return;

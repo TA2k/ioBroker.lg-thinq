@@ -185,6 +185,7 @@ class LgThinq extends utils.Adapter {
                         }
                     }
                 } catch (e) {
+                    this.log.debug(e);
                     this.log.debug(`Cannot load sessionID`);
                 }
                 this.log.debug(JSON.stringify(this.session));
@@ -534,6 +535,7 @@ class LgThinq extends utils.Adapter {
                                     // @ts-ignore
                                     resultConverted = JSON.parse(unit.toString("utf-8"));
                                 } catch (e) {
+                                    this.log.debug(e);
                                     this.log.debug(`Parse error! Stop Monitoring!`);
                                     device_status[dev] = "Parse error";
                                     await this.stopMonitor(data);
@@ -579,6 +581,7 @@ class LgThinq extends utils.Adapter {
                             await this.startMonitor(data);
                         }
                     } catch (e) {
+                        this.log.debug(e);
                         this.log.debug("CATCH RESULT: " + JSON.stringify(result));
                     }
                 }
@@ -707,6 +710,7 @@ class LgThinq extends utils.Adapter {
                                 // @ts-ignore
                                 resultConverted = JSON.parse(unit.toString("utf-8"));
                             } catch (e) {
+                                this.log.debug(e);
                                 this.log.debug(`Parse error! Stop Monitoring!`);
                                 device_status[device.deviceId] = "Parse error";
                                 await this.stopMonitor(data);
@@ -753,6 +757,7 @@ class LgThinq extends utils.Adapter {
                     }
                 }
             } catch (e) {
+                this.log.debug(e);
                 this.log.debug("CATCH WORKLIST: " + JSON.stringify(device_array));
                 this.log.debug("CATCH WORKLIST RESULT: " + JSON.stringify(result));
             }
@@ -914,6 +919,7 @@ class LgThinq extends utils.Adapter {
             }
             return false;
         } catch (e) {
+            this.log.debug(e);
             this.log.debug("terms: " + e);
             return false;
         }
@@ -996,6 +1002,7 @@ class LgThinq extends utils.Adapter {
         try {
             reqData = JSON.parse(data);
         } catch (e) {
+            this.log.debug(e);
             this.log.warn(`Own Request error: ${e}`);
             return;
         }
@@ -1063,6 +1070,7 @@ class LgThinq extends utils.Adapter {
                     try {
                         unit = JSON.parse(resp.lgedmRoot.returnData.toString());
                     } catch (e) {
+                        this.log.debug(e);
                         this.log.warn(`Parse error!`);
                         return;
                     }
@@ -1099,7 +1107,7 @@ class LgThinq extends utils.Adapter {
         const sessionCookie = await this.requestClient({
             method: "get",
             maxBodyLength: Infinity,
-            url: "https://de.lgemembers.com/lgacc/service/v1/signin",
+            url: "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com/lgacc/service/v1/signin",
             headers: {
                 accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                 "cache-control": "max-age=0",
@@ -1133,13 +1141,14 @@ class LgThinq extends utils.Adapter {
             });
         const hashedPassword = await this.requestClient({
             method: "post",
-            url: "https://de.lgemembers.com/lgacc/front/v1/signin/signInPre",
+            url:
+                "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com/lgacc/front/v1/signin/signInPre",
             headers: {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 accept: "*/*",
                 "x-requested-with": "XMLHttpRequest",
                 "accept-language": "de-DE,de;q=0.9",
-                origin: "https://de.lgemembers.com",
+                origin: "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com",
                 "user-agent":
                     "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
                 cookie: sessionCookie,
@@ -1156,13 +1165,14 @@ class LgThinq extends utils.Adapter {
             });
         const accountInfo = await this.requestClient({
             method: "post",
-            url: "https://de.lgemembers.com/lgacc/front/v1/signin/signInAct",
+            url:
+                "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com/lgacc/front/v1/signin/signInAct",
             headers: {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 accept: "*/*",
                 "x-requested-with": "XMLHttpRequest",
                 "accept-language": "de-DE,de;q=0.9",
-                origin: "https://de.lgemembers.com",
+                origin: "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com",
                 "user-agent":
                     "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
                 cookie: sessionCookie,
@@ -1194,22 +1204,25 @@ class LgThinq extends utils.Adapter {
             this.log.error("Login failed");
             return;
         }
-        const uuid = this.uuidv4();
-        var additionalInfo = {
-            uuid: uuid,
+        const loginUuid = uuid.v4();
+        const additionalInfo = {
+            uuid: loginUuid,
             user_id: accountInfo.account.userID,
             user_id_type: accountInfo.account.userIDType,
             svc_integrated: "Y", //queryMap.svc_integrated
         };
         const sessionCookieV2 = await this.requestClient({
             method: "post",
-            url: "https://de.lgemembers.com/lgacc/front/v1/signin/signInComplete",
+            url:
+                "https://" +
+                this.gateway.countryCode.toLowerCase() +
+                ".lgemembers.com/lgacc/front/v1/signin/signInComplete",
             headers: {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 accept: "*/*",
                 "x-requested-with": "XMLHttpRequest",
                 "accept-language": "de-DE,de;q=0.9",
-                origin: "https://de.lgemembers.com",
+                origin: "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com",
                 "user-agent":
                     "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
                 cookie: sessionCookie,
@@ -1226,7 +1239,7 @@ class LgThinq extends utils.Adapter {
                 serviceYn: "Y",
                 svcCode: "SVC202",
                 svc_code: "SVC202'",
-                uuid: uuid,
+                uuid: loginUuid,
             },
         })
             .then((res) => {
@@ -1242,13 +1255,13 @@ class LgThinq extends utils.Adapter {
             });
         await this.requestClient({
             method: "post",
-            url: "https://de.lgemembers.com/lgacc/front/v1/signin/token",
+            url: "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com/lgacc/front/v1/signin/token",
             headers: {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 accept: "*/*",
                 "x-requested-with": "XMLHttpRequest",
                 "accept-language": "de-DE,de;q=0.9",
-                origin: "https://de.lgemembers.com",
+                origin: "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com",
                 "user-agent":
                     "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
                 cookie: sessionCookieV2,
@@ -1272,13 +1285,13 @@ class LgThinq extends utils.Adapter {
             });
         const codeResponse = await this.requestClient({
             method: "post",
-            url: "https://de.lgemembers.com/lgacc/front/v1/signin/oauth",
+            url: "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com/lgacc/front/v1/signin/oauth",
             headers: {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 accept: "*/*",
                 "x-requested-with": "XMLHttpRequest",
                 "accept-language": "de-DE,de;q=0.9",
-                origin: "https://de.lgemembers.com",
+                origin: "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com",
                 "user-agent":
                     "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
                 cookie: sessionCookieV2,
@@ -1308,7 +1321,7 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
-        const tokenUrl = "https://de.lgeapi.com/oauth/1.0/oauth2/token";
+        const tokenUrl = "https://" + this.gateway.countryCode.toLowerCase() + ".lgeapi.com/oauth/1.0/oauth2/token";
         const timestamp = DateTime.utc().toRFC2822();
         const data = {
             code: codeResponse.code,
@@ -1341,7 +1354,7 @@ class LgThinq extends utils.Adapter {
         return resp;
     }
     plainTextToRSA(plainTxt) {
-        var pubkey =
+        const pubkey =
             "-----BEGIN PUBLIC KEY-----\r\n" +
             "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkb2bcfvV5Q2Ag0UI6Mj3\r\n" +
             "oDmS0b2I9RTIRFhIVqrO47FRKQaFQpjiKkgxMcbLqK+ACTORrt6eA6srX/HKGtN9\r\n" +
@@ -1612,6 +1625,7 @@ class LgThinq extends utils.Adapter {
                     this.jsessionId = jsessionId.jsessionId;
                 }
             } catch (e) {
+                this.log.debug(e);
                 this.log.debug(`Cannot load sessionID`);
             }
             // @ts-ignore
@@ -1900,6 +1914,7 @@ class LgThinq extends utils.Adapter {
                 uris["data"] = {};
             }
         } catch (err) {
+            this.log.debug(err);
             uris["data"] = {};
         }
         if (!device.modelJsonUri) {
@@ -1968,6 +1983,7 @@ class LgThinq extends utils.Adapter {
                             const arr_dataKey = dataKeys[0].dataKey.split("|").pop();
                             deviceModel["folder"] = arr_dataKey.split(".")[0];
                         } catch (error) {
+                            this.log.debug(error);
                             this.log.info("Cannot find the snapshot folder!");
                         }
                     }
@@ -1992,6 +2008,7 @@ class LgThinq extends utils.Adapter {
                             const arr_dataKey = dataKeys[0].dataKey.split("|").pop();
                             deviceModel["folder"] = arr_dataKey.split(".")[0];
                         } catch (error) {
+                            this.log.debug(error);
                             this.log.info("Cannot find the snapshot folder!");
                         }
                     }
@@ -2026,6 +2043,7 @@ class LgThinq extends utils.Adapter {
                         }
                     }
                 } catch (error) {
+                    this.log.debug(error);
                     this.log.debug("Cannot find the folder!");
                 }
                 if (deviceModel["ControlWifi"].action) {
@@ -2639,6 +2657,7 @@ class LgThinq extends utils.Adapter {
             }
             callback();
         } catch (e) {
+            this.log.debug(e);
             callback();
         }
     }
@@ -2652,6 +2671,7 @@ class LgThinq extends utils.Adapter {
                 });
             }
         } catch (e) {
+            this.log.debug(e);
             this.log.warn("setAckFlag: " + e);
         }
     }
@@ -2699,6 +2719,7 @@ class LgThinq extends utils.Adapter {
                         try {
                             sendData = JSON.parse(js);
                         } catch (e) {
+                            this.log.debug(e);
                             this.log.info("sendData: " + e);
                             return;
                         }
@@ -3143,6 +3164,7 @@ class LgThinq extends utils.Adapter {
                         await this.updateDevices();
                     }, 10 * 1000);
                 } catch (e) {
+                    this.log.debug(e);
                     this.log.error("onStateChange: " + e);
                 }
             } else {
@@ -3255,6 +3277,7 @@ class LgThinq extends utils.Adapter {
                 });
             }
         } catch (e) {
+            this.log.debug(e);
             this.log.info(`cleanupQuality: ${e}`);
         }
     }
@@ -3270,6 +3293,7 @@ class LgThinq extends utils.Adapter {
                     await this.delObjectAsync(`${id}`, { recursive: true });
                 }
             } catch (e) {
+                this.log.debug(e);
                 this.log.info(`Cannot delete a folder`);
             }
             await this.setObjectNotExistsAsync("oldVersionCleaned", {

@@ -30,6 +30,13 @@
 ### 0.0.3
 
 -   (TA2k) initial release
+## 0.3.3 (2024-01-14)
+
+-   (Lucky-ESA) Fixed thinq1 crash
+-   (Lucky-ESA) Fixed crash when internet fails (refreshToken)
+-   (Lucky-ESA) Added weather request
+-   (Lucky-ESA) Bugfixe
+
 ## 0.3.2 (2024-01-08)
 
 -   (Lucky-ESA) Added data point interval.status_devices

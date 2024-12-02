@@ -47,7 +47,7 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.0.5 (2024-12-02)
 
 -   (Lucky-ESA) Migration to ESLint9
 -   (Lucky-ESA) Bugfixe
@@ -78,13 +78,6 @@ Adapter for LG ThinQ
 -   (Lucky-ESA) Node 18 required
 -   (Lucky-ESA) JS-Controller >= 5.0.19 required
 -   (Lucky-ESA) Admin >=6.13.16 required
-
-### 0.3.3 (2024-01-14)
-
--   (Lucky-ESA) Fixed thinq1 crash
--   (Lucky-ESA) Fixed crash when internet fails (refreshToken)
--   (Lucky-ESA) Added weather request
--   (Lucky-ESA) Bugfixe
 
 ## License
 

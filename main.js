@@ -1270,7 +1270,7 @@ class LgThinq extends utils.Adapter {
             data: {
                 loginSessionID: accountInfo.account.loginSessionID,
 
-                uuid: uuid,
+                uuid: loginUuid,
             },
         })
             .then((res) => {

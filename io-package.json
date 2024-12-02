@@ -1,9 +1,9 @@
 {
     "common": {
         "name": "lg-thinq",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "news": {
-            "1.0.3": {
+            "1.0.4": {
                 "en": "Login fixed\nAdded hotwater for device 406 & 401\nDependencies updated",
                 "de": "Login gefixt\nHeißwasser für Gerät 406 & 401 hinzugefügt\nAusgaben aktualisiert",
                 "ru": "Добавленная горячая вода для устройства 406 & 401\nОбновленные данные о зависимостях",

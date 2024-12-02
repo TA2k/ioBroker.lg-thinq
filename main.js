@@ -59,6 +59,7 @@ class LgThinq extends utils.Adapter {
         this.deviceControls = {};
         this.json2iob = new Json2iob(this);
         this.targetKeys = {};
+        this.homes = null;
         this.createDataPoint = helper.createDataPoint;
         this.setDryerBlindStates = helper.setDryerBlindStates;
         this.createFridge = helper.createFridge;
@@ -1840,6 +1841,7 @@ class LgThinq extends utils.Adapter {
                 this.log.error("Could not receive homes");
                 return;
             }
+            this.log.debug(`Home Items: ${JSON.stringify(home_result)}`);
             this.homes = home_result.result.item;
             this.json2iob.parse("homes", this.homes, {
                 forceIndex: true,

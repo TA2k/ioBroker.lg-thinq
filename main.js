@@ -1104,10 +1104,11 @@ class LgThinq extends utils.Adapter {
     }
 
     async loginNew() {
+        const countryCode = this.gateway.countryCode.toLowerCase();
         const sessionCookie = await this.requestClient({
             method: "get",
             maxBodyLength: Infinity,
-            url: "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com/lgacc/service/v1/signin",
+            url: `https://${countryCode}.lgemembers.com/lgacc/service/v1/signin`,
             headers: {
                 accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                 "cache-control": "max-age=0",
@@ -1117,23 +1118,27 @@ class LgThinq extends utils.Adapter {
             },
             params: {
                 callback_url: "lgaccount.lgsmartthinq:/",
-                client_id: "LGAO221A02",
+                client_id: constants.CLIENT_ID,
                 close_type: "0",
-                country: "DE",
-                language: "de",
+                country: this.config.country,
+                language: this.config.language,
                 pre_login: "",
                 redirect_url: "lgaccount.lgsmartthinq:/",
                 state: "signin",
-                svc_code: "SVC202",
+                svc_code: constants.SVC_CODE,
                 svc_integrated: "Y",
                 ui_mode: "light",
                 webview_yn: "Y",
             },
         })
             .then((res) => {
-                this.log.debug(res);
+                res.data && this.log.debug(res.data);
                 //return session cookie
-                return res.headers["set-cookie"][0].split(";")[0];
+                if (res.headers["set-cookie"] != null) {
+                    return res.headers["set-cookie"][0].split(";")[0];
+                }
+                this.log.error(`Missing cookie`);
+                return;
             })
             .catch((error) => {
                 this.log.error(error);
@@ -1142,7 +1147,7 @@ class LgThinq extends utils.Adapter {
         const hashedPassword = await this.requestClient({
             method: "post",
             url:
-                "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com/lgacc/front/v1/signin/signInPre",
+                `https://${countryCode}.lgemembers.com/lgacc/front/v1/signin/signInPre`,
             headers: {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 accept: "*/*",
@@ -1166,7 +1171,7 @@ class LgThinq extends utils.Adapter {
         const accountInfo = await this.requestClient({
             method: "post",
             url:
-                "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com/lgacc/front/v1/signin/signInAct",
+                `https://${countryCode}.lgemembers.com/lgacc/front/v1/signin/signInAct`,
             headers: {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 accept: "*/*",
@@ -1177,18 +1182,17 @@ class LgThinq extends utils.Adapter {
                     "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
                 cookie: sessionCookie,
             },
-
             data: {
-                clientId: "LGAO221A02",
+                clientId: constants.CLIENT_ID,
                 doneYn: "",
                 ipadYn: "N",
                 itgTermsUseFlag: "Y",
                 itgUserType: "A",
-                local_country: "DE",
-                local_lang: "de",
+                local_country: this.config.country,
+                local_lang: this.config.language,
                 skipYn: "N",
-                svcCode: "SVC202",
-                svc_code: "SVC202",
+                svcCode: constants.SVC_CODE,
+                svc_code: constants.SVC_CODE,
                 userId: encodeURIComponent(this.plainTextToRSA(this.config.user)),
                 userPw: hashedPassword,
             },
@@ -1214,9 +1218,7 @@ class LgThinq extends utils.Adapter {
         const sessionCookieV2 = await this.requestClient({
             method: "post",
             url:
-                "https://" +
-                this.gateway.countryCode.toLowerCase() +
-                ".lgemembers.com/lgacc/front/v1/signin/signInComplete",
+                `https://${countryCode}.lgemembers.com/lgacc/front/v1/signin/signInComplete`,
             headers: {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 accept: "*/*",
@@ -1234,11 +1236,11 @@ class LgThinq extends utils.Adapter {
                 autoYn: "N",
                 deviceId: this.random_string(32),
                 ipadYn: "N",
-                local_country: "DE",
-                local_lang: "de",
+                local_country: this.config.country,
+                local_lang: this.config.language,
                 serviceYn: "Y",
-                svcCode: "SVC202",
-                svc_code: "SVC202'",
+                svcCode: constants.SVC_CODE,
+                svc_code: constants.SVC_CODE,
                 uuid: loginUuid,
             },
         })
@@ -1247,7 +1249,11 @@ class LgThinq extends utils.Adapter {
                     this.log.error(res.data);
                     return;
                 }
-                return res.headers["set-cookie"][0].split(";")[0];
+                if (res.headers["set-cookie"] != null) {
+                    return res.headers["set-cookie"][0].split(";")[0];
+                }
+                this.log.error(`Missing cookie`);
+                return;
             })
             .catch((error) => {
                 this.log.error(error);
@@ -1255,13 +1261,13 @@ class LgThinq extends utils.Adapter {
             });
         await this.requestClient({
             method: "post",
-            url: "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com/lgacc/front/v1/signin/token",
+            url: `https://${countryCode}.lgemembers.com/lgacc/front/v1/signin/token`,
             headers: {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 accept: "*/*",
                 "x-requested-with": "XMLHttpRequest",
                 "accept-language": "de-DE,de;q=0.9",
-                origin: "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com",
+                origin: `https://${countryCode}.lgemembers.com`,
                 "user-agent":
                     "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
                 cookie: sessionCookieV2,
@@ -1285,28 +1291,27 @@ class LgThinq extends utils.Adapter {
             });
         const codeResponse = await this.requestClient({
             method: "post",
-            url: "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com/lgacc/front/v1/signin/oauth",
+            url: `https://${countryCode}.lgemembers.com/lgacc/front/v1/signin/oauth`,
             headers: {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 accept: "*/*",
                 "x-requested-with": "XMLHttpRequest",
                 "accept-language": "de-DE,de;q=0.9",
-                origin: "https://" + this.gateway.countryCode.toLowerCase() + ".lgemembers.com",
+                origin: `https://${countryCode}.lgemembers.com`,
                 "user-agent":
                     "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
                 cookie: sessionCookieV2,
             },
-
             data: {
                 loginSessionID: accountInfo.account.loginSessionID,
                 accountType: "LGE",
-                clientId: "LGAO221A02",
-                countryCode: "DE",
-                local_country: "DE",
-                local_lang: "de",
+                clientId: constants.CLIENT_ID,
+                countryCode: this.config.country,
+                local_country: this.config.country,
+                local_lang: this.config.language,
                 redirectUri: "lgaccount.lgsmartthinq:/",
                 state: "signin",
-                svc_code: "SVC202",
+                svc_code: constants.SVC_CODE,
                 userName: this.config.user,
             },
         })
@@ -1321,7 +1326,7 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
-        const tokenUrl = "https://" + this.gateway.countryCode.toLowerCase() + ".lgeapi.com/oauth/1.0/oauth2/token";
+        const tokenUrl = `https://${countryCode}.lgeapi.com/oauth/1.0/oauth2/token`;
         const timestamp = DateTime.utc().toRFC2822();
         const data = {
             code: codeResponse.code,
@@ -1351,8 +1356,12 @@ class LgThinq extends utils.Adapter {
             });
         this.log.debug(JSON.stringify(resp));
         this.log.debug(JSON.stringify(codeResponse));
+        if (resp && resp.access_token) {
+            this.setState("info.connection", true, true);
+        }
         return resp;
     }
+
     plainTextToRSA(plainTxt) {
         const pubkey =
             "-----BEGIN PUBLIC KEY-----\r\n" +

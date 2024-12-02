@@ -52,7 +52,7 @@ Adapter for LG ThinQ
 -   (Lucky-ESA) Migration to ESLint9
 -   (Lucky-ESA) Bugfixe
 
-### 1.0.3 (2024-12-01)
+### 1.0.4 (2024-12-01)
 
 -   (TA2k) Login fixed
 -   (Lucky-ESA) Added hotwater for device 406 & 401

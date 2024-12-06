@@ -112,6 +112,7 @@ class LgThinq extends utils.Adapter {
         this.app_agent = "";
         this.app_device = "";
         this.isAdapterUpdateFor406 = false;
+        this.countLogin = 0;
     }
 
     /**
@@ -141,7 +142,7 @@ class LgThinq extends utils.Adapter {
         }
         this.app_agent = constants.APP_AGENT[Math.floor(Math.random() * constants.APP_AGENT.length)];
         this.app_device = constants.APP_DEVICE[Math.floor(Math.random() * constants.APP_DEVICE.length)];
-        await this.setState("info.connection", false, true);
+        await this.setConnection(false);
         await this.cleanOldVersion();
         if (this.config.interval < 0.5) {
             this.log.info("Set interval to minimum 0.5");
@@ -252,7 +253,7 @@ class LgThinq extends utils.Adapter {
                 this.defaultHeaders["x-emp-token"] = this.session.access_token;
                 let listDevices = await this.getListDevices();
                 if (listDevices && listDevices === "TERMS") {
-                    this.setState("info.connection", false, true);
+                    await this.setConnection(false);
                     const new_term = await this.terms();
                     if (new_term) {
                         listDevices = await this.getListDevices();
@@ -261,10 +262,10 @@ class LgThinq extends utils.Adapter {
                     }
                 }
                 if (listDevices && listDevices === "TERMS") {
-                    this.setState("info.connection", false, true);
+                    await this.setConnection(false);
                     return;
                 } else if (listDevices && listDevices === "BLOCKED") {
-                    this.setState("info.connection", false, true);
+                    await this.setConnection(false);
                     return;
                 }
                 if (!listDevices) {
@@ -1033,11 +1034,11 @@ class LgThinq extends utils.Adapter {
             this.log.error(error);
         });
         if (listDevices && listDevices === "TERMS") {
-            this.setState("info.connection", false, true);
+            await this.setConnection(false);
             this.terms();
             return;
         } else if (listDevices && listDevices === "BLOCKED") {
-            this.setState("info.connection", false, true);
+            await this.setConnection(false);
             return;
         }
         if (typeof listDevices == "object") {
@@ -1193,7 +1194,7 @@ class LgThinq extends utils.Adapter {
     }
 
     async loginNew() {
-        await this.setState("info.connection", false, true);
+        await this.setConnection(false);
         const countryCode = this.gateway.countryCode.toLowerCase();
         const sessionCookie = await this.requestClient({
             method: "get",
@@ -1456,7 +1457,7 @@ class LgThinq extends utils.Adapter {
             });
         this.log.debug(`resp: ${JSON.stringify(resp)}`);
         if (resp && resp.access_token) {
-            this.setState("info.connection", true, true);
+            await this.setConnection(true);
         }
         return resp;
     }
@@ -1573,7 +1574,7 @@ class LgThinq extends utils.Adapter {
 
         this.lgeapi_url = token.oauth2_backend_url || this.lgeapi_url;
         if (token && token.access_token) {
-            this.setState("info.connection", true, true);
+            await this.setConnection(true);
         }
         return token;
     }
@@ -1676,16 +1677,8 @@ class LgThinq extends utils.Adapter {
         this.log.debug("refreshToken");
         const tokenUrl = `${this.lgeapi_url}oauth/1.0/oauth2/token`;
         if (!this.session || !this.session.refresh_token) {
-            await this.setState("info.connection", false, true);
-            this.updateInterval && this.clearInterval(this.updateInterval);
-            this.qualityInterval && this.clearInterval(this.qualityInterval);
-            this.refreshTokenInterval && this.clearInterval(this.refreshTokenInterval);
-            this.refreshTokenTimeout && this.clearTimeout(this.refreshTokenTimeout);
-            this.refreshTimeout && this.clearTimeout(this.refreshTimeout);
-            this.sleepTimer && this.clearTimeout(this.sleepTimer);
-            this.updateThinq1Interval && this.clearInterval(this.updateThinq1Interval);
-            this.updateThinq1SingleInterval && this.clearInterval(this.updateThinq1SingleInterval);
-            this.log.warn(`Missing refreshtoken. Please restart this adapter!!`);
+            await this.setConnection(false);
+            this.unloadAllTimer();
             return false;
         }
         const data = {
@@ -1714,6 +1707,13 @@ class LgThinq extends utils.Adapter {
             .then(resp => resp.data)
             .catch(error => {
                 this.log.error(error);
+                if (error.code === "ERR_NETWORK" && !first && this.session.refresh_token) {
+                    this.log.error("no internet connection");
+                    if (this.refreshTokenInterval == null) {
+                        this.session.expires_in = 3600;
+                        this.setRefreshTokenInterval();
+                    }
+                }
                 return;
             });
         this.log.debug(JSON.stringify(resp));
@@ -1722,7 +1722,17 @@ class LgThinq extends utils.Adapter {
                 return false;
             }
             this.log.warn("refresh token failed, start relogin");
-            this.session = await this.loginNew();
+            const session = await this.loginNew();
+            if (session && session.access_token) {
+                this.session = session;
+                this.countLogin = 0;
+                return true;
+            }
+            ++this.countLogin;
+            if (this.countLogin > 3) {
+                this.log.warn("Relogin limit reached!! Stop all intervals");
+                this.unloadAllTimer();
+            }
             //   this.session = await this.login(this.config.user, this.config.password).catch((error) => {
             //     this.log.error(error);
             //   });
@@ -1750,12 +1760,40 @@ class LgThinq extends utils.Adapter {
             this.refreshTokenInterval && this.clearInterval(this.refreshTokenInterval);
             this.refreshTokenInterval = null;
             this.setRefreshTokenInterval();
+            this.countLogin = 0;
+            await this.setConnection(true);
             this.session.next = new Date().getTime() + parseInt(this.session.expires_in) * 1000;
             await this.setState("session", { val: this.encrypt(JSON.stringify(this.session)), ack: true });
             return true;
         }
         this.log.warn(`Cannot load new token. Next attempt in 1 hour!`);
         return false;
+    }
+
+    async setConnection(setVal) {
+        await this.setState("info.connection", {
+            val: setVal,
+            ack: true,
+        });
+    }
+
+    unloadAllTimer() {
+        this.updateInterval && this.clearInterval(this.updateInterval);
+        this.qualityInterval && this.clearInterval(this.qualityInterval);
+        this.refreshTokenInterval && this.clearInterval(this.refreshTokenInterval);
+        this.refreshTokenTimeout && this.clearTimeout(this.refreshTokenTimeout);
+        this.refreshTimeout && this.clearTimeout(this.refreshTimeout);
+        this.sleepTimer && this.clearTimeout(this.sleepTimer);
+        this.updateThinq1Interval && this.clearInterval(this.updateThinq1Interval);
+        this.updateThinq1SingleInterval && this.clearInterval(this.updateThinq1SingleInterval);
+        this.updateInterval = null;
+        this.qualityInterval = null;
+        this.refreshTokenInterval = null;
+        this.refreshTokenTimeout = null;
+        this.refreshTimeout = null;
+        this.sleepTimer = null;
+        this.updateThinq1Interval = null;
+        this.updateThinq1SingleInterval = null;
     }
 
     async getUserNumber() {

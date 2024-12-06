@@ -13,31 +13,31 @@ The adapter creates all data points with the template from the data point `model
 -   [Instance Settings](#instance-settings)
     -   [Setting LG-Thinq](#instance-setting-lg-thinq)
     -   [Thinq1 Interval](#interval-thinq1-lg-thinq)
--   [Datapoints](#datapoints)
-    -   [Datapoint Device 101 Refrigerator/Freezer](#device-101-refrigeratorfreezer-thinq1--thinq2)
+-   [States](#states)
+    -   [State Device 101 Refrigerator/Freezer](#device-101-refrigeratorfreezer-thinq1--thinq2)
         -   [Remote Statistic](#101-remote-statistic-thinq2)
         -   [Remote basic commands](#101-remote-control-thinq1--thinq2)
         -   [Snapshot](#101-snapshot-thinq1--thinq2)
-    -   [Datapoint Device 201 Signature](#device-201-washer-signature-thinq2)
+    -   [State Device 201 Signature](#device-201-washer-signature-thinq2)
         -   [Remote basic commands](#201-remote-control-signature-thinq2)
-    -   [Datapoint Device 201 Washer](#device-201-washer-thinq1--thinq2)
+    -   [State Device 201 Washer](#device-201-washer-thinq1--thinq2)
         -   [Remote Statistic](#201-remote-statistic-thinq2)
         -   [Remote basic commands](#201-remote-control-thinq1--thinq2)
         -   [Snapshot](#201-snapshot-thinq1--thinq2)
-    -   [Datapoint Device 202 Dryer](#device-202-dryer-thinq1--thinq2)
+    -   [State Device 202 Dryer](#device-202-dryer-thinq1--thinq2)
         -   [Remote Statistic](#202-remote-statistic-thinq2)
         -   [Remote basic commands](#202-remote-control-thinq1--thinq2)
         -   [Snapshot](#202-snapshot-thinq1--thinq2)
-    -   [Datapoint Device 401 air conditioner thinq2](#device-401-air-conditioner-thinq2)
+    -   [State Device 401 air conditioner thinq2](#device-401-air-conditioner-thinq2)
         -   [Remote Statistic](#401-remote-statistic-thinq2)
         -   [Remote basic commands](#401-remote-control-thinq2)
         -   [Remote Holiday](#401-remote-holiday-thinq2)
         -   [Snapshot](#401-snapshot-thinq2)
-    -   [Datapoint Device 401 air conditioner thinq1](#device-401-air-conditioner-thinq1)
+    -   [State Device 401 air conditioner thinq1](#device-401-air-conditioner-thinq1)
         -   [Remote Statistic](#401-remote-statistic-thinq1)
         -   [Remote basic commands](#401-remote-control-thinq1)
         -   [Snapshot](#401-snapshot-thinq1)
-    -   [Datapoint Device 406 Head pump](#device-406-heat-pump-thinq2)
+    -   [State Device 406 Head pump](#device-406-heat-pump-thinq2)
         -   [Remote Statistic](#406-remote-statistic-thinq2)
         -   [Remote basic commands](#406-remote-basicctrl-thinq2)
         -   [Remote schedule settings](#406-remote-reservationctrl-thinq2)
@@ -57,6 +57,7 @@ The adapter creates all data points with the template from the data point `model
 -   `Country`: Enter country - default DE
 -   `Language`: Enter language - default de_DE
 -   `Platform`: Enter platform - default LGThinQ
+-   `Delete session data`: If there are problems with the login, please delete the session data (lg-thinq.0.session wird geleert)
 
     ![instance_config_1.png](img/instance_config_1.png)
     ![instance_config_2.png](img/instance_config_2.png)
@@ -83,7 +84,9 @@ The adapter creates all data points with the template from the data point `model
 
     ![interval.png](img/interval.png)
 
-# Datapoints
+# States
+
+![states.png](img/states.png)
 
 ### Device 101 Refrigerator/Freezer thinq1 & thinq2
 
@@ -190,7 +193,7 @@ Example JSON Door open
 
 [Summary](#summary)
 
--   `remote.expressMode` Express Mode on/off/rapid on -> thinq1 Datapoint snapshot.IcePlus
+-   `remote.expressMode` Express Mode on/off/rapid on -> thinq1 state snapshot.IcePlus
 -   `remote.freezerTemp` Change the temperature of the freezer (Celsius only)
 -   `remote.fridgeTemp` Change the temperature of the refrigerator (Celsius only)
     ![101_remote_control.png](img/101_remote_control.png)

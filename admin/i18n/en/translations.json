@@ -6,5 +6,7 @@
     "Update thinq1 interval in minutes": "Update interval in seconds for Thinq1 (per device 1 Second)",
     "Country": "Country",
     "Language": "Language",
-    "Platform": "Platform"
+    "Platform": "Platform",
+    "deleteSession": "Delete session data (in case of login problems)",
+    "deleteText": "Delete session data"
 }

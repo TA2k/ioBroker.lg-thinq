@@ -6,5 +6,7 @@
     "Country": "Land",
     "Language": "Taal",
     "Platform": "Platform",
-    "Update thinq1 interval in minutes": "Update-interval in seconden voor Thinq1 (per apparaat 1 seconde)"
+    "Update thinq1 interval in minutes": "Update-interval in seconden voor Thinq1 (per apparaat 1 seconde)",
+    "deleteSession": "Sessiegegevens verwijderen (bij inlogproblemen)",
+    "deleteText": "Sessiegegevens verwijderen"
 }

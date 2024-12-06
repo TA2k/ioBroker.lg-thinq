@@ -57,6 +57,7 @@ Der Adapter erstellt alle Datenpunkte mit dem Template aus dem Datenpunkt `model
 -   `Land`: Land eingeben - Standard DE
 -   `Sprache`: Sprache eingeben - Standard de_DE
 -   `Plattform`: Plattform eingeben - Standard LGThinQ
+-   `Sitzungsdaten löschen`: Gibt es Probleme mit dem Login dann bitte die Sitzungsdaten löschen (lg-thinq.0.session wird geleert)
 
     ![instance_config_1.png](img/instance_config_1.png)
     ![instance_config_2.png](img/instance_config_2.png)
@@ -84,6 +85,8 @@ Der Adapter erstellt alle Datenpunkte mit dem Template aus dem Datenpunkt `model
     ![interval.png](img/interval.png)
 
 # Datenpunkte
+
+![states.png](img/states.png)
 
 ### Gerät 101 Kühlschrank/Eisschrank thinq1 & thinq2
 

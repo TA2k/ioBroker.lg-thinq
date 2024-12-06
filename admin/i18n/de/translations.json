@@ -6,5 +6,7 @@
     "Country": "Land",
     "Language": "Sprache",
     "Platform": "Plattform",
-    "Update thinq1 interval in minutes": "Aktualisierungsintervall in Sekunden für Thinq1 (pro Gerät 1 Sekunde)"
+    "Update thinq1 interval in minutes": "Aktualisierungsintervall in Sekunden für Thinq1 (pro Gerät 1 Sekunde)",
+    "deleteSession": "Sitzungsdaten löschen (bei Login-Problemen)",
+    "deleteText": "Sitzungsdaten löschen"
 }

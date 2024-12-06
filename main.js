@@ -47,6 +47,7 @@ class LgThinq extends utils.Adapter {
         this.updateInterval = null;
         this.qualityInterval = null;
         this.refreshTokenInterval = null;
+        this.refreshTokenTimeout = null;
         this.updateThinq1Interval = null;
         this.updateThinq1SingleInterval = null;
         this.updatethinq1Run = false;
@@ -117,6 +118,27 @@ class LgThinq extends utils.Adapter {
      * Is called when databases are connected and adapter received configuration.
      */
     async onReady() {
+        let isPWChanged = false;
+        const instance = await this.getObjectAsync("session");
+        if (instance && instance.native && instance.native.pw != "") {
+            if (
+                this.config.user === instance.native.user &&
+                this.config.password === this.decrypt(instance.native.pw)
+            ) {
+                this.log.debug(`User and password have not been changed!`);
+                isPWChanged = true;
+            } else {
+                this.log.debug(`Save user and password!!`);
+                this.extendObject("session", {
+                    native: { user: this.config.user, pw: this.encrypt(this.config.password) },
+                });
+            }
+        } else if (instance && instance.native) {
+            this.log.debug(`Save user and password!`);
+            this.extendObject("session", {
+                native: { user: this.config.user, pw: this.encrypt(this.config.password) },
+            });
+        }
         this.app_agent = constants.APP_AGENT[Math.floor(Math.random() * constants.APP_AGENT.length)];
         this.app_device = constants.APP_DEVICE[Math.floor(Math.random() * constants.APP_DEVICE.length)];
         await this.setState("info.connection", false, true);
@@ -170,13 +192,31 @@ class LgThinq extends utils.Adapter {
             //   this.session = await this.login(this.config.user, this.config.password).catch((error) => {
             //     this.log.error(error);
             //   });
-            this.session = await this.loginNew();
+            let session = 0;
+            if (isPWChanged) {
+                session = await this.sessionCheck();
+            }
+            if (session === 1) {
+                const refreshToken = await this.refreshNewToken(true);
+                if (refreshToken) {
+                    session = this.session.expires_in * 1000 - 100;
+                } else {
+                    session = 0;
+                }
+            }
+            if (session === 0) {
+                this.session = await this.loginNew();
+            }
             if (
                 this.session != null &&
                 this.session.access_token != null &&
                 this.session.expires_in != null &&
                 this.session.refresh_token != null
             ) {
+                if (session === 0) {
+                    this.session.next = new Date().getTime() + parseInt(this.session.expires_in) * 1000;
+                    await this.setState("session", { val: this.encrypt(JSON.stringify(this.session)), ack: true });
+                }
                 try {
                     if (!this.jsessionId) {
                         const jsessionId = await this.getJSessionId();
@@ -190,13 +230,21 @@ class LgThinq extends utils.Adapter {
                 }
                 this.log.debug(JSON.stringify(this.session));
                 this.log.info("Login successful");
-                this.refreshTokenInterval = this.setInterval(
-                    () => {
-                        this.refreshNewToken();
-                    },
-                    (this.session.expires_in - 100) * 1000,
-                );
+                if (session === 0) {
+                    this.session.next = new Date().getTime() + parseInt(this.session.expires_in) * 1000;
+                    await this.setState("session", { val: this.encrypt(JSON.stringify(this.session)), ack: true });
+                    this.setRefreshTokenInterval();
+                } else {
+                    this.log.debug(`Start refreshTokenTimeout with ${session}!`);
+                    this.refreshTokenTimeout = this.setTimeout(() => {
+                        this.refreshTokenTimeout = null;
+                        this.refreshNewToken(false);
+                    }, session);
+                }
                 this.userNumber = await this.getUserNumber();
+                if (this.userNumber == null) {
+                    this.log.error(`Cannot found user data`);
+                }
                 const hash = crypto.createHash("sha256");
                 const clientID = this.userNumber ? this.userNumber : constants.API_CLIENT_ID;
                 this.mqtt_userID = hash.update(clientID + new Date().getTime()).digest("hex");
@@ -220,7 +268,8 @@ class LgThinq extends utils.Adapter {
                     return;
                 }
                 if (!listDevices) {
-                    this.log.info("Cannot find device!");
+                    this.log.info("Cannot find device! Delete session data");
+                    await this.setState("session", { val: "", ack: true });
                     return;
                 }
                 this.log.info(`Found: ${listDevices.length} devices`);
@@ -348,6 +397,50 @@ class LgThinq extends utils.Adapter {
                 this.log.warn(`Missing Session Infos!`);
             }
         }
+    }
+
+    setRefreshTokenInterval() {
+        this.log.debug(`Start refreshTokenInterval!`);
+        this.refreshTokenInterval = this.setInterval(
+            () => {
+                this.refreshNewToken(false);
+            },
+            (this.session.expires_in - 100) * 1000,
+        );
+    }
+
+    async sessionCheck() {
+        const obj = await this.getObjectAsync("session");
+        if (obj) {
+            const check_key = await this.getStateAsync("session");
+            if (
+                check_key != null &&
+                check_key.val != null &&
+                check_key.val.toString().indexOf("aes-192-cbc") !== -1 &&
+                typeof check_key.val === "string" &&
+                check_key.val != ""
+            ) {
+                check_key.val = this.decrypt(check_key.val);
+                const actual = new Date().getTime();
+                if (typeof check_key.val === "string") {
+                    this.log.debug(`Old session ${check_key.val}`);
+                    const val = JSON.parse(check_key.val);
+                    if (val && val.next > actual) {
+                        this.log.debug(`Use old session!`);
+                        this.session = val;
+                        return val.next - actual;
+                    } else if (val && val.refresh_token) {
+                        this.log.debug(`Use old session for refresh token!`);
+                        this.session = val;
+                        return 1;
+                    }
+                }
+                return 0;
+            }
+            return 0;
+        }
+        await this.setState("session", { val: "", ack: true });
+        return 0;
     }
 
     async maskingTimer() {
@@ -1100,6 +1193,7 @@ class LgThinq extends utils.Adapter {
     }
 
     async loginNew() {
+        await this.setState("info.connection", false, true);
         const countryCode = this.gateway.countryCode.toLowerCase();
         const sessionCookie = await this.requestClient({
             method: "get",
@@ -1128,8 +1222,8 @@ class LgThinq extends utils.Adapter {
             },
         })
             .then(res => {
-                res.data && this.log.debug(res.data);
-                //return session cookie
+                // res.data && this.log.debug(res.data);
+                // return session cookie
                 if (res.headers["set-cookie"] != null) {
                     return res.headers["set-cookie"][0].split(";")[0];
                 }
@@ -1140,6 +1234,7 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
+        this.log.debug(`sessionCookie: ${sessionCookie}`);
         // @ts-expect-error nothing
         const hashedPassword = await this.requestClient({
             method: "post",
@@ -1155,7 +1250,11 @@ class LgThinq extends utils.Adapter {
                 cookie: sessionCookie,
             },
             //hash sha512 from password
-            data: { userAuth2: crypto.createHash("sha512").update(this.config.password).digest("hex") },
+            data: {
+                userAuth2: crypto.createHash("sha512").update(this.config.password).digest("hex"),
+                password_hash_prameter_flag: "Y",
+                svc_list: "SVC202,SVC710", // SVC202=LG SmartHome, SVC710=EMP OAuth
+            },
         })
             .then(res => {
                 return res.data;
@@ -1164,6 +1263,7 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
+        this.log.debug(`hashedPassword: ${hashedPassword}`);
         // @ts-expect-error nothing
         const accountInfo = await this.requestClient({
             method: "post",
@@ -1204,6 +1304,7 @@ class LgThinq extends utils.Adapter {
             this.log.error("Login failed");
             return;
         }
+        this.log.debug(`accountInfo: ${JSON.stringify(accountInfo)}`);
         const loginUuid = uuid.v4();
         const additionalInfo = {
             uuid: loginUuid,
@@ -1255,6 +1356,7 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
+        this.log.debug(`sessionCookieV2: ${sessionCookieV2}`);
         // @ts-expect-error nothing
         await this.requestClient({
             method: "post",
@@ -1272,7 +1374,6 @@ class LgThinq extends utils.Adapter {
 
             data: {
                 loginSessionID: accountInfo.account.loginSessionID,
-
                 uuid: loginUuid,
             },
         })
@@ -1324,6 +1425,7 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
+        this.log.debug(`codeResponse: ${JSON.stringify(codeResponse)}`);
         const tokenUrl = `https://${countryCode}.lgeapi.com/oauth/1.0/oauth2/token`;
         const timestamp = DateTime.utc().toRFC2822();
         const data = {
@@ -1352,8 +1454,7 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
                 return;
             });
-        this.log.debug(JSON.stringify(resp));
-        this.log.debug(JSON.stringify(codeResponse));
+        this.log.debug(`resp: ${JSON.stringify(resp)}`);
         if (resp && resp.access_token) {
             this.setState("info.connection", true, true);
         }
@@ -1571,7 +1672,7 @@ class LgThinq extends utils.Adapter {
 
         return decoded;
     }
-    async refreshNewToken() {
+    async refreshNewToken(first) {
         this.log.debug("refreshToken");
         const tokenUrl = `${this.lgeapi_url}oauth/1.0/oauth2/token`;
         if (!this.session || !this.session.refresh_token) {
@@ -1579,12 +1680,13 @@ class LgThinq extends utils.Adapter {
             this.updateInterval && this.clearInterval(this.updateInterval);
             this.qualityInterval && this.clearInterval(this.qualityInterval);
             this.refreshTokenInterval && this.clearInterval(this.refreshTokenInterval);
+            this.refreshTokenTimeout && this.clearTimeout(this.refreshTokenTimeout);
             this.refreshTimeout && this.clearTimeout(this.refreshTimeout);
             this.sleepTimer && this.clearTimeout(this.sleepTimer);
             this.updateThinq1Interval && this.clearInterval(this.updateThinq1Interval);
             this.updateThinq1SingleInterval && this.clearInterval(this.updateThinq1SingleInterval);
             this.log.warn(`Missing refreshtoken. Please restart this adapter!!`);
-            return;
+            return false;
         }
         const data = {
             grant_type: "refresh_token",
@@ -1616,14 +1718,21 @@ class LgThinq extends utils.Adapter {
             });
         this.log.debug(JSON.stringify(resp));
         if (!resp || !resp.access_token) {
+            if (first) {
+                return false;
+            }
             this.log.warn("refresh token failed, start relogin");
             this.session = await this.loginNew();
             //   this.session = await this.login(this.config.user, this.config.password).catch((error) => {
             //     this.log.error(error);
             //   });
+            return false;
         }
         if (this.session && resp && resp.access_token) {
             this.session.access_token = resp.access_token;
+            if (first) {
+                return true;
+            }
             try {
                 const jsessionId = await this.getJSessionId();
                 this.log.debug(JSON.stringify(this.jsessionId));
@@ -1631,7 +1740,7 @@ class LgThinq extends utils.Adapter {
                     this.jsessionId = jsessionId.jsessionId;
                 }
             } catch (e) {
-                this.logError("debug", "Cannot load sessionID: ", e);
+                this.logError("debug", "Cannot load jsessionId: ", e);
             }
             // @ts-expect-error nothing
             this.defaultHeaders["x-emp-token"] = this.session.access_token;
@@ -1640,13 +1749,13 @@ class LgThinq extends utils.Adapter {
             }
             this.refreshTokenInterval && this.clearInterval(this.refreshTokenInterval);
             this.refreshTokenInterval = null;
-            this.refreshTokenInterval = this.setInterval(
-                () => {
-                    this.refreshNewToken();
-                },
-                (this.session.expires_in - 100) * 1000,
-            );
+            this.setRefreshTokenInterval();
+            this.session.next = new Date().getTime() + parseInt(this.session.expires_in) * 1000;
+            await this.setState("session", { val: this.encrypt(JSON.stringify(this.session)), ack: true });
+            return true;
         }
+        this.log.warn(`Cannot load new token. Next attempt in 1 hour!`);
+        return false;
     }
 
     async getUserNumber() {
@@ -1673,7 +1782,7 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
             });
         if (!resp) {
-            return;
+            return null;
         }
         if (resp && resp.account && resp.account.serviceList) {
             const svc = resp.account.serviceList.find(val => val.svcName === "LG ThinQ");
@@ -1699,7 +1808,7 @@ class LgThinq extends utils.Adapter {
         if (!resp.account) {
             this.log.error("No account found");
             this.log.error(JSON.stringify(resp));
-            return;
+            return null;
         }
         return resp.account.userNo;
     }
@@ -1874,7 +1983,7 @@ class LgThinq extends utils.Adapter {
                     }
                     if (error.response && error.response.status === 400) {
                         this.log.info("Try to refresh Token");
-                        this.refreshNewToken();
+                        this.refreshNewToken(false);
                     }
                     return;
                 });
@@ -1917,7 +2026,11 @@ class LgThinq extends utils.Adapter {
         try {
             if (fs.existsSync(`${this.adapterDir}/lib/modelJsonUri`)) {
                 const data_uris = fs.readFileSync(`${this.adapterDir}/lib/modelJsonUri`, "utf-8");
-                uris = JSON.parse(data_uris);
+                if (data_uris.startsWith("{") && data_uris.length > 10) {
+                    uris = JSON.parse(data_uris);
+                } else {
+                    uris["data"] = {};
+                }
             } else {
                 uris["data"] = {};
             }

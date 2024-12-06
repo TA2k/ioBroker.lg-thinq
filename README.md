@@ -47,6 +47,12 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+
+-   (Lucky-ESA) Save session data (prevents the login email)
+-   (Lucky-ESA) Fixed invalid jsonConfig
+-   (Lucky-ESA) Bugfixe
+
 ### 1.0.5 (2024-12-02)
 
 -   (Lucky-ESA) Migration to ESLint9

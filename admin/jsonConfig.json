@@ -5,11 +5,7 @@
         "_headerAdapter": {
             "type": "header",
             "text": "Adapter settings for lg-thinq",
-            "xs": 12,
-            "sm": 12,
-            "md": 6,
-            "lg": 4,
-            "xl": 4
+            "size": 2
         },
         "user": {
             "type": "text",
@@ -89,6 +85,24 @@
             "lg": 4,
             "xl": 4,
             "default": "LGThinQ"
+        },
+        "setState": {
+            "type": "setState",
+            "label": "deleteText",
+            "id": "lg-thinq.%INSTANCE%.session",
+            "tooltip": "deleteSession",
+            "ack": true,
+            "val": "",
+            "newLine": true,
+            "xs": 12,
+            "sm": 12,
+            "md": 6,
+            "lg": 4,
+            "xl": 4,
+            "style": {
+                "backgroundColor": "red",
+                "border": "outset"
+            }
         }
     }
 }

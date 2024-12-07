@@ -8,5 +8,7 @@
     "Platform": "Platforma",
     "Update thinq1 interval in minutes": "Interwał aktualizacji w sekundach dla Thinq1 (na urządzenie 1 sekunda)",
     "deleteSession": "Usuń dane sesji (w przypadku problemów z logowaniem)",
-    "deleteText": "Usuń dane sesji"
+    "deleteText": "Usuń dane sesji",
+    "selectReg": "Wybierz metodę rejestracji",
+    "selectRegTip": "PRAWDA dla starego loginu strony trzeciej lub FAŁSZ dla nowego loginu do aplikacji"
 }

@@ -57,6 +57,7 @@ Der Adapter erstellt alle Datenpunkte mit dem Template aus dem Datenpunkt `model
 -   `Land`: Land eingeben - Standard DE
 -   `Sprache`: Sprache eingeben - Standard de_DE
 -   `Plattform`: Plattform eingeben - Standard LGThinQ
+-   `Registrierungsmethode auswählen` True für den alten Login und False für den neuen APP login (man erhält eine Mail)
 -   `Sitzungsdaten löschen`: Gibt es Probleme mit dem Login dann bitte die Sitzungsdaten löschen (lg-thinq.0.session wird geleert)
 
     ![instance_config_1.png](img/instance_config_1.png)

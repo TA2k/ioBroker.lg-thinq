@@ -51,6 +51,7 @@ Adapter for LG ThinQ
 
 -   (Lucky-ESA) Save session data (prevents the login email)
 -   (Lucky-ESA) Fixed invalid jsonConfig
+-   (Lucky-ESA) Added choice between old and new login
 -   (Lucky-ESA) Bugfixe
 
 ### 1.0.5 (2024-12-02)

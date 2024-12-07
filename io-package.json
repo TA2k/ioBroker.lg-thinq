@@ -184,7 +184,8 @@
     "country": "DE",
     "language": "de_DE",
     "thinq1": false,
-    "platform": "LGThinQ"
+    "platform": "LGThinQ",
+    "regProcedure": false
   },
   "objects": [],
   "instanceObjects": [

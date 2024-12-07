@@ -8,5 +8,7 @@
     "Platform": "Plattform",
     "Update thinq1 interval in minutes": "Aktualisierungsintervall in Sekunden für Thinq1 (pro Gerät 1 Sekunde)",
     "deleteSession": "Sitzungsdaten löschen (bei Login-Problemen)",
-    "deleteText": "Sitzungsdaten löschen"
+    "deleteText": "Sitzungsdaten löschen",
+    "selectReg": "Registrierungsmethode auswählen",
+    "selectRegTip": "TRUE für den alten Drittanbieter-Login oder FALSE für den neuen APP-Login"
 }

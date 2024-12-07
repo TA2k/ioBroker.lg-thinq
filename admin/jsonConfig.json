@@ -86,6 +86,18 @@
             "xl": 4,
             "default": "LGThinQ"
         },
+        "regProcedure": {
+            "type": "checkbox",
+            "label": "selectReg",
+            "tooltip": "selectRegTip",
+            "newLine": true,
+            "default": false,
+            "xs": 12,
+            "sm": 12,
+            "md": 6,
+            "lg": 4,
+            "xl": 4
+        },
         "setState": {
             "type": "setState",
             "label": "deleteText",

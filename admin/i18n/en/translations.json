@@ -8,5 +8,7 @@
     "Language": "Language",
     "Platform": "Platform",
     "deleteSession": "Delete session data (in case of login problems)",
-    "deleteText": "Delete session data"
+    "deleteText": "Delete session data",
+    "selectReg": "Registration method select",
+    "selectRegTip": "TRUE for the old third-party login or FALSE for the new APP login"
 }

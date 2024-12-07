@@ -8,5 +8,7 @@
     "Platform": "平台",
     "Update thinq1 interval in minutes": "Thinq1 的更新间隔（以秒为单位）（每台设备 1 秒）",
     "deleteSession": "删除会话数据（如果出现登录问题）",
-    "deleteText": "删除会话数据"
+    "deleteText": "删除会话数据",
+    "selectReg": "注册方式选择",
+    "selectRegTip": "TRUE 表示旧的第三方登录或 FALSE 表示新的 APP 登录"
 }

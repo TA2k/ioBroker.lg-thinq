@@ -189,10 +189,6 @@ class LgThinq extends utils.Adapter {
         this.log.debug(JSON.stringify(this.gateway));
         if (this.gateway) {
             this.lgeapi_url = `https://${this.gateway.countryCode.toLowerCase()}.lgeapi.com/`;
-
-            //   this.session = await this.login(this.config.user, this.config.password).catch((error) => {
-            //     this.log.error(error);
-            //   });
             let session = 0;
             if (isPWChanged) {
                 session = await this.sessionCheck();
@@ -206,7 +202,15 @@ class LgThinq extends utils.Adapter {
                 }
             }
             if (session === 0) {
-                this.session = await this.loginNew();
+                if (this.config.regProcedure) {
+                    this.log.info(`Use the old third-party login`);
+                    this.session = await this.login(this.config.user, this.config.password).catch(error => {
+                        this.log.error(error);
+                    });
+                } else {
+                    this.log.info(`Use the new APP login`);
+                    this.session = await this.loginNew();
+                }
             }
             if (
                 this.session != null &&
@@ -1301,7 +1305,7 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
-        if (!accountInfo) {
+        if (!accountInfo || !accountInfo.account) {
             this.log.error("Login failed");
             return;
         }
@@ -1483,6 +1487,7 @@ class LgThinq extends utils.Adapter {
     }
 
     async login(username, password) {
+        await this.setConnection(false);
         // get signature and timestamp in login form
         const loginForm = await this.requestClient.get(await this.getLoginUrl()).then(res => res.data);
         const headers = {
@@ -1722,7 +1727,16 @@ class LgThinq extends utils.Adapter {
                 return false;
             }
             this.log.warn("refresh token failed, start relogin");
-            const session = await this.loginNew();
+            let session;
+            if (this.config.regProcedure) {
+                this.log.debug(`Use the old third-party login`);
+                session = await this.login(this.config.user, this.config.password).catch(error => {
+                    this.log.error(error);
+                });
+            } else {
+                this.log.debug(`Use the new APP login`);
+                this.session = await this.loginNew();
+            }
             if (session && session.access_token) {
                 this.session = session;
                 this.countLogin = 0;
@@ -1733,9 +1747,6 @@ class LgThinq extends utils.Adapter {
                 this.log.warn("Relogin limit reached!! Stop all intervals");
                 this.unloadAllTimer();
             }
-            //   this.session = await this.login(this.config.user, this.config.password).catch((error) => {
-            //     this.log.error(error);
-            //   });
             return false;
         }
         if (this.session && resp && resp.access_token) {

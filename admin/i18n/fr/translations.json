@@ -8,5 +8,7 @@
     "Platform": "Plateforme",
     "Update thinq1 interval in minutes": "Intervalle de mise à jour en secondes pour Thinq1 (par appareil 1 seconde)",
     "deleteSession": "Supprimer les données de session (en cas de problèmes de connexion)",
-    "deleteText": "Supprimer les données de session"
+    "deleteText": "Supprimer les données de session",
+    "selectReg": "Sélection de la méthode d'inscription",
+    "selectRegTip": "VRAI pour l'ancienne connexion tierce ou FALSE pour la nouvelle connexion APP"
 }

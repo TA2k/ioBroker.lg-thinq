@@ -8,5 +8,7 @@
     "Platform": "Plataforma",
     "Update thinq1 interval in minutes": "Intervalo de atualização em segundos para Thinq1 (1 segundo por dispositivo)",
     "deleteSession": "Excluir dados da sessão (em caso de problemas de login)",
-    "deleteText": "Excluir dados da sessão"
+    "deleteText": "Excluir dados da sessão",
+    "selectReg": "Método de registro selecionado",
+    "selectRegTip": "TRUE para o antigo login de terceiros ou FALSE para o novo login do APP"
 }

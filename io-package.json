@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lg-thinq",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "news": {
+      "1.0.6": {
+        "en": "Save session data (prevents the login email)\nFixed invalid jsonConfig\nAdded choice between old and new login\nBugfixe",
+        "de": "Speichern von Sitzungsdaten (verhindert die Login-E-Mail)\nBehoben ungültig jsonConfig\nWahl zwischen altem und neuem Login hinzugefügt\nBugfixes",
+        "ru": "Сохранить данные сеанса (предотвратить логин электронной почты)\nИсправленный недействительный jsonConfig\nДобавить выбор между старым и новым логином\nBugfixe",
+        "pt": "Salvar dados de sessão (prevenindo o e-mail de login)\nFixo inválido jsonConfig\nAdicionado escolha entre velho e novo login\nBugfixe",
+        "nl": "Sessiegegevens opslaan (voorkomt de aanmeldmail)\nVaste ongeldige jsonConfig\nToegevoegde keuze tussen oude en nieuwe login\nBugfixe",
+        "fr": "Enregistrer les données de session (prévient l'email de connexion)\nCorrection de jsonConfig invalide\nAjout du choix entre l'ancien et le nouveau login\nBugfixe",
+        "it": "Salvare i dati di sessione (previene l'email di login)\nRisolto invalido jsonConfig\nAggiunta scelta tra vecchio e nuovo login\nBugfixe",
+        "es": "Guardar datos de sesión (prevende el email de inicio de sesión)\nJsonConfig no válido fijo\nSelección agregada entre el inicio de sesión y el nuevo\nBugfixe",
+        "pl": "Zapisz dane sesji (zapobiega e-mailowi logowania)\nNaprawiono nieprawidłowe jsonConfig\nDodano wybór pomiędzy starym i nowym logowaniem\nBugfixe",
+        "uk": "Заощаджуйте дані сеансу (перекладає електронну пошту)\nВиправлено недійсний jsonConfig\nДодано вибір між застарілим і новим логіном\nПомилки",
+        "zh-cn": "保存会话数据( 防止登录电子邮件)\n固定无效的jsonconfig\n添加新旧登录的选择\n错误修正"
+      },
       "1.0.5": {
         "en": "Migration to ESLint9\nBugfixe",
         "de": "Migration auf ESLint9\nBugfixes",
@@ -80,19 +93,6 @@
         "pl": "Naprawiono awarię thinq1\nNaprawiono awarię, gdy internet nie działa (reveaToken)\nDodano żądanie pogodowe\nBugfixe",
         "uk": "Фіксована патрона1\nВиправлено помилку при відмові в Інтернеті (RereshToken)\nЗапит погоди\nПомилки",
         "zh-cn": "固定薄q1坠毁\n互联网失败时的固定崩溃( 重新托肯)\n添加天气请求\n错误修正"
-      },
-      "0.3.2": {
-        "en": "Added data point interval.status_devices\nFixed missing value for fridge\nFixed thinq1 crash\nAdded save modelJSON local\nNode 16 checked",
-        "de": "Hinzugefügt Datenpunkt Intervall.status_devices\nFester fehlender Wert für Kühlschrank\nFester Thinq1 Crash\nHinzugefügt SpeichermodellJSON local\nNode 16 geprüft",
-        "ru": "Добавлен интервал.status_devices\nИсправленное недостающее значение для холодильника\nФиксированный крушение тонка1\nДобавлено Сохранить модельJSON\nНод 16 проверен",
-        "pt": "Adicionado intervalo de ponto de dados.status_devices\nValor perdido fixo para frigorífico\nCorrigido acidente thinq1\nAdicionado salvar modelJSON local\nNode 16 verificado",
-        "nl": "Gegevenspuntinterval.status_apparaten toegevoegd\nVaste ontbrekende waarde voor koelkast\nVaste thinq1-crash\nToegevoegd opslaan modelJSON lokaal\nKnooppunt 16 gecontroleerd",
-        "fr": "Ajout de données point interval.status_devices\nValeur fixe manquante pour le réfrigérateur\nCrash fixe shillq1\nAjout de la sauvegarde du modèleJSON local\nNoeud 16 vérifié",
-        "it": "Intervallo del punto di dati aggiunto.status_devices\nValore mancante fisso per frigo\nFisso crash sottileq1\nAggiunto salvare modelloJSON locale\nNode 16 controllato",
-        "es": "Intervalo de punto de datos añadido.status_devices\nValor fijo faltante para la nevera\nAccidente fijo delgadaq1\nAñadido modelo de ahorroJSON local\nNodo 16 revisado",
-        "pl": "Dodano punkt danych interval.status _ devices\nNaprawiono brakującą wartość dla lodówki\nNaprawiono awarię thinq1\nDodano save modelJSON lokalne\nSprawdzony węzeł 16",
-        "uk": "Додано інтервал точки даних.status_devices\nФіксований відсутній значення для холодильника\nФіксована патрона1\nДоданий економити модельJSON локальний\nNode 16 зареєстрований",
-        "zh-cn": "添加数据点间隔. status_devices\n冰箱的固定缺失值\n固定薄q1坠毁\n添加本地保存模型JSON\n检查节点 16"
       }
     },
     "titleLang": {

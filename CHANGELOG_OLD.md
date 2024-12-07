@@ -30,6 +30,16 @@
 ### 0.0.3
 
 -   (TA2k) initial release
+## 1.0.0 (2024-05-20)
+
+-   (Lucky-ESA) Changed airState.quality.odor max value
+-   (Lucky-ESA) Fixed sentry messages
+-   (Lucky-ESA) Added jet & airclean for device 401
+-   (Lucky-ESA) Added Mqtt wakeup for device 406
+-   (Lucky-ESA) Node 18 required
+-   (Lucky-ESA) JS-Controller >= 5.0.19 required
+-   (Lucky-ESA) Admin >=6.13.16 required
+
 ## 0.3.3 (2024-01-14)
 
 -   (Lucky-ESA) Fixed thinq1 crash

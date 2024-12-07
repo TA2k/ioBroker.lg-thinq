@@ -47,7 +47,7 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.0.6 (2024-12-07)
 
 -   (Lucky-ESA) Save session data (prevents the login email)
 -   (Lucky-ESA) Fixed invalid jsonConfig
@@ -75,16 +75,6 @@ Adapter for LG ThinQ
 
 -   (Lucky-ESA) Fixed Mqtt wakeup for device 406 only
 -   (Lucky-ESA) Fixed TypeError
-
-### 1.0.0 (2024-05-20)
-
--   (Lucky-ESA) Changed airState.quality.odor max value
--   (Lucky-ESA) Fixed sentry messages
--   (Lucky-ESA) Added jet & airclean for device 401
--   (Lucky-ESA) Added Mqtt wakeup for device 406
--   (Lucky-ESA) Node 18 required
--   (Lucky-ESA) JS-Controller >= 5.0.19 required
--   (Lucky-ESA) Admin >=6.13.16 required
 
 ## License
 

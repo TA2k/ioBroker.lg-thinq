@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lg-thinq",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "news": {
+      "1.0.7": {
+        "en": "Fixed: Connection status does not turn green\nChanged: Checkbox to dropdown for login procedure",
+        "de": "Behoben: Verbindungsstatus wird nicht grün\nGeändert: Checkbox zum Dropdown für Login-Verfahren",
+        "ru": "Исправлено: статус подключения не становится зеленым\nИзменение: Checkbox для отключения для процедуры регистрации",
+        "pt": "Corrigido: O status da conexão não fica verde\nAlterado: Caixa de seleção para dropdown para procedimento de login",
+        "nl": "Vast: Verbindingsstatus wordt niet groen\nGewijzigd: Checkbox naar dropdown voor login procedure",
+        "fr": "Correction : le statut de connexion ne devient pas vert\nChanged: Boîte à cocher pour la procédure de connexion",
+        "it": "Fisso: lo stato di connessione non diventa verde\nModificato: Checkbox to dropdown per la procedura di login",
+        "es": "Fijo: El estado de conexión no se vuelve verde\nCambio: Checkbox to dropdown for login procedure",
+        "pl": "Naprawiono: Stan połączenia nie zmienia się na zielony\nZmieniono: pole wyboru do zrzutu dla procedury logowania",
+        "uk": "Виправлено: статус підключення не перетворюється зелений\nЗмінено: Перевірити випадання для процедури входу",
+        "zh-cn": "固定: 连接状态不变为绿色\n已更改: 检查框以下载登录程序"
+      },
       "1.0.6": {
         "en": "Save session data (prevents the login email)\nFixed invalid jsonConfig\nAdded choice between old and new login\nBugfixe",
         "de": "Speichern von Sitzungsdaten (verhindert die Login-E-Mail)\nBehoben ungültig jsonConfig\nWahl zwischen altem und neuem Login hinzugefügt\nBugfixes",
@@ -80,19 +93,6 @@
         "pl": "Zmieniono airState.quality.odor max value\nPoprawione wiadomości wartownicze\nDodano jet & airclean dla urządzenia 401\nDodano obudzenie Mqtt dla urządzenia 406\nWymagany węzeł 18\nJS- Controller > = 5.0.19 wymagane\nWymagany dodatek > = 6.13.16",
         "uk": "Змінений AirState.quality.odor макс. значення\nВиправлено надіслані повідомлення\nДодано струменевий і повітряний очищення для пристрою 401\nДодано Mqtt пробудження для пристрою 406\nNode 18 потрібно\nJS-Controller >=5.0.19 потрібно\nAdmin >=6.13.16 потрібно",
         "zh-cn": "改变空气状态. 质地. 气味最大值\n固定哨兵信息\n为设备401添加了喷气式飞机和空气净化\n为设备406添加了 Mqtt 醒目\n需要18号节点\n联合来文主计长\n所需行政经费"
-      },
-      "0.3.3": {
-        "en": "Fixed thinq1 crash\nFixed crash when internet fails (refreshToken)\nAdded weather request\nBugfixe",
-        "de": "Fester Thinq1 Crash\nBehobener Absturz bei Ausfall des Internets (refreshToken)\nZusätzliche Wetteranfrage\nBugfixes",
-        "ru": "Фиксированный крушение тонка1\nФиксированная авария, когда интернет терпит неудачу (refreshToken)\nДобавить запрос погоды\nBugfixe",
-        "pt": "Corrigido acidente thinq1\nAcidente fixo quando a internet falha (refreshToken)\nAdicionado pedido de tempo\nBugfixe",
-        "nl": "Vaste thinq1-crash\nVaste crash wanneer internet mislukt (refreshToken)\nToegevoegde weeraanvraag\nBugfixe",
-        "fr": "Crash fixe shillq1\nCrash corrigé lorsque Internet échoue (refreshToken)\nDemande météorologique supplémentaire\nBugfixe",
-        "it": "Fisso crash sottileq1\nRisolto crash quando internet non riesce (refreshToken)\nAggiunto la richiesta del tempo\nBugfixe",
-        "es": "Accidente fijo delgadaq1\nAccidente fijo cuando el Internet falla (refreshToken)\nSolicitud de tiempo adicional\nBugfixe",
-        "pl": "Naprawiono awarię thinq1\nNaprawiono awarię, gdy internet nie działa (reveaToken)\nDodano żądanie pogodowe\nBugfixe",
-        "uk": "Фіксована патрона1\nВиправлено помилку при відмові в Інтернеті (RereshToken)\nЗапит погоди\nПомилки",
-        "zh-cn": "固定薄q1坠毁\n互联网失败时的固定崩溃( 重新托肯)\n添加天气请求\n错误修正"
       }
     },
     "titleLang": {

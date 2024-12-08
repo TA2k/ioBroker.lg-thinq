@@ -47,8 +47,7 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.0.7 (2024-12-08)
 
 -   (Lucky-ESA) Fixed: Connection status does not turn green
 -   (Lucky-ESA) Changed: Checkbox to dropdown for login procedure
@@ -76,11 +75,6 @@ Adapter for LG ThinQ
 -   (Lucky-ESA) Dependencies updated
 -   (Lucky-ESA) Changed autoDryRemainTime max value
 -   (Lucky-ESA) Added own request for 401 thinq1
-
-### 1.0.1 (2024-05-21)
-
--   (Lucky-ESA) Fixed Mqtt wakeup for device 406 only
--   (Lucky-ESA) Fixed TypeError
 
 ## License
 

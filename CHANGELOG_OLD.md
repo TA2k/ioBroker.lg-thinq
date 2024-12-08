@@ -30,6 +30,11 @@
 ### 0.0.3
 
 -   (TA2k) initial release
+## 1.0.1 (2024-05-21)
+
+-   (Lucky-ESA) Fixed Mqtt wakeup for device 406 only
+-   (Lucky-ESA) Fixed TypeError
+
 ## 1.0.0 (2024-05-20)
 
 -   (Lucky-ESA) Changed airState.quality.odor max value

@@ -241,6 +241,7 @@ class LgThinq extends utils.Adapter {
                     this.setRefreshTokenInterval();
                 } else {
                     this.log.debug(`Start refreshTokenTimeout with ${session}!`);
+                    await this.setConnection(true);
                     this.refreshTokenTimeout = this.setTimeout(() => {
                         this.refreshTokenTimeout = null;
                         this.refreshNewToken(false);

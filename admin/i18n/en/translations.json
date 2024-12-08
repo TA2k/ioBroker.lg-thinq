@@ -10,5 +10,7 @@
     "deleteSession": "Delete session data (in case of login problems)",
     "deleteText": "Delete session data",
     "selectReg": "Registration method select",
-    "selectRegTip": "TRUE for the old third-party login or FALSE for the new APP login"
+    "selectRegTip": "Switch between old third-party or APP login",
+    "APP-Login": "APP login",
+    "Third-Party-Login": "Third-Party login"
 }

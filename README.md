@@ -51,6 +51,7 @@ Adapter for LG ThinQ
 ### **WORK IN PROGRESS**
 
 -   (Lucky-ESA) Fixed: Connection status does not turn green
+-   (Lucky-ESA) Changed: Checkbox to dropdown for login procedure
 
 ### 1.0.6 (2024-12-07)
 

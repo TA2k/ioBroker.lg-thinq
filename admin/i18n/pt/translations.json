@@ -10,5 +10,7 @@
     "deleteSession": "Excluir dados da sessão (em caso de problemas de login)",
     "deleteText": "Excluir dados da sessão",
     "selectReg": "Método de registro selecionado",
-    "selectRegTip": "TRUE para o antigo login de terceiros ou FALSE para o novo login do APP"
+    "selectRegTip": "Alternar entre login antigo de terceiros ou de APP",
+    "APP-Login": "Login do aplicativo",
+    "Third-Party-Login": "Login de terceiros"
 }

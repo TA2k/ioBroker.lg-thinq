@@ -10,5 +10,7 @@
     "deleteSession": "Eliminar datos de sesión (en caso de problemas de inicio de sesión)",
     "deleteText": "Eliminar datos de sesión",
     "selectReg": "Seleccionar método de registro",
-    "selectRegTip": "VERDADERO para el antiguo inicio de sesión de terceros o FALSO para el nuevo inicio de sesión de la APLICACIÓN"
+    "selectRegTip": "Cambiar entre el antiguo inicio de sesión de terceros o de la aplicación",
+    "APP-Login": "inicio de sesión de la aplicación",
+    "Third-Party-Login": "Inicio de sesión de terceros"
 }

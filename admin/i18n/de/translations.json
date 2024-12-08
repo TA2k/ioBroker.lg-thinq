@@ -10,5 +10,7 @@
     "deleteSession": "Sitzungsdaten löschen (bei Login-Problemen)",
     "deleteText": "Sitzungsdaten löschen",
     "selectReg": "Registrierungsmethode auswählen",
-    "selectRegTip": "TRUE für den alten Drittanbieter-Login oder FALSE für den neuen APP-Login"
+    "selectRegTip": "Zwischen altem Drittanbieter- oder APP-Login wechseln",
+    "APP-Login": "APP-Anmeldung",
+    "Third-Party-Login": "Anmeldung bei Drittanbietern"
 }

@@ -10,5 +10,7 @@
     "deleteSession": "Supprimer les données de session (en cas de problèmes de connexion)",
     "deleteText": "Supprimer les données de session",
     "selectReg": "Sélection de la méthode d'inscription",
-    "selectRegTip": "VRAI pour l'ancienne connexion tierce ou FALSE pour la nouvelle connexion APP"
+    "selectRegTip": "Basculer entre l'ancienne connexion tierce ou APP",
+    "APP-Login": "Connexion à l'application",
+    "Third-Party-Login": "Connexion tierce"
 }

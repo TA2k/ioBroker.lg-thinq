@@ -10,5 +10,7 @@
     "deleteSession": "Eliminare i dati della sessione (in caso di problemi di accesso)",
     "deleteText": "Elimina i dati della sessione",
     "selectReg": "Seleziona il metodo di registrazione",
-    "selectRegTip": "TRUE per il vecchio login di terze parti o FALSE per il nuovo login APP"
+    "selectRegTip": "Passa dal vecchio accesso di terze parti a quello dell'APP",
+    "APP-Login": "Accesso all'APP",
+    "Third-Party-Login": "Accesso di terze parti"
 }

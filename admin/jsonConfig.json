@@ -87,16 +87,26 @@
             "default": "LGThinQ"
         },
         "regProcedure": {
-            "type": "checkbox",
+            "type": "select",
             "label": "selectReg",
             "tooltip": "selectRegTip",
             "newLine": true,
-            "default": false,
             "xs": 12,
             "sm": 12,
             "md": 6,
             "lg": 4,
-            "xl": 4
+            "xl": 4,
+            "options": [
+                {
+                    "label": "APP-Login",
+                    "value": false
+                },
+                {
+                    "label": "Third-Party-Login",
+                    "value": true
+                }
+            ],
+            "default": false
         },
         "setState": {
             "type": "setState",

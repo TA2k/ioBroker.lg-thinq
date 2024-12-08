@@ -57,7 +57,7 @@ The adapter creates all data points with the template from the data point `model
 -   `Country`: Enter country - default DE
 -   `Language`: Enter language - default de_DE
 -   `Platform`: Enter platform - default LGThinQ
--   `Registration method select` True for the old login and False for the new APP login (you receive an email)
+-   `Registration method select` Switch between old third-party or APP login (you receive an email)
 -   `Delete session data`: If there are problems with the login, please delete the session data (lg-thinq.0.session wird geleert)
 
     ![instance_config_1.png](img/instance_config_1.png)

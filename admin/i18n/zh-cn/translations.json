@@ -10,5 +10,7 @@
     "deleteSession": "删除会话数据（如果出现登录问题）",
     "deleteText": "删除会话数据",
     "selectReg": "注册方式选择",
-    "selectRegTip": "TRUE 表示旧的第三方登录或 FALSE 表示新的 APP 登录"
+    "selectRegTip": "旧第三方或APP登录切换",
+    "APP-Login": "APP登录",
+    "Third-Party-Login": "第三方登录"
 }

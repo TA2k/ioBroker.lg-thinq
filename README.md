@@ -47,6 +47,11 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+-   (Lucky-ESA) Fixed: Connection status does not turn green
+
 ### 1.0.6 (2024-12-07)
 
 -   (Lucky-ESA) Save session data (prevents the login email)

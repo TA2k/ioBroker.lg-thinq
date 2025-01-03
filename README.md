@@ -17,20 +17,20 @@ Adapter for LG ThinQ
 
 ## Requirement
 
--   Node >= 18
--   JS-Controller >= 5.0.19
--   Admin >= 6.13.16
+- Node >= 18
+- JS-Controller >= 5.0.19
+- Admin >= 6.13.16
 
 ## Supported devices
 
 **DEVICE**: lg-thinq.0.xxx.deviceType -> e. g. 101</br>
 **PLATFORM**: lg-thinq.0.xxx.platformType -> e. g. thinq2
 
--   Device -> 101 Refrigerator -> thinq2 + thinq1
--   Device -> 201 Washer + signature -> thinq2 + thinq1
--   Device -> 202 Dryer -> thinq2 + thinq1
--   Device -> 401 AC -> thinq2 + thinq1
--   Device -> 406 Heatpump -> thinq2
+- Device -> 101 Refrigerator -> thinq2 + thinq1
+- Device -> 201 Washer + signature -> thinq2 + thinq1
+- Device -> 202 Dryer -> thinq2 + thinq1
+- Device -> 401 AC -> thinq2 + thinq1
+- Device -> 406 Heatpump -> thinq2
 
 ## Description
 
@@ -47,40 +47,41 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+
 ### 1.0.7 (2024-12-08)
 
--   (Lucky-ESA) Fixed: Connection status does not turn green
--   (Lucky-ESA) Changed: Checkbox to dropdown for login procedure
+- (Lucky-ESA) Fixed: Connection status does not turn green
+- (Lucky-ESA) Changed: Checkbox to dropdown for login procedure
 
 ### 1.0.6 (2024-12-07)
 
--   (Lucky-ESA) Save session data (prevents the login email)
--   (Lucky-ESA) Fixed invalid jsonConfig
--   (Lucky-ESA) Added choice between old and new login
--   (Lucky-ESA) Bugfixe
+- (Lucky-ESA) Save session data (prevents the login email)
+- (Lucky-ESA) Fixed invalid jsonConfig
+- (Lucky-ESA) Added choice between old and new login
+- (Lucky-ESA) Bugfixe
 
 ### 1.0.5 (2024-12-02)
 
--   (Lucky-ESA) Migration to ESLint9
--   (Lucky-ESA) Bugfixe
+- (Lucky-ESA) Migration to ESLint9
+- (Lucky-ESA) Bugfixe
 
 ### 1.0.4 (2024-12-01)
 
--   (TA2k) Login fixed
--   (Lucky-ESA) Added hotwater for device 406 & 401
--   (Lucky-ESA) Dependencies updated
+- (TA2k) Login fixed
+- (Lucky-ESA) Added hotwater for device 406 & 401
+- (Lucky-ESA) Dependencies updated
 
 ### 1.0.2 (2024-09-10)
 
--   (Lucky-ESA) Dependencies updated
--   (Lucky-ESA) Changed autoDryRemainTime max value
--   (Lucky-ESA) Added own request for 401 thinq1
+- (Lucky-ESA) Dependencies updated
+- (Lucky-ESA) Changed autoDryRemainTime max value
+- (Lucky-ESA) Added own request for 401 thinq1
 
 ## License
 
 MIT License
 
-Copyright (c) 2021-2024 TA2k <tombox2020@gmail.com>
+Copyright (c) 2021-2025 TA2k <tombox2020@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

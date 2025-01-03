@@ -1208,8 +1208,7 @@ class LgThinq extends utils.Adapter {
             headers: {
                 accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                 "cache-control": "max-age=0",
-                "user-agent":
-                    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+                "user-agent": this.app_agent,
                 "accept-language": "de-DE,de;q=0.9",
             },
             params: {
@@ -1241,7 +1240,6 @@ class LgThinq extends utils.Adapter {
                 error.response && this.log.error(error.response.data);
             });
         this.log.debug(`sessionCookie: ${sessionCookie}`);
-        // @ts-expect-error nothing
         const hashedPassword = await this.requestClient({
             method: "post",
             url: `https://${countryCode}.lgemembers.com/lgacc/front/v1/signin/signInPre`,
@@ -1250,10 +1248,9 @@ class LgThinq extends utils.Adapter {
                 accept: "*/*",
                 "x-requested-with": "XMLHttpRequest",
                 "accept-language": "de-DE,de;q=0.9",
-                origin: `https://${this.gateway.countryCode.toLowerCase()}.lgemembers.com`,
-                "user-agent":
-                    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
-                cookie: sessionCookie,
+                origin: `https://${countryCode}.lgemembers.com`,
+                "user-agent": this.app_agent,
+                cookie: typeof sessionCookie === "string" ? sessionCookie : "",
             },
             //hash sha512 from password
             data: {
@@ -1270,7 +1267,6 @@ class LgThinq extends utils.Adapter {
                 error.response && this.log.error(error.response.data);
             });
         this.log.debug(`hashedPassword: ${hashedPassword}`);
-        // @ts-expect-error nothing
         const accountInfo = await this.requestClient({
             method: "post",
             url: `https://${countryCode}.lgemembers.com/lgacc/front/v1/signin/signInAct`,
@@ -1280,9 +1276,8 @@ class LgThinq extends utils.Adapter {
                 "x-requested-with": "XMLHttpRequest",
                 "accept-language": "de-DE,de;q=0.9",
                 origin: `https://${countryCode}.lgemembers.com`,
-                "user-agent":
-                    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
-                cookie: sessionCookie,
+                "user-agent": this.app_agent,
+                cookie: typeof sessionCookie === "string" ? sessionCookie : "",
             },
             data: {
                 clientId: constants.CLIENT_ID,
@@ -1318,7 +1313,6 @@ class LgThinq extends utils.Adapter {
             user_id_type: accountInfo.account.userIDType,
             svc_integrated: "Y", //queryMap.svc_integrated
         };
-        // @ts-expect-error nothing
         const sessionCookieV2 = await this.requestClient({
             method: "post",
             url: `https://${countryCode}.lgemembers.com/lgacc/front/v1/signin/signInComplete`,
@@ -1327,10 +1321,9 @@ class LgThinq extends utils.Adapter {
                 accept: "*/*",
                 "x-requested-with": "XMLHttpRequest",
                 "accept-language": "de-DE,de;q=0.9",
-                origin: `https://${this.gateway.countryCode.toLowerCase()}.lgemembers.com`,
-                "user-agent":
-                    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
-                cookie: sessionCookie,
+                origin: `https://${countryCode}.lgemembers.com`,
+                "user-agent": this.app_agent,
+                cookie: typeof sessionCookie === "string" ? sessionCookie : "",
             },
 
             data: {
@@ -1363,7 +1356,6 @@ class LgThinq extends utils.Adapter {
                 error.response && this.log.error(error.response.data);
             });
         this.log.debug(`sessionCookieV2: ${sessionCookieV2}`);
-        // @ts-expect-error nothing
         await this.requestClient({
             method: "post",
             url: `https://${countryCode}.lgemembers.com/lgacc/front/v1/signin/token`,
@@ -1373,9 +1365,8 @@ class LgThinq extends utils.Adapter {
                 "x-requested-with": "XMLHttpRequest",
                 "accept-language": "de-DE,de;q=0.9",
                 origin: `https://${countryCode}.lgemembers.com`,
-                "user-agent":
-                    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
-                cookie: sessionCookieV2,
+                "user-agent": this.app_agent,
+                cookie: typeof sessionCookieV2 === "string" ? sessionCookieV2 : "",
             },
 
             data: {
@@ -1393,7 +1384,6 @@ class LgThinq extends utils.Adapter {
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
-        // @ts-expect-error nothing
         const codeResponse = await this.requestClient({
             method: "post",
             url: `https://${countryCode}.lgemembers.com/lgacc/front/v1/signin/oauth`,
@@ -1403,9 +1393,8 @@ class LgThinq extends utils.Adapter {
                 "x-requested-with": "XMLHttpRequest",
                 "accept-language": "de-DE,de;q=0.9",
                 origin: `https://${countryCode}.lgemembers.com`,
-                "user-agent":
-                    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
-                cookie: sessionCookieV2,
+                "user-agent": this.app_agent,
+                cookie: typeof sessionCookieV2 === "string" ? sessionCookieV2 : "",
             },
             data: {
                 loginSessionID: accountInfo.account.loginSessionID,
@@ -2067,7 +2056,6 @@ class LgThinq extends utils.Adapter {
                     }
                 });
         }
-
         return this._homes;
     }
 

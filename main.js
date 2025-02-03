@@ -130,15 +130,19 @@ class LgThinq extends utils.Adapter {
                 isPWChanged = true;
             } else {
                 this.log.debug(`Save user and password!!`);
-                this.extendObject("session", {
-                    native: { user: this.config.user, pw: this.encrypt(this.config.password) },
-                });
+                this.setSession();
+            }
+            if (this.config.country === instance.native.country && this.config.language === instance.native.lang) {
+                this.log.debug(`Country and language have not been changed!`);
+            } else {
+                if (isPWChanged) {
+                    this.setSession();
+                    isPWChanged = false;
+                }
             }
         } else if (instance && instance.native) {
             this.log.debug(`Save user and password!`);
-            this.extendObject("session", {
-                native: { user: this.config.user, pw: this.encrypt(this.config.password) },
-            });
+            this.setSession();
         }
         this.app_agent = constants.APP_AGENT[Math.floor(Math.random() * constants.APP_AGENT.length)];
         this.app_device = constants.APP_DEVICE[Math.floor(Math.random() * constants.APP_DEVICE.length)];
@@ -403,6 +407,17 @@ class LgThinq extends utils.Adapter {
                 this.log.warn(`Missing Session Infos!`);
             }
         }
+    }
+
+    setSession() {
+        this.extendObject("session", {
+            native: {
+                user: this.config.user,
+                pw: this.encrypt(this.config.password),
+                country: this.config.country,
+                lang: this.config.language,
+            },
+        });
     }
 
     setRefreshTokenInterval() {
@@ -1201,6 +1216,8 @@ class LgThinq extends utils.Adapter {
     async loginNew() {
         await this.setConnection(false);
         const countryCode = this.gateway.countryCode.toLowerCase();
+        const local_country = this.config.country;
+        const local_lang = this.config.language.split("_");
         const sessionCookie = await this.requestClient({
             method: "get",
             maxBodyLength: Infinity,
@@ -1209,7 +1226,7 @@ class LgThinq extends utils.Adapter {
                 accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                 "cache-control": "max-age=0",
                 "user-agent": this.app_agent,
-                "accept-language": "de-DE,de;q=0.9",
+                "accept-language": `${this.gateway.languageCode},${countryCode};q=0.9`,
             },
             params: {
                 callback_url: "lgaccount.lgsmartthinq:/",
@@ -1220,7 +1237,7 @@ class LgThinq extends utils.Adapter {
                 pre_login: "",
                 redirect_url: "lgaccount.lgsmartthinq:/",
                 state: "signin",
-                svc_code: constants.SVC_CODE,
+                svc_code: this.svc,
                 svc_integrated: "Y",
                 ui_mode: "light",
                 webview_yn: "Y",
@@ -1247,7 +1264,7 @@ class LgThinq extends utils.Adapter {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 accept: "*/*",
                 "x-requested-with": "XMLHttpRequest",
-                "accept-language": "de-DE,de;q=0.9",
+                "accept-language": `${this.gateway.languageCode},${countryCode};q=0.9`,
                 origin: `https://${countryCode}.lgemembers.com`,
                 "user-agent": this.app_agent,
                 cookie: typeof sessionCookie === "string" ? sessionCookie : "",
@@ -1274,7 +1291,7 @@ class LgThinq extends utils.Adapter {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 accept: "*/*",
                 "x-requested-with": "XMLHttpRequest",
-                "accept-language": "de-DE,de;q=0.9",
+                "accept-language": `${this.gateway.languageCode},${countryCode};q=0.9`,
                 origin: `https://${countryCode}.lgemembers.com`,
                 "user-agent": this.app_agent,
                 cookie: typeof sessionCookie === "string" ? sessionCookie : "",
@@ -1285,23 +1302,38 @@ class LgThinq extends utils.Adapter {
                 ipadYn: "N",
                 itgTermsUseFlag: "Y",
                 itgUserType: "A",
-                local_country: this.config.country,
-                local_lang: this.config.language,
+                local_country: local_country,
+                local_lang: local_lang[0],
                 skipYn: "N",
-                svcCode: constants.SVC_CODE,
-                svc_code: constants.SVC_CODE,
+                svcCode: this.svc,
+                svc_code: this.svc,
                 userId: encodeURIComponent(this.plainTextToRSA(this.config.user)),
                 userPw: hashedPassword,
             },
         })
             .then(res => {
+                if (res.status) {
+                    this.log.debug(`accountInfo status: ${res.status}`);
+                }
+                if (res.statusText) {
+                    this.log.debug(`accountInfo statusText: ${res.statusText}`);
+                }
                 return res.data;
+            })
+            .then(data => {
+                this.log.debug(JSON.stringify(data));
+                return data;
             })
             .catch(error => {
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
         if (!accountInfo || !accountInfo.account) {
+            try {
+                this.log.debug(`accountInfo error: ${JSON.stringify(accountInfo)}`);
+            } catch (e) {
+                this.log.error(`Login failed: ${e}`);
+            }
             this.log.error("Login failed");
             return;
         }
@@ -1320,7 +1352,7 @@ class LgThinq extends utils.Adapter {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 accept: "*/*",
                 "x-requested-with": "XMLHttpRequest",
-                "accept-language": "de-DE,de;q=0.9",
+                "accept-language": `${this.gateway.languageCode},${countryCode};q=0.9`,
                 origin: `https://${countryCode}.lgemembers.com`,
                 "user-agent": this.app_agent,
                 cookie: typeof sessionCookie === "string" ? sessionCookie : "",
@@ -1332,11 +1364,11 @@ class LgThinq extends utils.Adapter {
                 autoYn: "N",
                 deviceId: this.random_string(32),
                 ipadYn: "N",
-                local_country: this.config.country,
-                local_lang: this.config.language,
+                local_country: local_country,
+                local_lang: local_lang[0],
                 serviceYn: "Y",
-                svcCode: constants.SVC_CODE,
-                svc_code: constants.SVC_CODE,
+                svcCode: this.svc,
+                svc_code: this.svc,
                 uuid: loginUuid,
             },
         })
@@ -1363,7 +1395,7 @@ class LgThinq extends utils.Adapter {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 accept: "*/*",
                 "x-requested-with": "XMLHttpRequest",
-                "accept-language": "de-DE,de;q=0.9",
+                "accept-language": `${this.gateway.languageCode},${countryCode};q=0.9`,
                 origin: `https://${countryCode}.lgemembers.com`,
                 "user-agent": this.app_agent,
                 cookie: typeof sessionCookieV2 === "string" ? sessionCookieV2 : "",
@@ -1391,7 +1423,7 @@ class LgThinq extends utils.Adapter {
                 "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
                 accept: "*/*",
                 "x-requested-with": "XMLHttpRequest",
-                "accept-language": "de-DE,de;q=0.9",
+                "accept-language": `${this.gateway.languageCode},${countryCode};q=0.9`,
                 origin: `https://${countryCode}.lgemembers.com`,
                 "user-agent": this.app_agent,
                 cookie: typeof sessionCookieV2 === "string" ? sessionCookieV2 : "",
@@ -1400,12 +1432,12 @@ class LgThinq extends utils.Adapter {
                 loginSessionID: accountInfo.account.loginSessionID,
                 accountType: "LGE",
                 clientId: constants.CLIENT_ID,
-                countryCode: this.config.country,
-                local_country: this.config.country,
-                local_lang: this.config.language,
+                countryCode: local_country,
+                local_country: local_country,
+                local_lang: local_lang[0],
                 redirectUri: "lgaccount.lgsmartthinq:/",
                 state: "signin",
-                svc_code: constants.SVC_CODE,
+                svc_code: this.svc,
                 userName: this.config.user,
             },
         })
@@ -1480,6 +1512,7 @@ class LgThinq extends utils.Adapter {
         await this.setConnection(false);
         // get signature and timestamp in login form
         const loginForm = await this.requestClient.get(await this.getLoginUrl()).then(res => res.data);
+        const countryCode = this.gateway.countryCode.toLowerCase();
         const headers = {
             Accept: "application/json",
             "X-Application-Key": constants.APPLICATION_KEY,
@@ -1500,7 +1533,7 @@ class LgThinq extends utils.Adapter {
         const data = {
             user_auth2: hash.update(password).digest("hex"),
             itg_terms_use_flag: "Y",
-            svc_list: "SVC202,SVC710", // SVC202=LG SmartHome, SVC710=EMP OAuth
+            svc_list: "SVC202", // SVC202=LG SmartHome, SVC710=EMP OAuth
         };
 
         // try login with username and hashed password
@@ -1550,7 +1583,7 @@ class LgThinq extends utils.Adapter {
             "Content-Type": "application/x-www-form-urlencoded",
             "Access-Control-Allow-Origin": "*",
             "Accept-Encoding": "gzip, deflate, br",
-            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Language": `${this.gateway.languageCode},${countryCode};q=0.9`,
         };
         // create emp session and get access token
         const token = await this.requestClient
@@ -1857,7 +1890,7 @@ class LgThinq extends utils.Adapter {
             country: this.gateway.countryCode,
             language: this.gateway.languageCode,
             client_id: constants.CLIENT_ID,
-            svc_list: constants.SVC_CODE,
+            svc_list: this.svc,
             svc_integrated: "Y",
             redirect_uri: `${this.gateway.empSpxUri}/` + `login/iabClose`,
             show_thirdparty_login: "LGE,MYLG",

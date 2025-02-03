@@ -2399,6 +2399,8 @@ class LgThinq extends utils.Adapter {
                                 common.max = 360;
                             } else if (state === "AirPolution" || state === "airState.quality.odor") {
                                 common.max = 2000000;
+                            } else if (state === "airState.tempState.target") {
+                                common.max = 40;
                             } else if (state === "airState.miscFuncState.autoDryRemainTime") {
                                 common.max = 300;
                             } else if (
@@ -2506,6 +2508,8 @@ class LgThinq extends utils.Adapter {
                                 common.max = 360;
                             } else if (state === "AirPolution" || state === "airState.quality.odor") {
                                 common.max = 2000000;
+                            } else if (state === "airState.tempState.target") {
+                                common.max = 40;
                             } else if (state === "airState.miscFuncState.autoDryRemainTime") {
                                 common.max = 300;
                             } else {

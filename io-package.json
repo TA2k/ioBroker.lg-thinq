@@ -1,263 +1,253 @@
 {
-  "common": {
-    "name": "lg-thinq",
-    "version": "1.0.7",
-    "news": {
-      "1.0.7": {
-        "en": "Fixed: Connection status does not turn green\nChanged: Checkbox to dropdown for login procedure",
-        "de": "Behoben: Verbindungsstatus wird nicht grün\nGeändert: Checkbox zum Dropdown für Login-Verfahren",
-        "ru": "Исправлено: статус подключения не становится зеленым\nИзменение: Checkbox для отключения для процедуры регистрации",
-        "pt": "Corrigido: O status da conexão não fica verde\nAlterado: Caixa de seleção para dropdown para procedimento de login",
-        "nl": "Vast: Verbindingsstatus wordt niet groen\nGewijzigd: Checkbox naar dropdown voor login procedure",
-        "fr": "Correction : le statut de connexion ne devient pas vert\nChanged: Boîte à cocher pour la procédure de connexion",
-        "it": "Fisso: lo stato di connessione non diventa verde\nModificato: Checkbox to dropdown per la procedura di login",
-        "es": "Fijo: El estado de conexión no se vuelve verde\nCambio: Checkbox to dropdown for login procedure",
-        "pl": "Naprawiono: Stan połączenia nie zmienia się na zielony\nZmieniono: pole wyboru do zrzutu dla procedury logowania",
-        "uk": "Виправлено: статус підключення не перетворюється зелений\nЗмінено: Перевірити випадання для процедури входу",
-        "zh-cn": "固定: 连接状态不变为绿色\n已更改: 检查框以下载登录程序"
-      },
-      "1.0.6": {
-        "en": "Save session data (prevents the login email)\nFixed invalid jsonConfig\nAdded choice between old and new login\nBugfixe",
-        "de": "Speichern von Sitzungsdaten (verhindert die Login-E-Mail)\nBehoben ungültig jsonConfig\nWahl zwischen altem und neuem Login hinzugefügt\nBugfixes",
-        "ru": "Сохранить данные сеанса (предотвратить логин электронной почты)\nИсправленный недействительный jsonConfig\nДобавить выбор между старым и новым логином\nBugfixe",
-        "pt": "Salvar dados de sessão (prevenindo o e-mail de login)\nFixo inválido jsonConfig\nAdicionado escolha entre velho e novo login\nBugfixe",
-        "nl": "Sessiegegevens opslaan (voorkomt de aanmeldmail)\nVaste ongeldige jsonConfig\nToegevoegde keuze tussen oude en nieuwe login\nBugfixe",
-        "fr": "Enregistrer les données de session (prévient l'email de connexion)\nCorrection de jsonConfig invalide\nAjout du choix entre l'ancien et le nouveau login\nBugfixe",
-        "it": "Salvare i dati di sessione (previene l'email di login)\nRisolto invalido jsonConfig\nAggiunta scelta tra vecchio e nuovo login\nBugfixe",
-        "es": "Guardar datos de sesión (prevende el email de inicio de sesión)\nJsonConfig no válido fijo\nSelección agregada entre el inicio de sesión y el nuevo\nBugfixe",
-        "pl": "Zapisz dane sesji (zapobiega e-mailowi logowania)\nNaprawiono nieprawidłowe jsonConfig\nDodano wybór pomiędzy starym i nowym logowaniem\nBugfixe",
-        "uk": "Заощаджуйте дані сеансу (перекладає електронну пошту)\nВиправлено недійсний jsonConfig\nДодано вибір між застарілим і новим логіном\nПомилки",
-        "zh-cn": "保存会话数据( 防止登录电子邮件)\n固定无效的jsonconfig\n添加新旧登录的选择\n错误修正"
-      },
-      "1.0.5": {
-        "en": "Migration to ESLint9\nBugfixe",
-        "de": "Migration auf ESLint9\nBugfixes",
-        "ru": "Миграция в ESLint9\nBugfixe",
-        "pt": "Migração para ESLint9\nBugfixe",
-        "nl": "Migratie naar ESLint9\nBugfixe",
-        "fr": "Migration vers ESLint9\nBugfixe",
-        "it": "Migrazione a ESLint9\nBugfixe",
-        "es": "Migración a ESLint9\nBugfixe",
-        "pl": "Migracja do ESLint9\nBugfixe",
-        "uk": "Міграція в ESLint9\nПомилки",
-        "zh-cn": "迁移到ESLint9\n错误修正"
-      },
-      "1.0.4": {
-        "en": "Login fixed\nAdded hotwater for device 406 & 401\nDependencies updated",
-        "de": "Login gefixt\nHeißwasser für Gerät 406 & 401 hinzugefügt\nAusgaben aktualisiert",
-        "ru": "Добавленная горячая вода для устройства 406 & 401\nОбновленные данные о зависимостях",
-        "pt": "Adicionado água quente para dispositivo 406 & 401\nDependências atualizadas",
-        "nl": "Toegevoegd warm water voor apparaat 406 & 401\nAfhankelijkheden bijgewerkt",
-        "fr": "Ajout d'eau chaude pour l'appareil 406 & 401\nDépendances actualisées",
-        "it": "Aggiunto acqua calda per dispositivo 406 & 401\nDipendenze aggiornate",
-        "es": "Agua caliente adicional para el dispositivo 406 & 401\nActualización de las dependencias",
-        "pl": "Dodano hotwater dla urządzenia 406 & 401\nAktualizacja zależności",
-        "uk": "Додана гаряча вода для пристрою 406 & 401\nЗалежність оновлено",
-        "zh-cn": "406 & 401设备加热水\n更新的依赖关系"
-      },
-      "1.0.2": {
-        "en": "Dependencies updated\nChanged autoDryRemainTime max value\nAdded own request for 401 thinq1",
-        "de": "Ausgaben aktualisiert\nAutoDryRemain geändert Zeit max Wert\nZusätzliche eigene Anfrage für 401 thinq1",
-        "ru": "Обновленные данные о зависимостях\nИзменение autoDryRemain Время макс. значение\nДобавлен собственный запрос на 401 тонкий q1",
-        "pt": "Dependências atualizadas\nMudança de autoDryRemain Valor máximo de tempo\nAdicionado próprio pedido para 401 thinq1",
-        "nl": "Afhankelijkheden bijgewerkt\nAutoDryRemain gewijzigd Maximumtijd\nToegevoegd eigen aanvraag voor 401 thinq1",
-        "fr": "Dépendances actualisées\nChangement d'autoDryRemain Durée maximale\nAjout d'une demande propre pour 401 thinq1",
-        "it": "Dipendenze aggiornate\nCambio automaticoDryRemain Tempo massimo valore\nAggiunto proprio richiesta per 401 sottileq1",
-        "es": "Actualización de las dependencias\nAutoDryRemain cambiado Valor máximo\nSe agregó su propia solicitud para 401 delgadaq1",
-        "pl": "Aktualizacja zależności\nZmieniony autoDryRemain Maksymalna wartość czasu\nDodano własne życzenie dla 401 thinq1",
-        "uk": "Залежність оновлено\nЗмінено autoDryRemain Максимальне значення часу\nДодано власний запит на 401 тонкийq1",
-        "zh-cn": "更新的依赖关系\n已更改自动干线 时间最大值\n401 薄q1 自行请求添加"
-      },
-      "1.0.1": {
-        "en": "Fixed Mqtt wakeup for device 406 only\nFixed TypeError",
-        "de": "Feste Mqt Weckung für Gerät 406 nur\nFeste ArtError",
-        "ru": "Исправленное пробуждение Mqtt только для устройства 406\nFixed TypeError",
-        "pt": "Acordo Mqtt fixo para dispositivo 406 apenas\nTipo fixoError",
-        "nl": "Alleen vaste Mqtt wakeup voor apparaat 406\nFixed TypeError",
-        "fr": "Réveil fixe Mqtt pour le dispositif 406 seulement\nType fixeErreur",
-        "it": "Risolto Mqt sveglia per dispositivo 406 solo\nTipo di errore fisso",
-        "es": "Despertamiento de Mqtt fijo para el dispositivo 406 sólo\nTipo fijoError",
-        "pl": "Naprawiono obudzenie Mqtt tylko dla urządzenia 406\nNaprawiono błąd typu",
-        "uk": "Виправлено Mqtt прокидання для пристрою 406 тільки\nФіксований TypeError",
-        "zh-cn": "仅用于设备406的固定 Mqtt 醒悟\n固定类型错误"
-      },
-      "1.0.0": {
-        "en": "Changed airState.quality.odor max value\nFixed sentry messages\nAdded jet & airclean for device 401\nAdded Mqtt wakeup for device 406\nNode 18 required\nJS-Controller >= 5.0.19 required\nAdmin >=6.13.16 required",
-        "de": "Änderung der LuftState.quality.odor max. Wert\nFeste gesendete Nachrichten\nJet & Airclean für Gerät 401 hinzugefügt\nMqtt Wakeup für Gerät 406 hinzugefügt\nNode 18 erforderlich\nJS-Controller >= 5.0.19 erforderlich\nAdmin >=6.13.16 erforderlich",
-        "ru": "Изменение состояния воздуха.quality.odor max\nИсправленные сообщения\nДобавленный реактивный и воздухоочиститель для устройства 401\nДобавлено пробуждение Mqtt для устройства 406\nНод 18 требуется\n JS 5.0.19\n>=6.13.16",
-        "pt": "Alterado airState.quality.odor valor máximo\nMensagens de envio fixas\nAdicionado jato & airclean para dispositivo 401\nAdicionado Mqtt acorde para dispositivo 406\nNode 18 necessário\nJS-Controller >= 5.0.19 necessário\nAdmin >=6.13.16 necessário",
-        "nl": "Changed airState.quality.odor max waarde\nVaste wachtberichten\nToegevoegd jet & airclean voor apparaat 401\nToegevoegd Mqtt wakeup voor apparaat 406\nNode 18 vereist\nJS-Controller < 5.01.19 vereist\nAdmin < 6.13.16 vereist",
-        "fr": "Changement d'airÉtat.quality.odor valeur max\nMessages de sentinelle corrigés\nAjouté jet & airclean pour l'appareil 401\nAjout du réveil Mqtt pour l'appareil 406\nNoeud 18 requis\nJS-Contrôleur >= 5.0.19 requis\nAdmin >=6.13.16 requis",
-        "it": "AirState.quality.odor valore massimo\nMessaggi inviati fissi\nAggiunto jet & airclean per dispositivo 401\nAggiunto Mqtt sveglia per dispositivo 406\nNodo 18 richiesto\nJS-Controller >= 5.0.19 richiesto\nAdmin >=6.13.16 richiesto",
-        "es": "Cambio de aireEstado.calidad.odor valor máximo\nMensajes enviados fijos\nAgregado jet & airclean para el dispositivo 401\nDespertador Mqtt añadido para el dispositivo 406\nNodo 18 requerido\nJS-Controller ≤ 5.0.19 requerido\nPersonal obligatorio",
-        "pl": "Zmieniono airState.quality.odor max value\nPoprawione wiadomości wartownicze\nDodano jet & airclean dla urządzenia 401\nDodano obudzenie Mqtt dla urządzenia 406\nWymagany węzeł 18\nJS- Controller > = 5.0.19 wymagane\nWymagany dodatek > = 6.13.16",
-        "uk": "Змінений AirState.quality.odor макс. значення\nВиправлено надіслані повідомлення\nДодано струменевий і повітряний очищення для пристрою 401\nДодано Mqtt пробудження для пристрою 406\nNode 18 потрібно\nJS-Controller >=5.0.19 потрібно\nAdmin >=6.13.16 потрібно",
-        "zh-cn": "改变空气状态. 质地. 气味最大值\n固定哨兵信息\n为设备401添加了喷气式飞机和空气净化\n为设备406添加了 Mqtt 醒目\n需要18号节点\n联合来文主计长\n所需行政经费"
-      }
+    "common": {
+        "name": "lg-thinq",
+        "version": "1.0.7",
+        "news": {
+            "1.0.7": {
+                "en": "Fixed: Connection status does not turn green\nChanged: Checkbox to dropdown for login procedure",
+                "de": "Behoben: Verbindungsstatus wird nicht grün\nGeändert: Checkbox zum Dropdown für Login-Verfahren",
+                "ru": "Исправлено: статус подключения не становится зеленым\nИзменение: Checkbox для отключения для процедуры регистрации",
+                "pt": "Corrigido: O status da conexão não fica verde\nAlterado: Caixa de seleção para dropdown para procedimento de login",
+                "nl": "Vast: Verbindingsstatus wordt niet groen\nGewijzigd: Checkbox naar dropdown voor login procedure",
+                "fr": "Correction : le statut de connexion ne devient pas vert\nChanged: Boîte à cocher pour la procédure de connexion",
+                "it": "Fisso: lo stato di connessione non diventa verde\nModificato: Checkbox to dropdown per la procedura di login",
+                "es": "Fijo: El estado de conexión no se vuelve verde\nCambio: Checkbox to dropdown for login procedure",
+                "pl": "Naprawiono: Stan połączenia nie zmienia się na zielony\nZmieniono: pole wyboru do zrzutu dla procedury logowania",
+                "uk": "Виправлено: статус підключення не перетворюється зелений\nЗмінено: Перевірити випадання для процедури входу",
+                "zh-cn": "固定: 连接状态不变为绿色\n已更改: 检查框以下载登录程序"
+            },
+            "1.0.6": {
+                "en": "Save session data (prevents the login email)\nFixed invalid jsonConfig\nAdded choice between old and new login\nBugfixe",
+                "de": "Speichern von Sitzungsdaten (verhindert die Login-E-Mail)\nBehoben ungültig jsonConfig\nWahl zwischen altem und neuem Login hinzugefügt\nBugfixes",
+                "ru": "Сохранить данные сеанса (предотвратить логин электронной почты)\nИсправленный недействительный jsonConfig\nДобавить выбор между старым и новым логином\nBugfixe",
+                "pt": "Salvar dados de sessão (prevenindo o e-mail de login)\nFixo inválido jsonConfig\nAdicionado escolha entre velho e novo login\nBugfixe",
+                "nl": "Sessiegegevens opslaan (voorkomt de aanmeldmail)\nVaste ongeldige jsonConfig\nToegevoegde keuze tussen oude en nieuwe login\nBugfixe",
+                "fr": "Enregistrer les données de session (prévient l'email de connexion)\nCorrection de jsonConfig invalide\nAjout du choix entre l'ancien et le nouveau login\nBugfixe",
+                "it": "Salvare i dati di sessione (previene l'email di login)\nRisolto invalido jsonConfig\nAggiunta scelta tra vecchio e nuovo login\nBugfixe",
+                "es": "Guardar datos de sesión (prevende el email de inicio de sesión)\nJsonConfig no válido fijo\nSelección agregada entre el inicio de sesión y el nuevo\nBugfixe",
+                "pl": "Zapisz dane sesji (zapobiega e-mailowi logowania)\nNaprawiono nieprawidłowe jsonConfig\nDodano wybór pomiędzy starym i nowym logowaniem\nBugfixe",
+                "uk": "Заощаджуйте дані сеансу (перекладає електронну пошту)\nВиправлено недійсний jsonConfig\nДодано вибір між застарілим і новим логіном\nПомилки",
+                "zh-cn": "保存会话数据( 防止登录电子邮件)\n固定无效的jsonconfig\n添加新旧登录的选择\n错误修正"
+            },
+            "1.0.5": {
+                "en": "Migration to ESLint9\nBugfixe",
+                "de": "Migration auf ESLint9\nBugfixes",
+                "ru": "Миграция в ESLint9\nBugfixe",
+                "pt": "Migração para ESLint9\nBugfixe",
+                "nl": "Migratie naar ESLint9\nBugfixe",
+                "fr": "Migration vers ESLint9\nBugfixe",
+                "it": "Migrazione a ESLint9\nBugfixe",
+                "es": "Migración a ESLint9\nBugfixe",
+                "pl": "Migracja do ESLint9\nBugfixe",
+                "uk": "Міграція в ESLint9\nПомилки",
+                "zh-cn": "迁移到ESLint9\n错误修正"
+            },
+            "1.0.4": {
+                "en": "Login fixed\nAdded hotwater for device 406 & 401\nDependencies updated",
+                "de": "Login gefixt\nHeißwasser für Gerät 406 & 401 hinzugefügt\nAusgaben aktualisiert",
+                "ru": "Добавленная горячая вода для устройства 406 & 401\nОбновленные данные о зависимостях",
+                "pt": "Adicionado água quente para dispositivo 406 & 401\nDependências atualizadas",
+                "nl": "Toegevoegd warm water voor apparaat 406 & 401\nAfhankelijkheden bijgewerkt",
+                "fr": "Ajout d'eau chaude pour l'appareil 406 & 401\nDépendances actualisées",
+                "it": "Aggiunto acqua calda per dispositivo 406 & 401\nDipendenze aggiornate",
+                "es": "Agua caliente adicional para el dispositivo 406 & 401\nActualización de las dependencias",
+                "pl": "Dodano hotwater dla urządzenia 406 & 401\nAktualizacja zależności",
+                "uk": "Додана гаряча вода для пристрою 406 & 401\nЗалежність оновлено",
+                "zh-cn": "406 & 401设备加热水\n更新的依赖关系"
+            },
+            "1.0.2": {
+                "en": "Dependencies updated\nChanged autoDryRemainTime max value\nAdded own request for 401 thinq1",
+                "de": "Ausgaben aktualisiert\nAutoDryRemain geändert Zeit max Wert\nZusätzliche eigene Anfrage für 401 thinq1",
+                "ru": "Обновленные данные о зависимостях\nИзменение autoDryRemain Время макс. значение\nДобавлен собственный запрос на 401 тонкий q1",
+                "pt": "Dependências atualizadas\nMudança de autoDryRemain Valor máximo de tempo\nAdicionado próprio pedido para 401 thinq1",
+                "nl": "Afhankelijkheden bijgewerkt\nAutoDryRemain gewijzigd Maximumtijd\nToegevoegd eigen aanvraag voor 401 thinq1",
+                "fr": "Dépendances actualisées\nChangement d'autoDryRemain Durée maximale\nAjout d'une demande propre pour 401 thinq1",
+                "it": "Dipendenze aggiornate\nCambio automaticoDryRemain Tempo massimo valore\nAggiunto proprio richiesta per 401 sottileq1",
+                "es": "Actualización de las dependencias\nAutoDryRemain cambiado Valor máximo\nSe agregó su propia solicitud para 401 delgadaq1",
+                "pl": "Aktualizacja zależności\nZmieniony autoDryRemain Maksymalna wartość czasu\nDodano własne życzenie dla 401 thinq1",
+                "uk": "Залежність оновлено\nЗмінено autoDryRemain Максимальне значення часу\nДодано власний запит на 401 тонкийq1",
+                "zh-cn": "更新的依赖关系\n已更改自动干线 时间最大值\n401 薄q1 自行请求添加"
+            },
+            "1.0.1": {
+                "en": "Fixed Mqtt wakeup for device 406 only\nFixed TypeError",
+                "de": "Feste Mqt Weckung für Gerät 406 nur\nFeste ArtError",
+                "ru": "Исправленное пробуждение Mqtt только для устройства 406\nFixed TypeError",
+                "pt": "Acordo Mqtt fixo para dispositivo 406 apenas\nTipo fixoError",
+                "nl": "Alleen vaste Mqtt wakeup voor apparaat 406\nFixed TypeError",
+                "fr": "Réveil fixe Mqtt pour le dispositif 406 seulement\nType fixeErreur",
+                "it": "Risolto Mqt sveglia per dispositivo 406 solo\nTipo di errore fisso",
+                "es": "Despertamiento de Mqtt fijo para el dispositivo 406 sólo\nTipo fijoError",
+                "pl": "Naprawiono obudzenie Mqtt tylko dla urządzenia 406\nNaprawiono błąd typu",
+                "uk": "Виправлено Mqtt прокидання для пристрою 406 тільки\nФіксований TypeError",
+                "zh-cn": "仅用于设备406的固定 Mqtt 醒悟\n固定类型错误"
+            },
+            "1.0.0": {
+                "en": "Changed airState.quality.odor max value\nFixed sentry messages\nAdded jet & airclean for device 401\nAdded Mqtt wakeup for device 406\nNode 18 required\nJS-Controller >= 5.0.19 required\nAdmin >=6.13.16 required",
+                "de": "Änderung der LuftState.quality.odor max. Wert\nFeste gesendete Nachrichten\nJet & Airclean für Gerät 401 hinzugefügt\nMqtt Wakeup für Gerät 406 hinzugefügt\nNode 18 erforderlich\nJS-Controller >= 5.0.19 erforderlich\nAdmin >=6.13.16 erforderlich",
+                "ru": "Изменение состояния воздуха.quality.odor max\nИсправленные сообщения\nДобавленный реактивный и воздухоочиститель для устройства 401\nДобавлено пробуждение Mqtt для устройства 406\nНод 18 требуется\n JS 5.0.19\n>=6.13.16",
+                "pt": "Alterado airState.quality.odor valor máximo\nMensagens de envio fixas\nAdicionado jato & airclean para dispositivo 401\nAdicionado Mqtt acorde para dispositivo 406\nNode 18 necessário\nJS-Controller >= 5.0.19 necessário\nAdmin >=6.13.16 necessário",
+                "nl": "Changed airState.quality.odor max waarde\nVaste wachtberichten\nToegevoegd jet & airclean voor apparaat 401\nToegevoegd Mqtt wakeup voor apparaat 406\nNode 18 vereist\nJS-Controller < 5.01.19 vereist\nAdmin < 6.13.16 vereist",
+                "fr": "Changement d'airÉtat.quality.odor valeur max\nMessages de sentinelle corrigés\nAjouté jet & airclean pour l'appareil 401\nAjout du réveil Mqtt pour l'appareil 406\nNoeud 18 requis\nJS-Contrôleur >= 5.0.19 requis\nAdmin >=6.13.16 requis",
+                "it": "AirState.quality.odor valore massimo\nMessaggi inviati fissi\nAggiunto jet & airclean per dispositivo 401\nAggiunto Mqtt sveglia per dispositivo 406\nNodo 18 richiesto\nJS-Controller >= 5.0.19 richiesto\nAdmin >=6.13.16 richiesto",
+                "es": "Cambio de aireEstado.calidad.odor valor máximo\nMensajes enviados fijos\nAgregado jet & airclean para el dispositivo 401\nDespertador Mqtt añadido para el dispositivo 406\nNodo 18 requerido\nJS-Controller ≤ 5.0.19 requerido\nPersonal obligatorio",
+                "pl": "Zmieniono airState.quality.odor max value\nPoprawione wiadomości wartownicze\nDodano jet & airclean dla urządzenia 401\nDodano obudzenie Mqtt dla urządzenia 406\nWymagany węzeł 18\nJS- Controller > = 5.0.19 wymagane\nWymagany dodatek > = 6.13.16",
+                "uk": "Змінений AirState.quality.odor макс. значення\nВиправлено надіслані повідомлення\nДодано струменевий і повітряний очищення для пристрою 401\nДодано Mqtt пробудження для пристрою 406\nNode 18 потрібно\nJS-Controller >=5.0.19 потрібно\nAdmin >=6.13.16 потрібно",
+                "zh-cn": "改变空气状态. 质地. 气味最大值\n固定哨兵信息\n为设备401添加了喷气式飞机和空气净化\n为设备406添加了 Mqtt 醒目\n需要18号节点\n联合来文主计长\n所需行政经费"
+            }
+        },
+        "titleLang": {
+            "en": "LG ThinQ",
+            "de": "LG ThinQ",
+            "ru": "LG ThinQ",
+            "pt": "LG ThinQ",
+            "nl": "LG ThinQ",
+            "fr": "LG ThinQ",
+            "it": "LG ThinQ",
+            "es": "LG ThinQ",
+            "pl": "LG ThinQ",
+            "uk": "LG ThinQ",
+            "zh-cn": "LG ThinQ"
+        },
+        "desc": {
+            "en": "Adapter for LG ThinQ",
+            "de": "Adapter für LG ThinQ",
+            "ru": "Адаптер для LG ThinQ",
+            "pt": "Adaptador para LG ThinQ",
+            "nl": "Adapter voor LG ThinQ",
+            "fr": "Adaptateur pour LG ThinQ",
+            "it": "Adattatore per LG ThinQ",
+            "es": "Adaptador para LG ThinQ",
+            "pl": "Adapter do LG ThinQ",
+            "uk": "Адаптер для LG Навігація",
+            "zh-cn": "LG ThinQ 适配器"
+        },
+        "authors": ["TA2k <tombox2020@gmail.com>", "Lucky-ESA <github@luckyskills.de>"],
+        "keywords": ["lg", "thinq"],
+        "licenseInformation": {
+            "license": "MIT",
+            "type": "free"
+        },
+        "tier": 2,
+        "platform": "Javascript/Node.js",
+        "icon": "lg-thinq.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/TA2k/ioBroker.lg-thinq/master/admin/lg-thinq.png",
+        "readme": "https://github.com/TA2k/ioBroker.lg-thinq/blob/master/README.md",
+        "loglevel": "info",
+        "mode": "daemon",
+        "type": "household",
+        "compact": true,
+        "connectionType": "cloud",
+        "dataSource": "poll",
+        "materialize": false,
+        "adminUI": {
+            "config": "json"
+        },
+        "plugins": {
+            "sentry": {
+                "dsn": "https://414a0c2632d7439a81cdeaff30884373@sentry.iobroker.net/157"
+            }
+        },
+        "messagebox": true,
+        "docs": {
+            "en": "docs/en/README.md",
+            "de": "docs/de/README.md"
+        },
+        "dependencies": [
+            {
+                "js-controller": ">=5.0.19"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=7.4.10"
+            }
+        ]
     },
-    "titleLang": {
-      "en": "LG ThinQ",
-      "de": "LG ThinQ",
-      "ru": "LG ThinQ",
-      "pt": "LG ThinQ",
-      "nl": "LG ThinQ",
-      "fr": "LG ThinQ",
-      "it": "LG ThinQ",
-      "es": "LG ThinQ",
-      "pl": "LG ThinQ",
-      "uk": "LG ThinQ",
-      "zh-cn": "LG ThinQ"
+    "encryptedNative": ["password"],
+    "protectedNative": ["password"],
+    "native": {
+        "user": "",
+        "password": "",
+        "interval": 5,
+        "interval_thinq1": 30,
+        "country": "DE",
+        "language": "de_DE",
+        "thinq1": false,
+        "platform": "LGThinQ",
+        "regProcedure": false
     },
-    "desc": {
-      "en": "Adapter for LG ThinQ",
-      "de": "Adapter für LG ThinQ",
-      "ru": "Адаптер для LG ThinQ",
-      "pt": "Adaptador para LG ThinQ",
-      "nl": "Adapter voor LG ThinQ",
-      "fr": "Adaptateur pour LG ThinQ",
-      "it": "Adattatore per LG ThinQ",
-      "es": "Adaptador para LG ThinQ",
-      "pl": "Adapter do LG ThinQ",
-      "uk": "Адаптер для LG Навігація",
-      "zh-cn": "LG ThinQ 适配器"
-    },
-    "authors": [
-      "TA2k <tombox2020@gmail.com>",
-      "Lucky-ESA <github@luckyskills.de>"
-    ],
-    "keywords": [
-      "lg",
-      "thinq"
-    ],
-    "licenseInformation": {
-      "license": "MIT",
-      "type": "free"
-    },
-    "tier": 2,
-    "platform": "Javascript/Node.js",
-    "icon": "lg-thinq.png",
-    "enabled": true,
-    "extIcon": "https://raw.githubusercontent.com/TA2k/ioBroker.lg-thinq/master/admin/lg-thinq.png",
-    "readme": "https://github.com/TA2k/ioBroker.lg-thinq/blob/master/README.md",
-    "loglevel": "info",
-    "mode": "daemon",
-    "type": "household",
-    "compact": true,
-    "connectionType": "cloud",
-    "dataSource": "poll",
-    "materialize": false,
-    "adminUI": {
-      "config": "json"
-    },
-    "plugins": {
-      "sentry": {
-        "dsn": "https://414a0c2632d7439a81cdeaff30884373@sentry.iobroker.net/157"
-      }
-    },
-    "messagebox": true,
-    "docs": {
-      "en": "docs/en/README.md",
-      "de": "docs/de/README.md"
-    },
-    "dependencies": [
-      {
-        "js-controller": ">=5.0.19"
-      }
-    ],
-    "globalDependencies": [
-      {
-        "admin": ">=6.13.16"
-      }
-    ]
-  },
-  "encryptedNative": [
-    "password"
-  ],
-  "protectedNative": [
-    "password"
-  ],
-  "native": {
-    "user": "",
-    "password": "",
-    "interval": 5,
-    "interval_thinq1": 30,
-    "country": "DE",
-    "language": "de_DE",
-    "thinq1": false,
-    "platform": "LGThinQ",
-    "regProcedure": false
-  },
-  "objects": [],
-  "instanceObjects": [
-    {
-      "_id": "info",
-      "type": "channel",
-      "common": {
-        "name": {
-          "en": "Information",
-          "de": "Informationen",
-          "ru": "Информация",
-          "pt": "Informação",
-          "nl": "Informatie",
-          "fr": "Information",
-          "it": "Informazioni",
-          "es": "Información",
-          "pl": "Informacja",
-          "uk": "Інформація",
-          "zh-cn": "信息"
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Information",
+                    "de": "Informationen",
+                    "ru": "Информация",
+                    "pt": "Informação",
+                    "nl": "Informatie",
+                    "fr": "Information",
+                    "it": "Informazioni",
+                    "es": "Información",
+                    "pl": "Informacja",
+                    "uk": "Інформація",
+                    "zh-cn": "信息"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": {
+                    "en": "Device or service connected",
+                    "de": "Geräte- oder Serviceanschluss",
+                    "ru": "Устройство или сервис подключены",
+                    "pt": "Dispositivo ou serviço conectado",
+                    "nl": "Device of dienst verbonden",
+                    "fr": "Appareil ou service connecté",
+                    "it": "Dispositivo o servizio collegato",
+                    "es": "Dispositivo o servicio conectado",
+                    "pl": "Device",
+                    "uk": "Пристрої або послуги підключені",
+                    "zh-cn": "证人或有关服务"
+                },
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "session",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": {
+                    "en": "Session infos",
+                    "de": "Sitzungsinfos",
+                    "ru": "Сессионная информация",
+                    "pt": "InformaÃ§Ãμes de sessão",
+                    "nl": "Sessie-informatie",
+                    "fr": "Infos de séance",
+                    "it": "Informazioni di sessione",
+                    "es": "Información de sesión",
+                    "pl": "Informacje o sesji",
+                    "uk": "Інформація про сеанс",
+                    "zh-cn": "会话信息"
+                },
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": ""
+            },
+            "native": {}
         }
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.connection",
-      "type": "state",
-      "common": {
-        "role": "indicator.connected",
-        "name": {
-          "en": "Device or service connected",
-          "de": "Geräte- oder Serviceanschluss",
-          "ru": "Устройство или сервис подключены",
-          "pt": "Dispositivo ou serviço conectado",
-          "nl": "Device of dienst verbonden",
-          "fr": "Appareil ou service connecté",
-          "it": "Dispositivo o servizio collegato",
-          "es": "Dispositivo o servicio conectado",
-          "pl": "Device",
-          "uk": "Пристрої або послуги підключені",
-          "zh-cn": "证人或有关服务"
-        },
-        "type": "boolean",
-        "read": true,
-        "write": false,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "session",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": {
-          "en": "Session infos",
-          "de": "Sitzungsinfos",
-          "ru": "Сессионная информация",
-          "pt": "InformaÃ§Ãμes de sessão",
-          "nl": "Sessie-informatie",
-          "fr": "Infos de séance",
-          "it": "Informazioni di sessione",
-          "es": "Información de sesión",
-          "pl": "Informacje o sesji",
-          "uk": "Інформація про сеанс",
-          "zh-cn": "会话信息"
-        },
-        "type": "string",
-        "read": true,
-        "write": false,
-        "def": ""
-      },
-      "native": {}
-    }
-  ]
+    ]
 }

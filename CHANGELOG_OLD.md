@@ -30,6 +30,12 @@
 ### 0.0.3
 
 -   (TA2k) initial release
+## 1.0.2 (2024-09-10)
+
+- (Lucky-ESA) Dependencies updated
+- (Lucky-ESA) Changed autoDryRemainTime max value
+- (Lucky-ESA) Added own request for 401 thinq1
+
 ## 1.0.1 (2024-05-21)
 
 -   (Lucky-ESA) Fixed Mqtt wakeup for device 406 only

@@ -57,6 +57,7 @@ class LgThinq extends utils.Adapter {
         this.modelInfos = {};
         this.auth = {};
         this.workIds = {};
+        this.available401 = {};
         this.deviceControls = {};
         this.json2iob = new Json2iob(this);
         this.targetKeys = {};

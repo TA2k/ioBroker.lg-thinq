@@ -47,6 +47,11 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- (Lucky-ESA) Node 20.x required
+
 ### 1.1.0 (2025-04-08)
 
 - (Lucky-ESA) max target changed from 30 to 40 degrees

@@ -50,6 +50,7 @@ Adapter for LG ThinQ
 
 ### **WORK IN PROGRESS**
 
+- (Lucky-ESA) Dependencies updated
 - (Lucky-ESA) Node 20.x required
 
 ### 1.1.0 (2025-04-08)

@@ -17,7 +17,7 @@ Adapter for LG ThinQ
 
 ## Requirement
 
-- Node >= 18
+- Node >= 20
 - JS-Controller >= 6.0.11
 - Admin >= 7.4.10
 

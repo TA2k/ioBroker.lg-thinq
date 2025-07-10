@@ -201,7 +201,7 @@ class LgThinq extends utils.Adapter {
             if (session === 1) {
                 const refreshToken = await this.refreshNewToken(true);
                 if (refreshToken) {
-                    session = this.session.expires_in * 1000 - 100;
+                    session = (this.session.expires_in - 100) * 1000;
                 } else {
                     session = 0;
                 }
@@ -423,6 +423,14 @@ class LgThinq extends utils.Adapter {
 
     setRefreshTokenInterval() {
         this.log.debug(`Start refreshTokenInterval!`);
+        if (this.session && this.session.expires_in < 3600) {
+            this.session.expires_in = 3600;
+        }
+        this.refreshTokenInterval && this.clearInterval(this.refreshTokenInterval);
+        if (typeof this.session.expires_in !== "number") {
+            this.log.error(`Missing expires time!!`);
+            return;
+        }
         this.refreshTokenInterval = this.setInterval(
             () => {
                 this.refreshNewToken(false);
@@ -1254,6 +1262,7 @@ class LgThinq extends utils.Adapter {
                 return;
             })
             .catch(error => {
+                this.session = {};
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
@@ -1281,6 +1290,7 @@ class LgThinq extends utils.Adapter {
                 return res.data;
             })
             .catch(error => {
+                this.session = {};
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
@@ -1326,6 +1336,7 @@ class LgThinq extends utils.Adapter {
                 return data;
             })
             .catch(error => {
+                this.session = {};
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
@@ -1385,6 +1396,7 @@ class LgThinq extends utils.Adapter {
                 return;
             })
             .catch(error => {
+                this.session = {};
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
@@ -1414,6 +1426,7 @@ class LgThinq extends utils.Adapter {
                 }
             })
             .catch(error => {
+                this.session = {};
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
@@ -1450,6 +1463,7 @@ class LgThinq extends utils.Adapter {
                 return qs.parse(decodeURIComponent(res.data.redirect_uri).split("?")[1]);
             })
             .catch(error => {
+                this.session = {};
                 this.log.error(error);
                 error.response && this.log.error(error.response.data);
             });
@@ -1479,6 +1493,7 @@ class LgThinq extends utils.Adapter {
             .post(tokenUrl, qs.stringify(data), { headers })
             .then(resp => resp.data)
             .catch(error => {
+                this.session = {};
                 this.log.error(error);
                 return;
             });
@@ -1543,6 +1558,7 @@ class LgThinq extends utils.Adapter {
             .post(loginUrl, qs.stringify(data), { headers })
             .then(res => res.data)
             .catch(err => {
+                this.session = {};
                 if (!err.response) {
                     this.log.error(err);
                     return;
@@ -1593,6 +1609,7 @@ class LgThinq extends utils.Adapter {
             })
             .then(res => res.data)
             .catch(err => {
+                this.session = {};
                 this.log.error(err.response.data.error.message);
                 return;
             });

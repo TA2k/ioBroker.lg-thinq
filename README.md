@@ -17,9 +17,9 @@ Adapter for LG ThinQ
 
 ## Requirement
 
-- Node >= 20
+- Node >= 20, 22 or 24
 - JS-Controller >= 6.0.11
-- Admin >= 7.4.10
+- Admin >= 7.6.17
 
 ## Supported devices
 
@@ -52,6 +52,7 @@ Adapter for LG ThinQ
 
 - (Lucky-ESA) Dependencies updated
 - (Lucky-ESA) Node 20.x required
+- (Lucky-ESA) Admin 7.6.17 required
 
 ### 1.1.0 (2025-04-08)
 

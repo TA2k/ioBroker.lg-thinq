@@ -120,7 +120,6 @@ class LgThinq extends utils.Adapter {
      * Is called when databases are connected and adapter received configuration.
      */
     async onReady() {
-        this.config.regProcedure = true;
         let isPWChanged = false;
         const instance = await this.getObjectAsync("session");
         if (instance && instance.native && instance.native.pw != "") {

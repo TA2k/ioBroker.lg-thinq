@@ -424,6 +424,13 @@ class LgThinq extends utils.Adapter {
 
     setRefreshTokenInterval() {
         this.log.debug(`Start refreshTokenInterval!`);
+        if (this.session && typeof this.session.expires_in !== "number") {
+            try {
+                this.session.expires_in = parseInt(this.session.expires_in);
+            } catch {
+                this.session.expires_in = 3600;
+            }
+        }
         if (this.session && this.session.expires_in < 3600) {
             this.session.expires_in = 3600;
         }

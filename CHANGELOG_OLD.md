@@ -30,6 +30,11 @@
 ### 0.0.3
 
 -   (TA2k) initial release
+## 1.0.5 (2024-12-02)
+
+- (Lucky-ESA) Migration to ESLint9
+- (Lucky-ESA) Bugfixe
+
 ## 1.0.4 (2024-12-01)
 
 - (TA2k) Login fixed

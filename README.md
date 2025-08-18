@@ -47,8 +47,7 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.1.2 (2025-08-18)
 
 - (Lucky-ESA) Delete expires check
 
@@ -74,11 +73,6 @@ Adapter for LG ThinQ
 - (Lucky-ESA) Save session data (prevents the login email)
 - (Lucky-ESA) Fixed invalid jsonConfig
 - (Lucky-ESA) Added choice between old and new login
-- (Lucky-ESA) Bugfixe
-
-### 1.0.5 (2024-12-02)
-
-- (Lucky-ESA) Migration to ESLint9
 - (Lucky-ESA) Bugfixe
 
 ## License

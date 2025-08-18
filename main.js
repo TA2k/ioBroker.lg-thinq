@@ -1350,8 +1350,8 @@ class LgThinq extends utils.Adapter {
             } catch (e) {
                 this.log.error(`Login failed: ${e}`);
             }
-            this.log.error("Login failed");
-            return;
+            this.log.error("Login failed. 3-Party login used!");
+            return await this.login(this.config.user, this.config.password);
         }
         this.log.debug(`accountInfo: ${JSON.stringify(accountInfo)}`);
         const loginUuid = uuid.v4();

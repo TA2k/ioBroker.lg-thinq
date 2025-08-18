@@ -51,7 +51,6 @@ Adapter for LG ThinQ
 ### **WORK IN PROGRESS**
 
 - (Lucky-ESA) Delete expires check
-- (Lucky-ESA) 3-Party login used (APP Login disable)
 
 ### 1.1.1 (2025-08-16)
 

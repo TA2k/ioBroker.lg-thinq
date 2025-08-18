@@ -7,7 +7,7 @@
 ![Number of Installations (latest)](https://iobroker.live/badges/lg-thinq-installed.svg)
 ![Number of Installations (stable)](https://iobroker.live/badges/lg-thinq-stable.svg)
 
-[![NPM](https://nodei.co/npm/iobroker.lg-thinq.png?downloads=true)](https://nodei.co/npm/iobroker.lg-thinq/)
+[![NPM](https://nodei.co/npm/iobroker.lg-thinq.svg)](https://nodei.co/npm/iobroker.lg-thinq/)
 
 **Tests:** ![Test and Release](https://github.com/TA2k/ioBroker.lg-thinq/workflows/Test%20and%20Release/badge.svg)
 
@@ -47,6 +47,12 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- (Lucky-ESA) Delete expires check
+- (Lucky-ESA) 3-Party login used (APP Login disable)
+
 ### 1.1.1 (2025-08-16)
 
 - (Lucky-ESA) Dependencies updated

@@ -120,6 +120,7 @@ class LgThinq extends utils.Adapter {
      * Is called when databases are connected and adapter received configuration.
      */
     async onReady() {
+        this.config.regProcedure = true;
         let isPWChanged = false;
         const instance = await this.getObjectAsync("session");
         if (instance && instance.native && instance.native.pw != "") {
@@ -427,10 +428,7 @@ class LgThinq extends utils.Adapter {
             this.session.expires_in = 3600;
         }
         this.refreshTokenInterval && this.clearInterval(this.refreshTokenInterval);
-        if (typeof this.session.expires_in !== "number") {
-            this.log.error(`Missing expires time!!`);
-            return;
-        }
+        this.log.debug(this.session.expires_in);
         this.refreshTokenInterval = this.setInterval(
             () => {
                 this.refreshNewToken(false);

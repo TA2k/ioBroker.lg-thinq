@@ -50,7 +50,7 @@ Adapter for LG ThinQ
 
 ### **WORK IN PROGRESS**
 
-- (Lucky-ESA) Add SOILWASH_PREWASH
+- (Lucky-ESA) Add translate
 
 ### 1.1.2 (2025-08-18)
 

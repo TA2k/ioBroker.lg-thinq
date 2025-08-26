@@ -47,6 +47,11 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- (Lucky-ESA) Add SOILWASH_PREWASH
+
 ### 1.1.2 (2025-08-18)
 
 - (Lucky-ESA) Delete expires check

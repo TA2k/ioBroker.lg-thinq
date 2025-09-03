@@ -50,7 +50,8 @@ Adapter for LG ThinQ
 
 ### **WORK IN PROGRESS**
 
-- (Lucky-ESA) Add translate
+- (Lucky-ESA) Add translate for device 201
+- (Lucky-ESA) Delete APP-Login (removed by LG)
 
 ### 1.1.2 (2025-08-18)
 

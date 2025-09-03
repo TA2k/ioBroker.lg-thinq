@@ -207,15 +207,9 @@ class LgThinq extends utils.Adapter {
                 }
             }
             if (session === 0) {
-                if (this.config.regProcedure) {
-                    this.log.info(`Use the old third-party login`);
-                    this.session = await this.login(this.config.user, this.config.password).catch(error => {
-                        this.log.error(error);
-                    });
-                } else {
-                    this.log.info(`Use the new APP login`);
-                    this.session = await this.loginNew();
-                }
+                this.session = await this.login(this.config.user, this.config.password).catch(error => {
+                    this.log.error(error);
+                });
             }
             if (
                 this.session != null &&
@@ -1772,16 +1766,9 @@ class LgThinq extends utils.Adapter {
                 return false;
             }
             this.log.warn("refresh token failed, start relogin");
-            let session;
-            if (this.config.regProcedure) {
-                this.log.debug(`Use the old third-party login`);
-                session = await this.login(this.config.user, this.config.password).catch(error => {
-                    this.log.error(error);
-                });
-            } else {
-                this.log.debug(`Use the new APP login`);
-                this.session = await this.loginNew();
-            }
+            const session = await this.login(this.config.user, this.config.password).catch(error => {
+                this.log.error(error);
+            });
             if (session && session.access_token) {
                 this.session = session;
                 this.countLogin = 0;

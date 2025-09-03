@@ -2647,11 +2647,11 @@ class LgThinq extends utils.Adapter {
             const client_certificate = await this.getUser("service/users/client/certificate", {
                 csr: this.mqttdata.key,
             });
-            if (!client_certificate && !client_certificate.result && !client_certificate.result.certificatePem) {
+            if (!client_certificate || !client_certificate.result || !client_certificate.result.certificatePem) {
                 this.log.info("Cannot load certificatePem");
                 return;
             }
-            if (!client_certificate && !client_certificate.result && !client_certificate.result.subscriptions) {
+            if (!client_certificate || !client_certificate.result || !client_certificate.result.subscriptions) {
                 this.log.info("Cannot load subscriptions");
                 return;
             }

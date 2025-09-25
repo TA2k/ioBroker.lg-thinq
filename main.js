@@ -903,11 +903,11 @@ class LgThinq extends utils.Adapter {
         this.log.debug(req);
         const weather = await this.getDeviceEnergy(req);
         this.log.debug(JSON.stringify(weather));
-        if (weather.temperature != null) {
+        if (typeof weather === "object" && weather.temperature != null) {
             const temp = typeof weather.temperature === "string" ? weather.temperature : weather.temperature.toString();
             this.setState("weather.temperature", temp, true);
         }
-        if (weather.humidity != null) {
+        if (typeof weather === "object" && weather.humidity != null) {
             const humi = typeof weather.humidity === "string" ? weather.humidity : weather.humidity.toString();
             this.setState("weather.humidity", humi, true);
         }
@@ -2070,7 +2070,7 @@ class LgThinq extends utils.Adapter {
                 });
 
             this.log.debug(JSON.stringify(resp));
-            if (resp) {
+            if (resp && resp.result != null) {
                 this.log.debug(JSON.stringify(resp));
                 devices.push(...resp.result.devices);
             }

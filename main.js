@@ -184,7 +184,14 @@ class LgThinq extends utils.Adapter {
             "x-app-version": "3.5.1721",
             "x-message-id": this.random_string(22),
         };
-
+        if (!this.config.user || this.config.user == "") {
+            this.log.warn(`Missing Username!`);
+            return;
+        }
+        if (!this.config.password || this.config.password == "") {
+            this.log.warn(`Missing Password!`);
+            return;
+        }
         this.gateway = await this.requestClient
             .get(constants.GATEWAY_URL, { headers: this.defaultHeaders })
             .then(res => res.data.result)
@@ -2815,7 +2822,7 @@ class LgThinq extends utils.Adapter {
         }
         this.log.debug(`sendCommandToDevice: ${JSON.stringify(data)}`);
         this.log.debug(`sendCommandToDevice URL: ${JSON.stringify(controlUrl)}`);
-
+        this.log.debug(`sendCommandToDevice Header: ${JSON.stringify(headers)}`);
         return this.requestClient
             .post(controlUrl, data, { headers })
             .then(resp => resp.data)
@@ -2827,9 +2834,17 @@ class LgThinq extends utils.Adapter {
                     data.command === "Get"
                 ) {
                     this.log.debug(`Bad Request: ${error.message}`);
+                } else if (
+                    error.response &&
+                    error.response.status === 400
+                ) {
+                    this.log.error(`Send: ${error.message}`);
+                    this.log.error(`Send: ${error.response.data}`);
+                    this.log.error(`Send: ${error.response.status}`);
+                    this.log.error(`Send: ${error.response.headers}`);
                 } else {
                     this.log.error("Send failed");
-                    this.log.error(error);
+                    this.log.error(`Send: ${error}`);
                 }
             });
     }

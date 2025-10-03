@@ -369,7 +369,7 @@ class LgThinq extends utils.Adapter {
                             //LG Signature without reserveTimeHour, remainTimeHour and initialTimeHour
                         }
                     }
-                    if (element.platformType && element.platformType === "thinq1") {
+                    if (element.platformType && element.platformType === "thinq1" && element.deviceType != 302) {
                         isThinq1 = true;
                         ++this.thinq1Counter;
                     }
@@ -1636,7 +1636,7 @@ class LgThinq extends utils.Adapter {
     }
 
     async pollMonitor(device) {
-        if (device.platformType === "thinq1") {
+        if (device && device.platformType === "thinq1" && device.deviceType != 302) {
             this.log.debug("start polling");
             let result = new Uint8Array(1024);
             try {
@@ -2841,7 +2841,7 @@ class LgThinq extends utils.Adapter {
                     this.log.debug(`Bad Request: ${error.message}`);
                 } else if (error.response && error.response.status === 400) {
                     this.log.error(`Send: ${error.message}`);
-                    this.log.error(`Send: ${error.response.data}`);
+                    this.log.error(`Send: ${JSON.stringify(error.response.data)}`);
                     this.log.error(`Send: ${error.response.status}`);
                     this.log.error(`Send: ${error.response.headers}`);
                 } else {

@@ -50,8 +50,10 @@ Adapter for LG ThinQ
 
 ### **WORK IN PROGRESS**
 
-- (Lucky-ESA) Add translate for device 201
+- (Lucky-ESA) Added translate for device 201
 - (Lucky-ESA) Delete APP-Login (removed by LG)
+- (Lucky-ESA) Added online icon
+- (Lucky-ESA) Microwave 302 disabled (thinq1)
 
 ### 1.1.2 (2025-08-18)
 

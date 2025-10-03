@@ -47,8 +47,7 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.1.3 (2025-10-03)
 
 - (Lucky-ESA) Added translate for device 201
 - (Lucky-ESA) Delete APP-Login (removed by LG)
@@ -75,13 +74,6 @@ Adapter for LG ThinQ
 
 - (Lucky-ESA) Fixed: Connection status does not turn green
 - (Lucky-ESA) Changed: Checkbox to dropdown for login procedure
-
-### 1.0.6 (2024-12-07)
-
-- (Lucky-ESA) Save session data (prevents the login email)
-- (Lucky-ESA) Fixed invalid jsonConfig
-- (Lucky-ESA) Added choice between old and new login
-- (Lucky-ESA) Bugfixe
 
 ## License
 

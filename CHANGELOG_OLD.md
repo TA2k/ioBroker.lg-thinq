@@ -30,6 +30,13 @@
 ### 0.0.3
 
 -   (TA2k) initial release
+## 1.0.6 (2024-12-07)
+
+- (Lucky-ESA) Save session data (prevents the login email)
+- (Lucky-ESA) Fixed invalid jsonConfig
+- (Lucky-ESA) Added choice between old and new login
+- (Lucky-ESA) Bugfixe
+
 ## 1.0.5 (2024-12-02)
 
 - (Lucky-ESA) Migration to ESLint9

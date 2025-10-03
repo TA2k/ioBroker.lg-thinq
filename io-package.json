@@ -1,252 +1,262 @@
 {
-    "common": {
-        "name": "lg-thinq",
-        "version": "1.1.2",
-        "news": {
-            "1.1.2": {
-                "en": "Delete expires check",
-                "de": "Löschen läuft ab",
-                "ru": "Удаление истекает проверка",
-                "pt": "Apagar a verificação expira",
-                "nl": "Controle verlopen verwijderen",
-                "fr": "Supprimer la vérification d'expiration",
-                "it": "Cancellare scade il controllo",
-                "es": "Borrar vence el cheque",
-                "pl": "Usuń sprawdzenie wygaśnięcia",
-                "uk": "Видалити параметри перевірки",
-                "zh-cn": "删除过期检查"
-            },
-            "1.1.1": {
-                "en": "Dependencies updated\nNode 20.x required\nAdmin 7.6.17 required",
-                "de": "Ausgaben aktualisiert\nNode 20.x erforderlich\nAdmin 7.6.17 erforderlich",
-                "ru": "Обновленные зависимости\nУзел 20.x требуется\nТребуется администратор 7.6.17",
-                "pt": "Dependências atualizadas\nNó 20.x requerido\nAdministração 7.6.17 necessária",
-                "nl": "Afhankelijkheden bijgewerkt\nNode 20.x vereist\nBeheerder 7.6.17 vereist",
-                "fr": "Dépendances actualisées\nNoeud 20.x requis\nAdmin 7.6.17 requis",
-                "it": "Dipendenze aggiornate\nNodo 20.x richiesto\nAdmin 7.6.17 richiesto",
-                "es": "Actualización de las dependencias\nNodo 20.x requerido\nAdmin 7.6.17 requerido",
-                "pl": "Aktualizacja zależności\nWymagany węzeł 20.x\nWymagany admin 7.6.17",
-                "uk": "Залежність оновлено\nNode 20.x обов'язковий\nAdmin 7.6.17 потрібно",
-                "zh-cn": "更新的依赖关系\n需要节点20x\n所需行政经费"
-            },
-            "1.1.0": {
-                "en": "max target changed from 30 to 40 degrees\nDependencies updated\nAdmin 7.4.10 required",
-                "de": "max ziel geändert von 30 bis 40 grad\nAusgaben aktualisiert\nAdmin 7.4.10 erforderlich",
-                "ru": "максимальная цель изменилась с 30 до 40 градусов\nОбновленные зависимости\nТребуется администратор 7.4.10",
-                "pt": "alvo máximo alterado de 30 a 40 graus\nDependências atualizadas\nAdmin 7.4.10 necessário",
-                "nl": "max doel gewijzigd van 30 naar 40 graden\nAfhankelijkheden bijgewerkt\nBeheerder 7.4.10 vereist",
-                "fr": "la cible maximale est passée de 30 à 40 degrés\nDépendances actualisées\nAdmin 7.4.10 requis",
-                "it": "obiettivo massimo cambiato da 30 a 40 gradi\nDipendenze aggiornate\nAdmin 7.4.10 richiesto",
-                "es": "objetivo máximo cambiado de 30 a 40 grados\nActualización de las dependencias\nAdmin 7.4.10",
-                "pl": "max cel zmieniony z 30 do 40 stopni\nAktualizacja zależności\nWymagany admin 7.4.10",
-                "uk": "максимальна цільова зміна від 30 до 40 градусів\nЗалежність оновлено\nAdmin 7.4.10 потрібно",
-                "zh-cn": "最大目标从30度改为40度\n更新的依赖关系\n所需行政经费"
-            },
-            "1.0.7": {
-                "en": "Fixed: Connection status does not turn green\nChanged: Checkbox to dropdown for login procedure",
-                "de": "Behoben: Verbindungsstatus wird nicht grün\nGeändert: Checkbox zum Dropdown für Login-Verfahren",
-                "ru": "Исправлено: статус подключения не становится зеленым\nИзменение: Checkbox для отключения для процедуры регистрации",
-                "pt": "Corrigido: O status da conexão não fica verde\nAlterado: Caixa de seleção para dropdown para procedimento de login",
-                "nl": "Vast: Verbindingsstatus wordt niet groen\nGewijzigd: Checkbox naar dropdown voor login procedure",
-                "fr": "Correction : le statut de connexion ne devient pas vert\nChanged: Boîte à cocher pour la procédure de connexion",
-                "it": "Fisso: lo stato di connessione non diventa verde\nModificato: Checkbox to dropdown per la procedura di login",
-                "es": "Fijo: El estado de conexión no se vuelve verde\nCambio: Checkbox to dropdown for login procedure",
-                "pl": "Naprawiono: Stan połączenia nie zmienia się na zielony\nZmieniono: pole wyboru do zrzutu dla procedury logowania",
-                "uk": "Виправлено: статус підключення не перетворюється зелений\nЗмінено: Перевірити випадання для процедури входу",
-                "zh-cn": "固定: 连接状态不变为绿色\n已更改: 检查框以下载登录程序"
-            },
-            "1.0.6": {
-                "en": "Save session data (prevents the login email)\nFixed invalid jsonConfig\nAdded choice between old and new login\nBugfixe",
-                "de": "Speichern von Sitzungsdaten (verhindert die Login-E-Mail)\nBehoben ungültig jsonConfig\nWahl zwischen altem und neuem Login hinzugefügt\nBugfixes",
-                "ru": "Сохранить данные сеанса (предотвратить логин электронной почты)\nИсправленный недействительный jsonConfig\nДобавить выбор между старым и новым логином\nBugfixe",
-                "pt": "Salvar dados de sessão (prevenindo o e-mail de login)\nFixo inválido jsonConfig\nAdicionado escolha entre velho e novo login\nBugfixe",
-                "nl": "Sessiegegevens opslaan (voorkomt de aanmeldmail)\nVaste ongeldige jsonConfig\nToegevoegde keuze tussen oude en nieuwe login\nBugfixe",
-                "fr": "Enregistrer les données de session (prévient l'email de connexion)\nCorrection de jsonConfig invalide\nAjout du choix entre l'ancien et le nouveau login\nBugfixe",
-                "it": "Salvare i dati di sessione (previene l'email di login)\nRisolto invalido jsonConfig\nAggiunta scelta tra vecchio e nuovo login\nBugfixe",
-                "es": "Guardar datos de sesión (prevende el email de inicio de sesión)\nJsonConfig no válido fijo\nSelección agregada entre el inicio de sesión y el nuevo\nBugfixe",
-                "pl": "Zapisz dane sesji (zapobiega e-mailowi logowania)\nNaprawiono nieprawidłowe jsonConfig\nDodano wybór pomiędzy starym i nowym logowaniem\nBugfixe",
-                "uk": "Заощаджуйте дані сеансу (перекладає електронну пошту)\nВиправлено недійсний jsonConfig\nДодано вибір між застарілим і новим логіном\nПомилки",
-                "zh-cn": "保存会话数据( 防止登录电子邮件)\n固定无效的jsonconfig\n添加新旧登录的选择\n错误修正"
-            },
-            "1.0.5": {
-                "en": "Migration to ESLint9\nBugfixe",
-                "de": "Migration auf ESLint9\nBugfixes",
-                "ru": "Миграция в ESLint9\nBugfixe",
-                "pt": "Migração para ESLint9\nBugfixe",
-                "nl": "Migratie naar ESLint9\nBugfixe",
-                "fr": "Migration vers ESLint9\nBugfixe",
-                "it": "Migrazione a ESLint9\nBugfixe",
-                "es": "Migración a ESLint9\nBugfixe",
-                "pl": "Migracja do ESLint9\nBugfixe",
-                "uk": "Міграція в ESLint9\nПомилки",
-                "zh-cn": "迁移到ESLint9\n错误修正"
-            },
-            "1.0.4": {
-                "en": "Login fixed\nAdded hotwater for device 406 & 401\nDependencies updated",
-                "de": "Login gefixt\nHeißwasser für Gerät 406 & 401 hinzugefügt\nAusgaben aktualisiert",
-                "ru": "Добавленная горячая вода для устройства 406 & 401\nОбновленные данные о зависимостях",
-                "pt": "Adicionado água quente para dispositivo 406 & 401\nDependências atualizadas",
-                "nl": "Toegevoegd warm water voor apparaat 406 & 401\nAfhankelijkheden bijgewerkt",
-                "fr": "Ajout d'eau chaude pour l'appareil 406 & 401\nDépendances actualisées",
-                "it": "Aggiunto acqua calda per dispositivo 406 & 401\nDipendenze aggiornate",
-                "es": "Agua caliente adicional para el dispositivo 406 & 401\nActualización de las dependencias",
-                "pl": "Dodano hotwater dla urządzenia 406 & 401\nAktualizacja zależności",
-                "uk": "Додана гаряча вода для пристрою 406 & 401\nЗалежність оновлено",
-                "zh-cn": "406 & 401设备加热水\n更新的依赖关系"
-            }
-        },
-        "titleLang": {
-            "en": "LG ThinQ",
-            "de": "LG ThinQ",
-            "ru": "LG ThinQ",
-            "pt": "LG ThinQ",
-            "nl": "LG ThinQ",
-            "fr": "LG ThinQ",
-            "it": "LG ThinQ",
-            "es": "LG ThinQ",
-            "pl": "LG ThinQ",
-            "uk": "LG ThinQ",
-            "zh-cn": "LG ThinQ"
-        },
-        "desc": {
-            "en": "Adapter for LG ThinQ",
-            "de": "Adapter für LG ThinQ",
-            "ru": "Адаптер для LG ThinQ",
-            "pt": "Adaptador para LG ThinQ",
-            "nl": "Adapter voor LG ThinQ",
-            "fr": "Adaptateur pour LG ThinQ",
-            "it": "Adattatore per LG ThinQ",
-            "es": "Adaptador para LG ThinQ",
-            "pl": "Adapter do LG ThinQ",
-            "uk": "Адаптер для LG Навігація",
-            "zh-cn": "LG ThinQ 适配器"
-        },
-        "authors": ["TA2k <tombox2020@gmail.com>", "Lucky-ESA <github@luckyskills.de>"],
-        "keywords": ["lg", "thinq"],
-        "licenseInformation": {
-            "license": "MIT",
-            "type": "free"
-        },
-        "tier": 2,
-        "platform": "Javascript/Node.js",
-        "icon": "lg-thinq.png",
-        "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/TA2k/ioBroker.lg-thinq/master/admin/lg-thinq.png",
-        "readme": "https://github.com/TA2k/ioBroker.lg-thinq/blob/master/README.md",
-        "loglevel": "info",
-        "mode": "daemon",
-        "type": "household",
-        "compact": true,
-        "connectionType": "cloud",
-        "dataSource": "poll",
-        "materialize": false,
-        "adminUI": {
-            "config": "json"
-        },
-        "plugins": {
-            "sentry": {
-                "dsn": "https://414a0c2632d7439a81cdeaff30884373@sentry.iobroker.net/157"
-            }
-        },
-        "messagebox": true,
-        "docs": {
-            "en": "docs/en/README.md",
-            "de": "docs/de/README.md"
-        },
-        "dependencies": [
-            {
-                "js-controller": ">=6.0.11"
-            }
-        ],
-        "globalDependencies": [
-            {
-                "admin": ">=7.6.17"
-            }
-        ]
+  "common": {
+    "name": "lg-thinq",
+    "version": "1.1.3",
+    "news": {
+      "1.1.3": {
+        "en": "Added translate for device 201\nDelete APP-Login (removed by LG)\nAdded online icon\nMicrowave 302 disabled (thinq1)",
+        "de": "Übersetzung für Gerät 201 hinzugefügt\nLöschen von APP-Login (entfernt von LG)\nOnline-Symbol\nMikrowelle 302 behindert (thinq1)",
+        "ru": "Добавленный перевод для устройства 201\nУдалить APP-Login (удалено LG)\nДобавлена онлайн икона\nМикроволновая печь 302 отключена (thinq1)",
+        "pt": "Tradutor adicionado para o dispositivo 201\nExcluir APP-Login (removido por LG)\nAdicionado ícone online\nMicroondas 302 desactivadas (thinq1)",
+        "nl": "Toegevoegd vertalen voor apparaat 201\nAPP-Login verwijderen (verwijderd door LG)\nToegevoegd online pictogram\nMagnetron 302 uitgeschakeld (dinq1)",
+        "fr": "Ajouté traduire pour l'appareil 201\nSupprimer APP-Connexion (remplacé par LG)\nAjouté icône en ligne\nMicro-ondes 302 désactivées (thinq1)",
+        "it": "Aggiunto traduttore per dispositivo 201\nEliminare APP-Login (rimossa da LG)\nAggiunto online icona\nMicroonde 302 disabili (thinq1)",
+        "es": "Añadido traducir para el dispositivo 201\nEliminar APP-Login (removido por LG)\nAñadido icono en línea\nMicroondas 302 discapacitados (thinq1)",
+        "pl": "Dodano tłumaczenie dla urządzenia 201\nUsuń logowanie APP- (usunięte przez LG)\nDodano ikonę online\nMikrofala 302 wyłączona (thinq1)",
+        "uk": "Додано переклад для пристрою 201\nВидалити APP-Login (видалення LG)\nДодано іконку онлайн\nМікрохвильова піч 302 вимкнено (thinq1)",
+        "zh-cn": "为设备 201 添加翻译\n删除 APP- Login( 由 LG 删除)\n已添加在线图标\n微波 302 已禁用( 微量)"
+      },
+      "1.1.2": {
+        "en": "Delete expires check",
+        "de": "Löschen läuft ab",
+        "ru": "Удаление истекает проверка",
+        "pt": "Apagar a verificação expira",
+        "nl": "Controle verlopen verwijderen",
+        "fr": "Supprimer la vérification d'expiration",
+        "it": "Cancellare scade il controllo",
+        "es": "Borrar vence el cheque",
+        "pl": "Usuń sprawdzenie wygaśnięcia",
+        "uk": "Видалити параметри перевірки",
+        "zh-cn": "删除过期检查"
+      },
+      "1.1.1": {
+        "en": "Dependencies updated\nNode 20.x required\nAdmin 7.6.17 required",
+        "de": "Ausgaben aktualisiert\nNode 20.x erforderlich\nAdmin 7.6.17 erforderlich",
+        "ru": "Обновленные зависимости\nУзел 20.x требуется\nТребуется администратор 7.6.17",
+        "pt": "Dependências atualizadas\nNó 20.x requerido\nAdministração 7.6.17 necessária",
+        "nl": "Afhankelijkheden bijgewerkt\nNode 20.x vereist\nBeheerder 7.6.17 vereist",
+        "fr": "Dépendances actualisées\nNoeud 20.x requis\nAdmin 7.6.17 requis",
+        "it": "Dipendenze aggiornate\nNodo 20.x richiesto\nAdmin 7.6.17 richiesto",
+        "es": "Actualización de las dependencias\nNodo 20.x requerido\nAdmin 7.6.17 requerido",
+        "pl": "Aktualizacja zależności\nWymagany węzeł 20.x\nWymagany admin 7.6.17",
+        "uk": "Залежність оновлено\nNode 20.x обов'язковий\nAdmin 7.6.17 потрібно",
+        "zh-cn": "更新的依赖关系\n需要节点20x\n所需行政经费"
+      },
+      "1.1.0": {
+        "en": "max target changed from 30 to 40 degrees\nDependencies updated\nAdmin 7.4.10 required",
+        "de": "max ziel geändert von 30 bis 40 grad\nAusgaben aktualisiert\nAdmin 7.4.10 erforderlich",
+        "ru": "максимальная цель изменилась с 30 до 40 градусов\nОбновленные зависимости\nТребуется администратор 7.4.10",
+        "pt": "alvo máximo alterado de 30 a 40 graus\nDependências atualizadas\nAdmin 7.4.10 necessário",
+        "nl": "max doel gewijzigd van 30 naar 40 graden\nAfhankelijkheden bijgewerkt\nBeheerder 7.4.10 vereist",
+        "fr": "la cible maximale est passée de 30 à 40 degrés\nDépendances actualisées\nAdmin 7.4.10 requis",
+        "it": "obiettivo massimo cambiato da 30 a 40 gradi\nDipendenze aggiornate\nAdmin 7.4.10 richiesto",
+        "es": "objetivo máximo cambiado de 30 a 40 grados\nActualización de las dependencias\nAdmin 7.4.10",
+        "pl": "max cel zmieniony z 30 do 40 stopni\nAktualizacja zależności\nWymagany admin 7.4.10",
+        "uk": "максимальна цільова зміна від 30 до 40 градусів\nЗалежність оновлено\nAdmin 7.4.10 потрібно",
+        "zh-cn": "最大目标从30度改为40度\n更新的依赖关系\n所需行政经费"
+      },
+      "1.0.7": {
+        "en": "Fixed: Connection status does not turn green\nChanged: Checkbox to dropdown for login procedure",
+        "de": "Behoben: Verbindungsstatus wird nicht grün\nGeändert: Checkbox zum Dropdown für Login-Verfahren",
+        "ru": "Исправлено: статус подключения не становится зеленым\nИзменение: Checkbox для отключения для процедуры регистрации",
+        "pt": "Corrigido: O status da conexão não fica verde\nAlterado: Caixa de seleção para dropdown para procedimento de login",
+        "nl": "Vast: Verbindingsstatus wordt niet groen\nGewijzigd: Checkbox naar dropdown voor login procedure",
+        "fr": "Correction : le statut de connexion ne devient pas vert\nChanged: Boîte à cocher pour la procédure de connexion",
+        "it": "Fisso: lo stato di connessione non diventa verde\nModificato: Checkbox to dropdown per la procedura di login",
+        "es": "Fijo: El estado de conexión no se vuelve verde\nCambio: Checkbox to dropdown for login procedure",
+        "pl": "Naprawiono: Stan połączenia nie zmienia się na zielony\nZmieniono: pole wyboru do zrzutu dla procedury logowania",
+        "uk": "Виправлено: статус підключення не перетворюється зелений\nЗмінено: Перевірити випадання для процедури входу",
+        "zh-cn": "固定: 连接状态不变为绿色\n已更改: 检查框以下载登录程序"
+      },
+      "1.0.6": {
+        "en": "Save session data (prevents the login email)\nFixed invalid jsonConfig\nAdded choice between old and new login\nBugfixe",
+        "de": "Speichern von Sitzungsdaten (verhindert die Login-E-Mail)\nBehoben ungültig jsonConfig\nWahl zwischen altem und neuem Login hinzugefügt\nBugfixes",
+        "ru": "Сохранить данные сеанса (предотвратить логин электронной почты)\nИсправленный недействительный jsonConfig\nДобавить выбор между старым и новым логином\nBugfixe",
+        "pt": "Salvar dados de sessão (prevenindo o e-mail de login)\nFixo inválido jsonConfig\nAdicionado escolha entre velho e novo login\nBugfixe",
+        "nl": "Sessiegegevens opslaan (voorkomt de aanmeldmail)\nVaste ongeldige jsonConfig\nToegevoegde keuze tussen oude en nieuwe login\nBugfixe",
+        "fr": "Enregistrer les données de session (prévient l'email de connexion)\nCorrection de jsonConfig invalide\nAjout du choix entre l'ancien et le nouveau login\nBugfixe",
+        "it": "Salvare i dati di sessione (previene l'email di login)\nRisolto invalido jsonConfig\nAggiunta scelta tra vecchio e nuovo login\nBugfixe",
+        "es": "Guardar datos de sesión (prevende el email de inicio de sesión)\nJsonConfig no válido fijo\nSelección agregada entre el inicio de sesión y el nuevo\nBugfixe",
+        "pl": "Zapisz dane sesji (zapobiega e-mailowi logowania)\nNaprawiono nieprawidłowe jsonConfig\nDodano wybór pomiędzy starym i nowym logowaniem\nBugfixe",
+        "uk": "Заощаджуйте дані сеансу (перекладає електронну пошту)\nВиправлено недійсний jsonConfig\nДодано вибір між застарілим і новим логіном\nПомилки",
+        "zh-cn": "保存会话数据( 防止登录电子邮件)\n固定无效的jsonconfig\n添加新旧登录的选择\n错误修正"
+      },
+      "1.0.5": {
+        "en": "Migration to ESLint9\nBugfixe",
+        "de": "Migration auf ESLint9\nBugfixes",
+        "ru": "Миграция в ESLint9\nBugfixe",
+        "pt": "Migração para ESLint9\nBugfixe",
+        "nl": "Migratie naar ESLint9\nBugfixe",
+        "fr": "Migration vers ESLint9\nBugfixe",
+        "it": "Migrazione a ESLint9\nBugfixe",
+        "es": "Migración a ESLint9\nBugfixe",
+        "pl": "Migracja do ESLint9\nBugfixe",
+        "uk": "Міграція в ESLint9\nПомилки",
+        "zh-cn": "迁移到ESLint9\n错误修正"
+      }
     },
-    "encryptedNative": ["password"],
-    "protectedNative": ["password"],
-    "native": {
-        "user": "",
-        "password": "",
-        "interval": 5,
-        "interval_thinq1": 30,
-        "country": "DE",
-        "language": "de_DE",
-        "thinq1": false,
-        "platform": "LGThinQ"
+    "titleLang": {
+      "en": "LG ThinQ",
+      "de": "LG ThinQ",
+      "ru": "LG ThinQ",
+      "pt": "LG ThinQ",
+      "nl": "LG ThinQ",
+      "fr": "LG ThinQ",
+      "it": "LG ThinQ",
+      "es": "LG ThinQ",
+      "pl": "LG ThinQ",
+      "uk": "LG ThinQ",
+      "zh-cn": "LG ThinQ"
     },
-    "objects": [],
-    "instanceObjects": [
-        {
-            "_id": "info",
-            "type": "channel",
-            "common": {
-                "name": {
-                    "en": "Information",
-                    "de": "Informationen",
-                    "ru": "Информация",
-                    "pt": "Informação",
-                    "nl": "Informatie",
-                    "fr": "Information",
-                    "it": "Informazioni",
-                    "es": "Información",
-                    "pl": "Informacja",
-                    "uk": "Інформація",
-                    "zh-cn": "信息"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "info.connection",
-            "type": "state",
-            "common": {
-                "role": "indicator.connected",
-                "name": {
-                    "en": "Device or service connected",
-                    "de": "Geräte- oder Serviceanschluss",
-                    "ru": "Устройство или сервис подключены",
-                    "pt": "Dispositivo ou serviço conectado",
-                    "nl": "Device of dienst verbonden",
-                    "fr": "Appareil ou service connecté",
-                    "it": "Dispositivo o servizio collegato",
-                    "es": "Dispositivo o servicio conectado",
-                    "pl": "Device",
-                    "uk": "Пристрої або послуги підключені",
-                    "zh-cn": "证人或有关服务"
-                },
-                "type": "boolean",
-                "read": true,
-                "write": false,
-                "def": false
-            },
-            "native": {}
-        },
-        {
-            "_id": "session",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": {
-                    "en": "Session infos",
-                    "de": "Sitzungsinfos",
-                    "ru": "Сессионная информация",
-                    "pt": "InformaÃ§Ãμes de sessão",
-                    "nl": "Sessie-informatie",
-                    "fr": "Infos de séance",
-                    "it": "Informazioni di sessione",
-                    "es": "Información de sesión",
-                    "pl": "Informacje o sesji",
-                    "uk": "Інформація про сеанс",
-                    "zh-cn": "会话信息"
-                },
-                "type": "string",
-                "read": true,
-                "write": false,
-                "def": ""
-            },
-            "native": {}
-        }
+    "desc": {
+      "en": "Adapter for LG ThinQ",
+      "de": "Adapter für LG ThinQ",
+      "ru": "Адаптер для LG ThinQ",
+      "pt": "Adaptador para LG ThinQ",
+      "nl": "Adapter voor LG ThinQ",
+      "fr": "Adaptateur pour LG ThinQ",
+      "it": "Adattatore per LG ThinQ",
+      "es": "Adaptador para LG ThinQ",
+      "pl": "Adapter do LG ThinQ",
+      "uk": "Адаптер для LG Навігація",
+      "zh-cn": "LG ThinQ 适配器"
+    },
+    "authors": [
+      "TA2k <tombox2020@gmail.com>",
+      "Lucky-ESA <github@luckyskills.de>"
+    ],
+    "keywords": [
+      "lg",
+      "thinq"
+    ],
+    "licenseInformation": {
+      "license": "MIT",
+      "type": "free"
+    },
+    "tier": 2,
+    "platform": "Javascript/Node.js",
+    "icon": "lg-thinq.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/TA2k/ioBroker.lg-thinq/master/admin/lg-thinq.png",
+    "readme": "https://github.com/TA2k/ioBroker.lg-thinq/blob/master/README.md",
+    "loglevel": "info",
+    "mode": "daemon",
+    "type": "household",
+    "compact": true,
+    "connectionType": "cloud",
+    "dataSource": "poll",
+    "materialize": false,
+    "adminUI": {
+      "config": "json"
+    },
+    "plugins": {
+      "sentry": {
+        "dsn": "https://414a0c2632d7439a81cdeaff30884373@sentry.iobroker.net/157"
+      }
+    },
+    "messagebox": true,
+    "docs": {
+      "en": "docs/en/README.md",
+      "de": "docs/de/README.md"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=6.0.11"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=7.6.17"
+      }
     ]
+  },
+  "encryptedNative": [
+    "password"
+  ],
+  "protectedNative": [
+    "password"
+  ],
+  "native": {
+    "user": "",
+    "password": "",
+    "interval": 5,
+    "interval_thinq1": 30,
+    "country": "DE",
+    "language": "de_DE",
+    "thinq1": false,
+    "platform": "LGThinQ"
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Information",
+          "de": "Informationen",
+          "ru": "Информация",
+          "pt": "Informação",
+          "nl": "Informatie",
+          "fr": "Information",
+          "it": "Informazioni",
+          "es": "Información",
+          "pl": "Informacja",
+          "uk": "Інформація",
+          "zh-cn": "信息"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": {
+          "en": "Device or service connected",
+          "de": "Geräte- oder Serviceanschluss",
+          "ru": "Устройство или сервис подключены",
+          "pt": "Dispositivo ou serviço conectado",
+          "nl": "Device of dienst verbonden",
+          "fr": "Appareil ou service connecté",
+          "it": "Dispositivo o servizio collegato",
+          "es": "Dispositivo o servicio conectado",
+          "pl": "Device",
+          "uk": "Пристрої або послуги підключені",
+          "zh-cn": "证人或有关服务"
+        },
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "session",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": {
+          "en": "Session infos",
+          "de": "Sitzungsinfos",
+          "ru": "Сессионная информация",
+          "pt": "InformaÃ§Ãμes de sessão",
+          "nl": "Sessie-informatie",
+          "fr": "Infos de séance",
+          "it": "Informazioni di sessione",
+          "es": "Información de sesión",
+          "pl": "Informacje o sesji",
+          "uk": "Інформація про сеанс",
+          "zh-cn": "会话信息"
+        },
+        "type": "string",
+        "read": true,
+        "write": false,
+        "def": ""
+      },
+      "native": {}
+    }
+  ]
 }

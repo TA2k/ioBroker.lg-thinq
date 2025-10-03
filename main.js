@@ -347,6 +347,9 @@ class LgThinq extends utils.Adapter {
                         checkType: true,
                         firstload: true,
                     });
+                    if (element.online != null) {
+                        this.extendObject(element.deviceId, { common: { statusStates: { onlineId: `${this.namespace}.${element.deviceId}.online`} } });
+                    }
                     this.modelInfos[element.deviceId]["thinq2"] = element.platformType;
                     this.modelInfos[element.deviceId]["signature"] = false;
                     this.modelInfos[element.deviceId]["deviceState"] = element.deviceState;

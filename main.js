@@ -348,7 +348,9 @@ class LgThinq extends utils.Adapter {
                         firstload: true,
                     });
                     if (element.online != null) {
-                        this.extendObject(element.deviceId, { common: { statusStates: { onlineId: `${this.namespace}.${element.deviceId}.online`} } });
+                        this.extendObject(element.deviceId, {
+                            common: { statusStates: { onlineId: `${this.namespace}.${element.deviceId}.online` } },
+                        });
                     }
                     this.modelInfos[element.deviceId]["thinq2"] = element.platformType;
                     this.modelInfos[element.deviceId]["signature"] = false;
@@ -2837,10 +2839,7 @@ class LgThinq extends utils.Adapter {
                     data.command === "Get"
                 ) {
                     this.log.debug(`Bad Request: ${error.message}`);
-                } else if (
-                    error.response &&
-                    error.response.status === 400
-                ) {
+                } else if (error.response && error.response.status === 400) {
                     this.log.error(`Send: ${error.message}`);
                     this.log.error(`Send: ${error.response.data}`);
                     this.log.error(`Send: ${error.response.status}`);

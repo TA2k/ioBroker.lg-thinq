@@ -2424,6 +2424,10 @@ class LgThinq extends utils.Adapter {
                                 common.max = 40;
                             } else if (state === "airState.miscFuncState.autoDryRemainTime") {
                                 common.max = 300;
+                            } else if (state === "airState.tempState.limitMin") {
+                                common.max = 40;
+                            } else if (state === "airState.tempState.limitMax") {
+                                common.max = 70;
                             } else if (
                                 this.modelInfos[device.deviceId]["signature"] &&
                                 (state === "reserveTimeMinute" ||
@@ -2533,6 +2537,10 @@ class LgThinq extends utils.Adapter {
                                 common.max = 40;
                             } else if (state === "airState.miscFuncState.autoDryRemainTime") {
                                 common.max = 300;
+                            } else if (state === "airState.tempState.limitMin") {
+                                common.max = 40;
+                            } else if (state === "airState.tempState.limitMax") {
+                                common.max = 70;
                             } else {
                                 if (valueDefault != null && valueDefault > valueObject.max) {
                                     common.max = valueDefault;

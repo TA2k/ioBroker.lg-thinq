@@ -52,6 +52,7 @@ Adapter for LG ThinQ
 
 - (Lucky-ESA) Attribute max of object limitMax and limitMin changed (device 401)
 - (Lucky-ESA) Fixed deviceType error
+- (Lucky-ESA) JSONbig loglevel changed
 
 ### 1.1.3 (2025-10-03)
 

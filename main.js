@@ -25,6 +25,27 @@ const http = require("http");
 const https = require("https");
 const fs = require("fs");
 
+const userSettings = {
+    groupName: "USB", // Items get created within this group. required
+    location: {
+        wasteCollectionShortcut: "usb", // waste provider shortcut. required. Available options see table.
+        city: "Bochum", // city from list with available cities. see logs, if needed.
+        street: "Raiffeisenstraße", // street from list with available street. see logs, if needed.
+        number: "18", // number from list with available number. see logs, if needed.
+    },
+    items: {
+        recreateItemIfNotPresent: false, // Create item again if deleted
+        checkItemsBeforeRequest: true, // Check if state of items in group with tag mm-waste-schedule are NULL/UNDEF or date is before today and do http-request only if required.
+        deleteItemsInGroup: false, // cleanup. removes all items within provided group which are tagged with tag in mmItemTag (default is mm-waste-schedule)
+        // Add a pattern to the stateDescription of the created items. This only happens once per new item. Let exactly one of the following lines uncommented
+        stateDescriptionPatternOnCreation: "",
+        // '%1$td.%1$tm'       // 13.01
+        // '%1$ta, %1$td.%1$tm'       // Thu, 13.01
+        // '%1$td.%1$tm.%1$ty' // 13.05.22
+        // '%1$td.%1$tm.%1$tY' // 13.05.2022
+    },
+};
+
 class LgThinq extends utils.Adapter {
     /**
      * @param options Options
@@ -347,7 +368,13 @@ class LgThinq extends utils.Adapter {
                         checkType: true,
                         firstload: true,
                     });
-                    if (element.online != null) {
+                    if (element.snapshot.online != null) {
+                        this.extendObject(element.deviceId, {
+                            common: {
+                                statusStates: { onlineId: `${this.namespace}.${element.deviceId}.snapshot.online` },
+                            },
+                        });
+                    } else if (element.online != null) {
                         this.extendObject(element.deviceId, {
                             common: { statusStates: { onlineId: `${this.namespace}.${element.deviceId}.online` } },
                         });
@@ -2278,7 +2305,7 @@ class LgThinq extends utils.Adapter {
                     if (controlWifi) {
                         for (const control in controlWifi) {
                             if (control === "WMDownload" && device.platformType === "thinq2") {
-                                await this.createremote(device.deviceId, control, deviceModel);
+                                await this.createremote(device.deviceId, control, deviceModel, device.deviceType);
                             }
                             const common = {
                                 name: control,

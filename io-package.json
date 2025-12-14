@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lg-thinq",
-    "version": "1.1.3",
+    "version": "1.1.4",
     "news": {
+      "1.1.4": {
+        "en": "Attribute max of object limitMax and limitMin changed (device 401)\nFixed deviceType error\nJSONbig loglevel changed",
+        "de": "Attribut max ObjektlimitMax und LimitMin geändert (Gerät 401)\nFeste Vorrichtung Typ Fehler\nJSO Nbig loglevel geändert",
+        "ru": "Изменился атрибут max предела объектаMax и пределMin (устройство 401)\nФиксированное устройство Тип ошибки\nДж. Уровень Nbig изменился",
+        "pt": "Atributo máximo do limite do objetoMax e limiteMín alterado (dispositivo 401)\nDispositivo fixo Erro de tipo\nJSO Nbig loglevel alterado",
+        "nl": "Attribuut max of object limitMax en limietMin gewijzigd (apparaat 401)\nVast apparaat Typefout\nJSO Nbig loglevel gewijzigd",
+        "fr": "Attribut max de l'objet limitMax et limitMin modifié (dispositif 401)\nAppareil fixe Erreur de type\nJSO Nbig niveau de log a changé",
+        "it": "Attribuire max di limite di oggettoMax e limitMin modificato (dispositivo 401)\nDispositivo fisso Tipo di errore\nJSO Nbig loglevel cambiato",
+        "es": "Attribute max of object limitMax and limitMin changed (dispositivo 401)\nDispositivo fijo Error de tipo\nJSO Cambio de nivel de registro",
+        "pl": "Atrybut max obiektu limitMax i limitMin zmienione (urządzenie 401)\nUrządzenie stałe Błąd typu\nJSO Zmieniono poziom logowania Nbig",
+        "uk": "Атрибут максимум ліміту об'єктаМакс і лімітМін змінено (device 401)\nФіксований пристрій Тип помилки\nЯСО Nbig loglevel змінив",
+        "zh-cn": "对象限制的最大属性\n固定设备 类型错误\n牙买加 Nbig 日志级别已更改"
+      },
       "1.1.3": {
         "en": "Added translate for device 201\nDelete APP-Login (removed by LG)\nAdded online icon\nMicrowave 302 disabled (thinq1)",
         "de": "Übersetzung für Gerät 201 hinzugefügt\nLöschen von APP-Login (entfernt von LG)\nOnline-Symbol\nMikrowelle 302 behindert (thinq1)",
@@ -80,19 +93,6 @@
         "pl": "Zapisz dane sesji (zapobiega e-mailowi logowania)\nNaprawiono nieprawidłowe jsonConfig\nDodano wybór pomiędzy starym i nowym logowaniem\nBugfixe",
         "uk": "Заощаджуйте дані сеансу (перекладає електронну пошту)\nВиправлено недійсний jsonConfig\nДодано вибір між застарілим і новим логіном\nПомилки",
         "zh-cn": "保存会话数据( 防止登录电子邮件)\n固定无效的jsonconfig\n添加新旧登录的选择\n错误修正"
-      },
-      "1.0.5": {
-        "en": "Migration to ESLint9\nBugfixe",
-        "de": "Migration auf ESLint9\nBugfixes",
-        "ru": "Миграция в ESLint9\nBugfixe",
-        "pt": "Migração para ESLint9\nBugfixe",
-        "nl": "Migratie naar ESLint9\nBugfixe",
-        "fr": "Migration vers ESLint9\nBugfixe",
-        "it": "Migrazione a ESLint9\nBugfixe",
-        "es": "Migración a ESLint9\nBugfixe",
-        "pl": "Migracja do ESLint9\nBugfixe",
-        "uk": "Міграція в ESLint9\nПомилки",
-        "zh-cn": "迁移到ESLint9\n错误修正"
       }
     },
     "titleLang": {

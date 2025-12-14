@@ -47,8 +47,7 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.1.4 (2025-12-14)
 
 - (Lucky-ESA) Attribute max of object limitMax and limitMin changed (device 401)
 - (Lucky-ESA) Fixed deviceType error
@@ -76,11 +75,6 @@ Adapter for LG ThinQ
 - (Lucky-ESA) max target changed from 30 to 40 degrees
 - (Lucky-ESA) Dependencies updated
 - (Lucky-ESA) Admin 7.4.10 required
-
-### 1.0.7 (2024-12-08)
-
-- (Lucky-ESA) Fixed: Connection status does not turn green
-- (Lucky-ESA) Changed: Checkbox to dropdown for login procedure
 
 ## License
 

@@ -30,6 +30,11 @@
 ### 0.0.3
 
 -   (TA2k) initial release
+## 1.0.7 (2024-12-08)
+
+- (Lucky-ESA) Fixed: Connection status does not turn green
+- (Lucky-ESA) Changed: Checkbox to dropdown for login procedure
+
 ## 1.0.6 (2024-12-07)
 
 - (Lucky-ESA) Save session data (prevents the login email)

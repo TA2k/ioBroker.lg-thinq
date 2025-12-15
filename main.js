@@ -347,7 +347,7 @@ class LgThinq extends utils.Adapter {
                         checkType: true,
                         firstload: true,
                     });
-                    if (element.snapshot.online != null) {
+                    if (element.snapshot && element.snapshot.online != null) {
                         this.extendObject(element.deviceId, {
                             common: {
                                 statusStates: { onlineId: `${this.namespace}.${element.deviceId}.snapshot.online` },

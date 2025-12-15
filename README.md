@@ -47,6 +47,11 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- (Lucky-ESA) Fixed adapter crash (thinq1 only)
+
 ### 1.1.4 (2025-12-14)
 
 - (Lucky-ESA) Attribute max of object limitMax and limitMin changed (device 401)

@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lg-thinq",
-    "version": "1.1.4",
+    "version": "1.1.5",
     "news": {
+      "1.1.5": {
+        "en": "Fixed adapter crash (thinq1 only)\nFixed: Address Root-CA certificate has changed",
+        "de": "Fester Adapterabsturz (nur inq1)\nFix: Adresse Root-CA-Zertifikat hat sich geändert",
+        "ru": "Исправленный сбой адаптера (только индекс 1)\nИсправлено: изменился адрес сертификата Root-CA",
+        "pt": "Falha fixa do adaptador (somente o thinq1)\nFixo: O certificado de endereço Root-CA foi alterado",
+        "nl": "Fixed adapter crash (alleen thinq1)\nVast: Adres Root-CA certificaat is gewijzigd",
+        "fr": "Crash de l'adaptateur fixe (thinq1 seulement)\nCorrection : Le certificat d'adresse Root-CA a changé",
+        "it": "Attacco fisso (solo THinq1)\nRisolto: Indirizzo certificato Root-CA è cambiato",
+        "es": "Accidente de adaptador fijo (sólo en el punto 1)\nFijo: el certificado de dirección Root-CA ha cambiado",
+        "pl": "Naprawiono awarię adaptera (tylko thinq1)\nNaprawiono: Zmieniono certyfikat Root- CA",
+        "uk": "Виправлена аварійна аварія адаптера (тільки трійця)\nВиправлено: Код ЄДРПОУ змінився",
+        "zh-cn": "固定适配器崩溃( 仅是 tinq1)\n固定: 地址根- CA 证书已更改"
+      },
       "1.1.4": {
         "en": "Attribute max of object limitMax and limitMin changed (device 401)\nFixed deviceType error\nJSONbig loglevel changed",
         "de": "Attribut max ObjektlimitMax und LimitMin geändert (Gerät 401)\nFeste Vorrichtung Typ Fehler\nJSO Nbig loglevel geändert",
@@ -80,19 +93,6 @@
         "pl": "Naprawiono: Stan połączenia nie zmienia się na zielony\nZmieniono: pole wyboru do zrzutu dla procedury logowania",
         "uk": "Виправлено: статус підключення не перетворюється зелений\nЗмінено: Перевірити випадання для процедури входу",
         "zh-cn": "固定: 连接状态不变为绿色\n已更改: 检查框以下载登录程序"
-      },
-      "1.0.6": {
-        "en": "Save session data (prevents the login email)\nFixed invalid jsonConfig\nAdded choice between old and new login\nBugfixe",
-        "de": "Speichern von Sitzungsdaten (verhindert die Login-E-Mail)\nBehoben ungültig jsonConfig\nWahl zwischen altem und neuem Login hinzugefügt\nBugfixes",
-        "ru": "Сохранить данные сеанса (предотвратить логин электронной почты)\nИсправленный недействительный jsonConfig\nДобавить выбор между старым и новым логином\nBugfixe",
-        "pt": "Salvar dados de sessão (prevenindo o e-mail de login)\nFixo inválido jsonConfig\nAdicionado escolha entre velho e novo login\nBugfixe",
-        "nl": "Sessiegegevens opslaan (voorkomt de aanmeldmail)\nVaste ongeldige jsonConfig\nToegevoegde keuze tussen oude en nieuwe login\nBugfixe",
-        "fr": "Enregistrer les données de session (prévient l'email de connexion)\nCorrection de jsonConfig invalide\nAjout du choix entre l'ancien et le nouveau login\nBugfixe",
-        "it": "Salvare i dati di sessione (previene l'email di login)\nRisolto invalido jsonConfig\nAggiunta scelta tra vecchio e nuovo login\nBugfixe",
-        "es": "Guardar datos de sesión (prevende el email de inicio de sesión)\nJsonConfig no válido fijo\nSelección agregada entre el inicio de sesión y el nuevo\nBugfixe",
-        "pl": "Zapisz dane sesji (zapobiega e-mailowi logowania)\nNaprawiono nieprawidłowe jsonConfig\nDodano wybór pomiędzy starym i nowym logowaniem\nBugfixe",
-        "uk": "Заощаджуйте дані сеансу (перекладає електронну пошту)\nВиправлено недійсний jsonConfig\nДодано вибір між застарілим і новим логіном\nПомилки",
-        "zh-cn": "保存会话数据( 防止登录电子邮件)\n固定无效的jsonconfig\n添加新旧登录的选择\n错误修正"
       }
     },
     "titleLang": {

@@ -47,8 +47,7 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.1.5 (2025-12-15)
 
 - (Lucky-ESA) Fixed adapter crash (thinq1 only)
 - (Lucky-ESA) Fixed: Address Root-CA certificate has changed
@@ -75,12 +74,6 @@ Adapter for LG ThinQ
 - (Lucky-ESA) Dependencies updated
 - (Lucky-ESA) Node 20.x required
 - (Lucky-ESA) Admin 7.6.17 required
-
-### 1.1.0 (2025-04-08)
-
-- (Lucky-ESA) max target changed from 30 to 40 degrees
-- (Lucky-ESA) Dependencies updated
-- (Lucky-ESA) Admin 7.4.10 required
 
 ## License
 

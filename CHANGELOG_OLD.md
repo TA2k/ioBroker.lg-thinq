@@ -30,6 +30,12 @@
 ### 0.0.3
 
 -   (TA2k) initial release
+## 1.1.0 (2025-04-08)
+
+- (Lucky-ESA) max target changed from 30 to 40 degrees
+- (Lucky-ESA) Dependencies updated
+- (Lucky-ESA) Admin 7.4.10 required
+
 ## 1.0.7 (2024-12-08)
 
 - (Lucky-ESA) Fixed: Connection status does not turn green

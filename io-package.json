@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lg-thinq",
-    "version": "1.1.5",
+    "version": "1.1.6",
     "news": {
+      "1.1.6": {
+        "en": "Fixed: Address Root-CA certificate has changed",
+        "de": "Fix: Adresse Root-CA-Zertifikat hat sich geändert",
+        "ru": "Исправлено: изменился адрес сертификата Root-CA",
+        "pt": "Fixo: O certificado de endereço Root-CA foi alterado",
+        "nl": "Vast: Adres Root-CA certificaat is gewijzigd",
+        "fr": "Correction : Le certificat d'adresse Root-CA a changé",
+        "it": "Risolto: Indirizzo certificato Root-CA è cambiato",
+        "es": "Fijo: el certificado de dirección Root-CA ha cambiado",
+        "pl": "Naprawiono: Zmieniono certyfikat Root- CA",
+        "uk": "Виправлено: Код ЄДРПОУ змінився",
+        "zh-cn": "固定: 地址根- CA 证书已更改"
+      },
       "1.1.5": {
         "en": "Fixed adapter crash (thinq1 only)\nFixed: Address Root-CA certificate has changed",
         "de": "Fester Adapterabsturz (nur inq1)\nFix: Adresse Root-CA-Zertifikat hat sich geändert",
@@ -80,19 +93,6 @@
         "pl": "max cel zmieniony z 30 do 40 stopni\nAktualizacja zależności\nWymagany admin 7.4.10",
         "uk": "максимальна цільова зміна від 30 до 40 градусів\nЗалежність оновлено\nAdmin 7.4.10 потрібно",
         "zh-cn": "最大目标从30度改为40度\n更新的依赖关系\n所需行政经费"
-      },
-      "1.0.7": {
-        "en": "Fixed: Connection status does not turn green\nChanged: Checkbox to dropdown for login procedure",
-        "de": "Behoben: Verbindungsstatus wird nicht grün\nGeändert: Checkbox zum Dropdown für Login-Verfahren",
-        "ru": "Исправлено: статус подключения не становится зеленым\nИзменение: Checkbox для отключения для процедуры регистрации",
-        "pt": "Corrigido: O status da conexão não fica verde\nAlterado: Caixa de seleção para dropdown para procedimento de login",
-        "nl": "Vast: Verbindingsstatus wordt niet groen\nGewijzigd: Checkbox naar dropdown voor login procedure",
-        "fr": "Correction : le statut de connexion ne devient pas vert\nChanged: Boîte à cocher pour la procédure de connexion",
-        "it": "Fisso: lo stato di connessione non diventa verde\nModificato: Checkbox to dropdown per la procedura di login",
-        "es": "Fijo: El estado de conexión no se vuelve verde\nCambio: Checkbox to dropdown for login procedure",
-        "pl": "Naprawiono: Stan połączenia nie zmienia się na zielony\nZmieniono: pole wyboru do zrzutu dla procedury logowania",
-        "uk": "Виправлено: статус підключення не перетворюється зелений\nЗмінено: Перевірити випадання для процедури входу",
-        "zh-cn": "固定: 连接状态不变为绿色\n已更改: 检查框以下载登录程序"
       }
     },
     "titleLang": {

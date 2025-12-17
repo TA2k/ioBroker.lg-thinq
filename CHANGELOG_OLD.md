@@ -30,6 +30,12 @@
 ### 0.0.3
 
 -   (TA2k) initial release
+## 1.1.1 (2025-08-16)
+
+- (Lucky-ESA) Dependencies updated
+- (Lucky-ESA) Node 20.x required
+- (Lucky-ESA) Admin 7.6.17 required
+
 ## 1.1.0 (2025-04-08)
 
 - (Lucky-ESA) max target changed from 30 to 40 degrees

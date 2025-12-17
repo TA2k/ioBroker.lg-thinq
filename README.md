@@ -47,8 +47,7 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.1.6 (2025-12-17)
 
 - (Lucky-ESA) Fixed: Address Root-CA certificate has changed
 
@@ -73,12 +72,6 @@ Adapter for LG ThinQ
 ### 1.1.2 (2025-08-18)
 
 - (Lucky-ESA) Delete expires check
-
-### 1.1.1 (2025-08-16)
-
-- (Lucky-ESA) Dependencies updated
-- (Lucky-ESA) Node 20.x required
-- (Lucky-ESA) Admin 7.6.17 required
 
 ## License
 

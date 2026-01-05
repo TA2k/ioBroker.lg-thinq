@@ -47,6 +47,11 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- (Lucky-ESA) Added translate for device 201
+
 ### 1.1.6 (2025-12-17)
 
 - (Lucky-ESA) Fixed: Address Root-CA certificate has changed

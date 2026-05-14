@@ -9,21 +9,21 @@
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
 const axios = require("axios").default;
-const crypto = require("crypto");
+const crypto = require("node:crypto");
 const uuid = require("uuid");
 const qs = require("qs");
 const { DateTime } = require("luxon");
 const Json2iob = require("./lib/extractKeys");
 const constants = require("./lib/constants");
-const { URL } = require("url");
+const { URL } = require("node:url");
 const helper = require("./lib/helper");
 const air = require("./lib/air_conditioning"); // Device 401
 const heat = require("./lib/heat_pump"); // Device 406
 const awsIot = require("aws-iot-device-sdk").device;
 const forge = require("node-forge");
-const http = require("http");
-const https = require("https");
-const fs = require("fs");
+const http = require("node:http");
+const https = require("node:https");
+const fs = require("node:fs");
 
 class LgThinq extends utils.Adapter {
     /**

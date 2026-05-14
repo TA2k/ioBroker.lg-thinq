@@ -49,6 +49,7 @@ Adapter for LG ThinQ
 ## Changelog
 
 ### **WORK IN PROGRESS**
+- (copilot) Adapter requires node.js >= 22 now
 
 - (Lucky-ESA) Added translate for device 201
 

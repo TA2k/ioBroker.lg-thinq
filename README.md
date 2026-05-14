@@ -17,9 +17,9 @@ Adapter for LG ThinQ
 
 ## Requirement
 
-- Node >= 20, 22 or 24
+- Node >= 22 or 24
 - JS-Controller >= 6.0.11
-- Admin >= 7.6.17
+- Admin >= 7.7.22
 
 ## Supported devices
 
@@ -49,8 +49,9 @@ Adapter for LG ThinQ
 ## Changelog
 
 ### **WORK IN PROGRESS**
-- (copilot) Adapter requires node.js >= 22 now
 
+- (copilot) Adapter requires node.js >= 22 now
+- (Lucky-ESA) Adapter requires admin >= 7.7.22 now
 - (Lucky-ESA) Added translate for device 201
 
 ### 1.1.6 (2025-12-17)

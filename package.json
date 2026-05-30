@@ -28,7 +28,7 @@
         "luxon": "^3.7.2",
         "node-forge": "^1.4.0",
         "qs": "^6.15.2",
-        "uuid": "^11.1.1"
+        "uuid": "^14.0.0"
     },
     "devDependencies": {
         "@alcalzone/release-script": "^5.2.0",

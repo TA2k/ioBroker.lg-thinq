@@ -30,6 +30,10 @@
 ### 0.0.3
 
 -   (TA2k) initial release
+## 1.1.2 (2025-08-18)
+
+- (Lucky-ESA) Delete expires check
+
 ## 1.1.1 (2025-08-16)
 
 - (Lucky-ESA) Dependencies updated

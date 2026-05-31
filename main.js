@@ -27,7 +27,7 @@ const fs = require("node:fs");
 
 class LgThinq extends utils.Adapter {
     /**
-     * @param options Options
+     * @param {Partial<utils.AdapterOptions>} [options]
      */
     constructor(options) {
         super({
@@ -3579,10 +3579,9 @@ class LgThinq extends utils.Adapter {
 if (require.main !== module) {
     // Export the constructor in compact mode
     /**
-     * @param options [options={}]
+     * @param {Partial<utils.AdapterOptions>} [options]
      */
     module.exports = options => new LgThinq(options);
 } else {
-    // @ts-expect-error otherwise start the instance directly
     new LgThinq();
 }

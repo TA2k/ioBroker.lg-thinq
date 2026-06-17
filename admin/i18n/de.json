@@ -1,16 +1,16 @@
 {
+    "APP-Login": "APP-Anmeldung",
     "Adapter settings for lg-thinq": "Adaptereinstellungen für LG-Thinq",
+    "Country": "Land",
     "LG ThinQ Email": "LG ThinQ E-Mail",
     "LG ThinQ Password": "LG ThinQ-Passwort",
-    "Update interval in minutes": "Aktualisierungsintervall in Minuten",
-    "Country": "Land",
     "Language": "Sprache",
     "Platform": "Plattform",
+    "Third-Party-Login": "Anmeldung bei Drittanbietern",
+    "Update interval in minutes": "Aktualisierungsintervall in Minuten",
     "Update thinq1 interval in minutes": "Aktualisierungsintervall in Sekunden für Thinq1 (pro Gerät 1 Sekunde)",
     "deleteSession": "Sitzungsdaten löschen (bei Login-Problemen)",
     "deleteText": "Sitzungsdaten löschen",
     "selectReg": "Registrierungsmethode auswählen",
-    "selectRegTip": "Zwischen altem Drittanbieter- oder APP-Login wechseln",
-    "APP-Login": "APP-Anmeldung",
-    "Third-Party-Login": "Anmeldung bei Drittanbietern"
+    "selectRegTip": "Zwischen altem Drittanbieter- oder APP-Login wechseln"
 }

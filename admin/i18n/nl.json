@@ -1,16 +1,16 @@
 {
+    "APP-Login": "APP-login",
     "Adapter settings for lg-thinq": "Adapterinstellingen voor lg-thinq",
+    "Country": "Land",
     "LG ThinQ Email": "LG ThinQ e-mail",
     "LG ThinQ Password": "LG ThinQ-wachtwoord",
-    "Update interval in minutes": "Update-interval in minuten",
-    "Country": "Land",
     "Language": "Taal",
     "Platform": "Platform",
+    "Third-Party-Login": "Inloggen door derden",
+    "Update interval in minutes": "Update-interval in minuten",
     "Update thinq1 interval in minutes": "Update-interval in seconden voor Thinq1 (per apparaat 1 seconde)",
     "deleteSession": "Sessiegegevens verwijderen (bij inlogproblemen)",
     "deleteText": "Sessiegegevens verwijderen",
     "selectReg": "Registratiemethode selecteren",
-    "selectRegTip": "Schakel tussen oude login van derden of APP",
-    "APP-Login": "APP-login",
-    "Third-Party-Login": "Inloggen door derden"
+    "selectRegTip": "Schakel tussen oude login van derden of APP"
 }

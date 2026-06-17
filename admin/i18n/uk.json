@@ -1,16 +1,16 @@
 {
+    "APP-Login": "Вхід у APP",
     "Adapter settings for lg-thinq": "Налаштування адаптера для lg-think",
+    "Country": "Країна",
     "LG ThinQ Email": "Електронна пошта LG ThinQ",
     "LG ThinQ Password": "Пароль LG ThinQ",
-    "Update interval in minutes": "Інтервал оновлення в хвилинах",
-    "Country": "Країна",
     "Language": "Мова",
     "Platform": "Платформа",
+    "Third-Party-Login": "Сторонній вхід",
+    "Update interval in minutes": "Інтервал оновлення в хвилинах",
     "Update thinq1 interval in minutes": "Інтервал оновлення в секундах для Thinq1 (на пристрій 1 секунда)",
     "deleteSession": "Видалити дані сесії (у разі проблем із входом)",
     "deleteText": "Видалити дані сеансу",
     "selectReg": "Вибір способу реєстрації",
-    "selectRegTip": "Перемикання між старим входом сторонніх розробників або APP",
-    "APP-Login": "Вхід у APP",
-    "Third-Party-Login": "Сторонній вхід"
+    "selectRegTip": "Перемикання між старим входом сторонніх розробників або APP"
 }

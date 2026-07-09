@@ -23,7 +23,7 @@
   "dependencies": {
     "@iobroker/adapter-core": "^3.3.2",
     "aws-iot-device-sdk": "^2.2.16",
-    "axios": "^1.16.1",
+    "axios": "^1.18.1",
     "json-bigint": "^1.0.0",
     "luxon": "^3.7.2",
     "node-forge": "^1.4.0",

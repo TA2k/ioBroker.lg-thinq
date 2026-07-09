@@ -27,7 +27,7 @@
     "json-bigint": "^1.0.0",
     "luxon": "^3.7.2",
     "node-forge": "^1.4.0",
-    "qs": "^6.15.2",
+    "qs": "^6.15.3",
     "uuid": "^14.0.1"
   },
   "devDependencies": {

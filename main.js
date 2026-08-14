@@ -2630,7 +2630,7 @@ class LgThinq extends utils.Adapter {
                 this.mqttdata.amazon = mqttCer;
                 this.log.info("Found AWS CER");
                 const certGenerator = await this.getMqttInfo(constants.MQTT_AZU);
-                if (certGenerator.privKey && certGenerator.csr) {
+                if (certGenerator && certGenerator.privKey && certGenerator.csr) {
                     this.mqttdata.privateKey = certGenerator.privKey;
                     this.mqttdata.key = certGenerator.csr;
                 } else {
@@ -2797,7 +2797,11 @@ class LgThinq extends utils.Adapter {
             .get(requestUrl, { headers })
             .then(res => res.data)
             .catch(error => {
-                this.log.error(`getMqttInfo: ${error}`);
+                if (constants.MQTT_AZU == requestUrl) {
+                    this.log.debug(`getMqttInfo: ${error}`);
+                } else {
+                    this.log.error(`getMqttInfo: ${error}`);
+                }
             });
     }
 

@@ -52,6 +52,10 @@ Adapter for LG ThinQ
 
 ## Changelog
 
+### **WORK IN PROGRESS**
+
+- (Lucky-ESA) Issue missing privKey fixed
+
 ### 1.2.0 (2026-05-31)
 
 - (copilot) Adapter requires node.js >= 22 now

@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lg-thinq",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "news": {
+      "1.2.1": {
+        "en": "Issue missing privKey fixed",
+        "de": "Ausgabe fehlt privKey Fixed",
+        "ru": "Исчезновение PrivKey исправлено",
+        "pt": "Problema em falta PrivKey corrigido",
+        "nl": "Geen privKey gevonden",
+        "fr": "Émission manquante privKey corrigé",
+        "it": "Problema mancante privKey fisso",
+        "es": "Número desaparecido privKey fijo",
+        "pl": "Wydanie brakującego klucza prywatnego stałe",
+        "uk": "Випуск відсутній privKey фіксований",
+        "zh-cn": "丢失的 PrivKey 已修复"
+      },
       "1.2.0": {
         "en": "Adapter requires node.js >= 22 now\nAdapter requires admin >= 7.8.23 now\nAdded translate for device 201",
         "de": "Adapter benötigt node.js >= 22 jetzt\nAdapter benötigt admin >= 7.8.23 jetzt\nTranslate for device 201 hinzugefügt",
@@ -80,19 +93,6 @@
         "pl": "Usuń sprawdzenie wygaśnięcia",
         "uk": "Видалити параметри перевірки",
         "zh-cn": "删除过期检查"
-      },
-      "1.1.1": {
-        "en": "Dependencies updated\nNode 20.x required\nAdmin 7.6.17 required",
-        "de": "Ausgaben aktualisiert\nNode 20.x erforderlich\nAdmin 7.6.17 erforderlich",
-        "ru": "Обновленные зависимости\nУзел 20.x требуется\nТребуется администратор 7.6.17",
-        "pt": "Dependências atualizadas\nNó 20.x requerido\nAdministração 7.6.17 necessária",
-        "nl": "Afhankelijkheden bijgewerkt\nNode 20.x vereist\nBeheerder 7.6.17 vereist",
-        "fr": "Dépendances actualisées\nNoeud 20.x requis\nAdmin 7.6.17 requis",
-        "it": "Dipendenze aggiornate\nNodo 20.x richiesto\nAdmin 7.6.17 richiesto",
-        "es": "Actualización de las dependencias\nNodo 20.x requerido\nAdmin 7.6.17 requerido",
-        "pl": "Aktualizacja zależności\nWymagany węzeł 20.x\nWymagany admin 7.6.17",
-        "uk": "Залежність оновлено\nNode 20.x обов'язковий\nAdmin 7.6.17 потрібно",
-        "zh-cn": "更新的依赖关系\n需要节点20x\n所需行政经费"
       }
     },
     "titleLang": {

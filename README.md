@@ -51,8 +51,7 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.2.1 (2026-08-14)
 
 - (Lucky-ESA) Issue missing privKey fixed
 
@@ -76,13 +75,6 @@ Adapter for LG ThinQ
 - (Lucky-ESA) Attribute max of object limitMax and limitMin changed (device 401)
 - (Lucky-ESA) Fixed deviceType error
 - (Lucky-ESA) JSONbig loglevel changed
-
-### 1.1.3 (2025-10-03)
-
-- (Lucky-ESA) Added translate for device 201
-- (Lucky-ESA) Delete APP-Login (removed by LG)
-- (Lucky-ESA) Added online icon
-- (Lucky-ESA) Microwave 302 disabled (thinq1)
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 

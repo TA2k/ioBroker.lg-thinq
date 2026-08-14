@@ -30,6 +30,13 @@
 ### 0.0.3
 
 -   (TA2k) initial release
+## 1.1.3 (2025-10-03)
+
+- (Lucky-ESA) Added translate for device 201
+- (Lucky-ESA) Delete APP-Login (removed by LG)
+- (Lucky-ESA) Added online icon
+- (Lucky-ESA) Microwave 302 disabled (thinq1)
+
 ## 1.1.2 (2025-08-18)
 
 - (Lucky-ESA) Delete expires check

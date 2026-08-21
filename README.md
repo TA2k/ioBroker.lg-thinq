@@ -51,6 +51,11 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- (Lucky-ESA) Added default header for login
+
 ### 1.2.1 (2026-08-14)
 
 - (Lucky-ESA) Issue missing privKey fixed

@@ -1543,7 +1543,9 @@ class LgThinq extends utils.Adapter {
     async login(username, password) {
         await this.setConnection(false);
         // get signature and timestamp in login form
-        const loginForm = await this.requestClient.get(await this.getLoginUrl()).then(res => res.data);
+        const loginForm = await this.requestClient
+            .get(await this.getLoginUrl(), { headers: { "User-Agent": this.app_agent } })
+            .then(res => res.data);
         const countryCode = this.gateway.countryCode.toLowerCase();
         const headers = {
             Accept: "application/json",
@@ -1567,7 +1569,6 @@ class LgThinq extends utils.Adapter {
             itg_terms_use_flag: "Y",
             svc_list: "SVC202", // SVC202=LG SmartHome, SVC710=EMP OAuth
         };
-
         // try login with username and hashed password
         const loginUrl = `${this.gateway.empTermsUri}/` + `emp/v2.0/account/session/${encodeURIComponent(username)}`;
         const res = await this.requestClient
@@ -1592,10 +1593,9 @@ class LgThinq extends utils.Adapter {
         // dynamic get secret key for emp signature
         const empSearchKeyUrl = `${this.gateway.empSpxUri}/` + `searchKey?key_name=OAUTH_SECRETKEY&sever_type=OP`;
         const secretKey = await this.requestClient
-            .get(empSearchKeyUrl)
+            .get(empSearchKeyUrl, { headers: { "User-Agent": this.app_agent } })
             .then(res => res.data)
             .then(data => data.returnData);
-
         const timestamp = DateTime.utc().toRFC2822();
         const empData = {
             account_type: res.account.userIDType,

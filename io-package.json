@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lg-thinq",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "news": {
+      "1.2.2": {
+        "en": "Added default header for login",
+        "de": "Standard-Header für die Anmeldung hinzugefügt.",
+        "ru": "Добавлен заголовок по умолчанию для входа в систему.",
+        "pt": "Adicionado cabeçalho padrão para login",
+        "nl": "Standaardheader toegevoegd voor inloggen",
+        "fr": "Ajout d'un en-tête par défaut pour la connexion",
+        "it": "Aggiunta l'intestazione predefinita per l'accesso",
+        "es": "Se agregó el encabezado predeterminado para el inicio de sesión.",
+        "pl": "Dodano domyślny nagłówek do logowania",
+        "uk": "Додано заголовок за замовчуванням для входу",
+        "zh-cn": "添加了登录时的默认标头"
+      },
       "1.2.1": {
         "en": "Issue missing privKey fixed",
         "de": "Ausgabe fehlt privKey Fixed",
@@ -80,19 +93,6 @@
         "pl": "Dodano tłumaczenie dla urządzenia 201\nUsuń logowanie APP- (usunięte przez LG)\nDodano ikonę online\nMikrofala 302 wyłączona (thinq1)",
         "uk": "Додано переклад для пристрою 201\nВидалити APP-Login (видалення LG)\nДодано іконку онлайн\nМікрохвильова піч 302 вимкнено (thinq1)",
         "zh-cn": "为设备 201 添加翻译\n删除 APP- Login( 由 LG 删除)\n已添加在线图标\n微波 302 已禁用( 微量)"
-      },
-      "1.1.2": {
-        "en": "Delete expires check",
-        "de": "Löschen läuft ab",
-        "ru": "Удаление истекает проверка",
-        "pt": "Apagar a verificação expira",
-        "nl": "Controle verlopen verwijderen",
-        "fr": "Supprimer la vérification d'expiration",
-        "it": "Cancellare scade il controllo",
-        "es": "Borrar vence el cheque",
-        "pl": "Usuń sprawdzenie wygaśnięcia",
-        "uk": "Видалити параметри перевірки",
-        "zh-cn": "删除过期检查"
       }
     },
     "titleLang": {

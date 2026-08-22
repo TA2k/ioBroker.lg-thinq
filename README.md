@@ -51,8 +51,7 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.2.2 (2026-08-22)
 
 - (Lucky-ESA) Added default header for login
 
@@ -74,12 +73,6 @@ Adapter for LG ThinQ
 
 - (Lucky-ESA) Fixed adapter crash (thinq1 only)
 - (Lucky-ESA) Fixed: Address Root-CA certificate has changed
-
-### 1.1.4 (2025-12-14)
-
-- (Lucky-ESA) Attribute max of object limitMax and limitMin changed (device 401)
-- (Lucky-ESA) Fixed deviceType error
-- (Lucky-ESA) JSONbig loglevel changed
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 

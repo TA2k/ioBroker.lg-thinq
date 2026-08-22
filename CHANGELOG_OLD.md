@@ -30,6 +30,12 @@
 ### 0.0.3
 
 -   (TA2k) initial release
+## 1.1.4 (2025-12-14)
+
+- (Lucky-ESA) Attribute max of object limitMax and limitMin changed (device 401)
+- (Lucky-ESA) Fixed deviceType error
+- (Lucky-ESA) JSONbig loglevel changed
+
 ## 1.1.3 (2025-10-03)
 
 - (Lucky-ESA) Added translate for device 201

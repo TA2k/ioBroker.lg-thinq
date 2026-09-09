@@ -21,7 +21,7 @@
     "node": ">=22"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^3.4.1",
+    "@iobroker/adapter-core": "^3.4.3",
     "aws-iot-device-sdk": "^2.2.16",
     "axios": "^1.18.1",
     "json-bigint": "^1.0.0",

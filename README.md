@@ -19,6 +19,10 @@
 
 Adapter for LG ThinQ
 
+## References
+
+- LG-Thinq: <https://www.lg.com>
+
 ## Requirement
 
 - Node >= 22
@@ -51,6 +55,7 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+
 ### 1.2.2 (2026-08-22)
 
 - (Lucky-ESA) Added default header for login

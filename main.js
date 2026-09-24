@@ -2287,6 +2287,7 @@ class LgThinq extends utils.Adapter {
                                 control === "WMWakeup"
                             ) {
                                 common.role = "button";
+                                common.read = false;
                                 common.def = false;
                             }
                             await this.createDataPoint(`${device.deviceId}.remote.${control}`, common, "state");

@@ -169,6 +169,7 @@ class LgThinq extends utils.Adapter {
         this.defaultHeaders = {
             "x-api-key": constants.API_KEY,
             "x-client-id": constants.API_CLIENT_ID,
+            "User-Agent": this.app_agent,
             "x-thinq-app-ver": "3.5.1700",
             "x-thinq-app-type": "NUTS",
             "x-thinq-app-level": "PRD",
@@ -522,6 +523,7 @@ class LgThinq extends utils.Adapter {
             "x-thinq-security-key": "nuts_securitykey",
             Accept: "application/json",
             "x-thinq-token": this.session.access_token,
+            "User-Agent": this.app_agent,
         };
         const data = {
             countryCode: this.gateway.countryCode,
@@ -534,7 +536,7 @@ class LgThinq extends utils.Adapter {
             .then(res => res.data.lgedmRoot)
             .then(data => data)
             .catch(error => {
-                error.message && this.log.debug(`getJSessionId message: ${error.message}`);
+                error.message && this.log.debug(`getJSessionId message: ${error.message} - ${this.gateway.thinq1Uri}`);
                 this.log.debug(`getJSessionId: ${error}`);
                 return null;
             });
@@ -986,6 +988,7 @@ class LgThinq extends utils.Adapter {
                 .get(`${this.gateway.empSpxUri}/${showTermUrl}`, {
                     headers: {
                         "X-Login-Session": this.session.access_token,
+                        "User-Agent": this.app_agent,
                     },
                 })
                 .then(res => res.data)
@@ -995,6 +998,7 @@ class LgThinq extends utils.Adapter {
                 });
             const headers = {
                 Accept: "application/json",
+                "User-Agent": this.app_agent,
                 "X-Application-Key": constants.APPLICATION_KEY,
                 "X-Client-App-Key": constants.CLIENT_ID,
                 "X-Lge-Svccode": "SVC709",
@@ -1526,6 +1530,7 @@ class LgThinq extends utils.Adapter {
         const countryCode = this.gateway.countryCode.toLowerCase();
         const headers = {
             Accept: "application/json",
+            "User-Agent": this.app_agent,
             "X-Application-Key": constants.APPLICATION_KEY,
             "X-Client-App-Key": constants.CLIENT_ID,
             "X-Lge-Svccode": "SVC709",
@@ -1584,6 +1589,7 @@ class LgThinq extends utils.Adapter {
         const signature = this.signature(`${empUrl}\n${timestamp}`, secretKey);
         const empHeaders = {
             "lgemp-x-app-key": constants.OAUTH_CLIENT_KEY,
+            "User-Agent": this.app_agent,
             "lgemp-x-date": timestamp,
             "lgemp-x-session-key": res.account.loginSessionID,
             "lgemp-x-signature": signature,
@@ -1737,6 +1743,7 @@ class LgThinq extends utils.Adapter {
             "x-lge-oauth-date": timestamp,
             Accept: "application/json",
             "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": this.app_agent,
         };
         this.log.debug(JSON.stringify(tokenUrl));
         this.log.debug(JSON.stringify(headers));
@@ -1842,6 +1849,7 @@ class LgThinq extends utils.Adapter {
         const headers = {
             Accept: "application/json",
             Authorization: `Bearer ${this.session.access_token}`,
+            "User-Agent": this.app_agent,
             "X-Lge-Svccode": "SVC202",
             "X-Application-Key": constants.APPLICATION_KEY,
             "lgemp-x-app-key": constants.CLIENT_ID,
@@ -2121,7 +2129,7 @@ class LgThinq extends utils.Adapter {
         this.log.debug(JSON.stringify(device));
         let stopp = false;
         let deviceModel = await this.requestClient
-            .get(device.modelJsonUri)
+            .get(device.modelJsonUri, { headers: { "User-Agent": this.app_agent } })
             .then(res => res.data)
             .catch(error => {
                 this.log.error(error);
@@ -2305,7 +2313,7 @@ class LgThinq extends utils.Adapter {
         }
         if (langPath != null) {
             langPack = await this.requestClient
-                .get(device[langPath])
+                .get(device[langPath], { headers: { "User-Agent": this.app_agent } })
                 .then(res => res.data)
                 .catch(error => {
                     this.log.info(`langPackProductTypeUri: ${error}`);
@@ -2769,6 +2777,7 @@ class LgThinq extends utils.Adapter {
         const headers = {
             "x-country-code": "DE",
             "x-service-phase": "OP",
+            "User-Agent": this.app_agent,
         };
         return this.requestClient
             .get(requestUrl, { headers })

@@ -120,7 +120,7 @@ Der Adapter erstellt alle Datenpunkte mit dem Template aus dem Datenpunkt `model
 
     ![101_remote.png](img/101_remote.png)
     ![101_remote_command.png](img/101_remote_command.png)
-    ![101_remote_period.png](../en/img/101_remote_period.png)
+    ![101_remote_period.png](img/101_remote_period.png)
 
 Beispiel JSON Tür geöffnet
 

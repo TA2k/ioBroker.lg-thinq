@@ -214,7 +214,7 @@ class LgThinq extends utils.Adapter {
                 }
             }
             if (session === 0) {
-                this.session = await this.login(this.config.user, this.config.password).catch(error => {
+                this.session = await this.loginNew().catch(error => {
                     this.log.error(error);
                 });
             }
@@ -1283,34 +1283,8 @@ class LgThinq extends utils.Adapter {
                 error.response && this.log.error(error.response.data);
             });
         this.log.debug(`sessionCookie: ${sessionCookie}`);
-        const hashedPassword = await this.requestClient({
-            method: "post",
-            url: `https://${countryCode}.lgemembers.com/lgacc/front/v1/signin/signInPre`,
-            headers: {
-                "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-                accept: "*/*",
-                "x-requested-with": "XMLHttpRequest",
-                "accept-language": `${this.gateway.languageCode},${countryCode};q=0.9`,
-                origin: `https://${countryCode}.lgemembers.com`,
-                "user-agent": this.app_agent,
-                cookie: typeof sessionCookie === "string" ? sessionCookie : "",
-            },
-            //hash sha512 from password
-            data: {
-                userAuth2: crypto.createHash("sha512").update(this.config.password).digest("hex"),
-                password_hash_prameter_flag: "Y",
-                svc_list: "SVC202,SVC710", // SVC202=LG SmartHome, SVC710=EMP OAuth
-            },
-        })
-            .then(res => {
-                return res.data;
-            })
-            .catch(error => {
-                this.session = {};
-                this.log.error(error);
-                error.response && this.log.error(error.response.data);
-            });
-        this.log.debug(`hashedPassword: ${hashedPassword}`);
+        // sha512 hash of the plain password, sent directly to signInAct
+        const hashedPassword = crypto.createHash("sha512").update(this.config.password).digest("hex");
         const accountInfo = await this.requestClient({
             method: "post",
             url: `https://${countryCode}.lgemembers.com/lgacc/front/v1/signin/signInAct`,
@@ -1515,6 +1489,9 @@ class LgThinq extends utils.Adapter {
             });
         this.log.debug(`resp: ${JSON.stringify(resp)}`);
         if (resp && resp.access_token) {
+            if (resp.oauth2_backend_url) {
+                this.lgeapi_url = decodeURIComponent(resp.oauth2_backend_url);
+            }
             await this.setConnection(true);
         }
         return resp;
@@ -1784,7 +1761,7 @@ class LgThinq extends utils.Adapter {
                 return false;
             }
             this.log.warn("refresh token failed, start relogin");
-            const session = await this.login(this.config.user, this.config.password).catch(error => {
+            const session = await this.loginNew().catch(error => {
                 this.log.error(error);
             });
             if (session && session.access_token) {

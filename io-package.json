@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lg-thinq",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "news": {
+      "1.2.3": {
+        "en": "Login flow changed",
+        "de": "Login-Flow geändert",
+        "ru": "Изменен процесс входа в систему",
+        "pt": "Fluxo de login mudou",
+        "nl": "Het aanmeldingsproces is gewijzigd",
+        "fr": "Login flow modifié",
+        "it": "Login cambiato",
+        "es": "Flujo de acceso cambiado",
+        "pl": "Zmieniono przepływ logowania",
+        "uk": "Змінено потік входу",
+        "zh-cn": "登录流程已更改"
+      },
       "1.2.2": {
         "en": "Added default header for login",
         "de": "Standard-Header für die Anmeldung hinzugefügt.",
@@ -80,19 +93,6 @@
         "pl": "Atrybut max obiektu limitMax i limitMin zmienione (urządzenie 401)\nUrządzenie stałe Błąd typu\nJSO Zmieniono poziom logowania Nbig",
         "uk": "Атрибут максимум ліміту об'єктаМакс і лімітМін змінено (device 401)\nФіксований пристрій Тип помилки\nЯСО Nbig loglevel змінив",
         "zh-cn": "对象限制的最大属性\n固定设备 类型错误\n牙买加 Nbig 日志级别已更改"
-      },
-      "1.1.3": {
-        "en": "Added translate for device 201\nDelete APP-Login (removed by LG)\nAdded online icon\nMicrowave 302 disabled (thinq1)",
-        "de": "Übersetzung für Gerät 201 hinzugefügt\nLöschen von APP-Login (entfernt von LG)\nOnline-Symbol\nMikrowelle 302 behindert (thinq1)",
-        "ru": "Добавленный перевод для устройства 201\nУдалить APP-Login (удалено LG)\nДобавлена онлайн икона\nМикроволновая печь 302 отключена (thinq1)",
-        "pt": "Tradutor adicionado para o dispositivo 201\nExcluir APP-Login (removido por LG)\nAdicionado ícone online\nMicroondas 302 desactivadas (thinq1)",
-        "nl": "Toegevoegd vertalen voor apparaat 201\nAPP-Login verwijderen (verwijderd door LG)\nToegevoegd online pictogram\nMagnetron 302 uitgeschakeld (dinq1)",
-        "fr": "Ajouté traduire pour l'appareil 201\nSupprimer APP-Connexion (remplacé par LG)\nAjouté icône en ligne\nMicro-ondes 302 désactivées (thinq1)",
-        "it": "Aggiunto traduttore per dispositivo 201\nEliminare APP-Login (rimossa da LG)\nAggiunto online icona\nMicroonde 302 disabili (thinq1)",
-        "es": "Añadido traducir para el dispositivo 201\nEliminar APP-Login (removido por LG)\nAñadido icono en línea\nMicroondas 302 discapacitados (thinq1)",
-        "pl": "Dodano tłumaczenie dla urządzenia 201\nUsuń logowanie APP- (usunięte przez LG)\nDodano ikonę online\nMikrofala 302 wyłączona (thinq1)",
-        "uk": "Додано переклад для пристрою 201\nВидалити APP-Login (видалення LG)\nДодано іконку онлайн\nМікрохвильова піч 302 вимкнено (thinq1)",
-        "zh-cn": "为设备 201 添加翻译\n删除 APP- Login( 由 LG 删除)\n已添加在线图标\n微波 302 已禁用( 微量)"
       }
     },
     "titleLang": {

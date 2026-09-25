@@ -68,6 +68,7 @@ class LgThinq extends utils.Adapter {
         this.createInterval = helper.createInterval;
         this.createStatistic = helper.createStatistic;
         this.createremote = helper.createremote;
+        this.createSendJson = helper.createSendJson;
         this.lastDeviceCourse = helper.lastDeviceCourse;
         this.insertCourse = helper.insertCourse;
         this.setCourse = helper.setCourse;
@@ -2267,6 +2268,9 @@ class LgThinq extends utils.Adapter {
                     return deviceModel;
                 } else {
                     if (controlWifi) {
+                        if (device.deviceType === 204) {
+                            await this.createSendJson(device.deviceId);
+                        }
                         for (const control in controlWifi) {
                             if (control === "WMDownload" && device.platformType === "thinq2") {
                                 await this.createremote(device.deviceId, control, deviceModel, device.deviceType);

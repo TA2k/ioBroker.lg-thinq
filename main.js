@@ -3310,6 +3310,48 @@ class LgThinq extends utils.Adapter {
                             data = { ctrlKey: action, command: rawData.command, dataSetList: rawData.data };
                         }
 
+                        if (
+                            rawData &&
+                            rawData.command &&
+                            rawData.dataForm &&
+                            !rawData.data &&
+                            !rawData.dataKey &&
+                            !rawData.dataGetList
+                        ) {
+                            // Control style used e.g. by the dishwasher (type 204): the "dataForm"
+                            // object from the device model already has the shape the API expects for
+                            // "dataSetList". Used only as a fallback when no other payload shape
+                            // (data / dataKey / dataGetList) is present.
+                            const dataForm = rawData.dataForm;
+
+                            // Build a fresh copy so the cached device model is never modified.
+                            const dataSetList = {};
+                            for (const rootKey of Object.keys(dataForm)) {
+                                const rootValue = dataForm[rootKey];
+
+                                // Non-object roots are copied as they are.
+                                if (typeof rootValue !== "object" || rootValue === null) {
+                                    dataSetList[rootKey] = rootValue;
+                                    continue;
+                                }
+
+                                // Copy each field, but skip unresolved template placeholders like
+                                // "{{Course}}" so only concrete values end up in the request.
+                                const copiedRoot = {};
+                                for (const fieldKey of Object.keys(rootValue)) {
+                                    const fieldValue = rootValue[fieldKey];
+                                    const isPlaceholder = typeof fieldValue === "string" && fieldValue.startsWith("{{");
+                                    if (!isPlaceholder) {
+                                        copiedRoot[fieldKey] = fieldValue;
+                                    }
+                                }
+                                dataSetList[rootKey] = copiedRoot;
+                            }
+
+                            data = { ctrlKey: "basicCtrl", command: rawData.command, dataSetList };
+                            no_for = false;
+                        }
+
                         if (rawData && rawData.command && (rawData.dataKey || rawData.dataGetList)) {
                             data = {
                                 ctrlKey: action,

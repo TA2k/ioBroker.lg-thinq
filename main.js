@@ -14,6 +14,7 @@ const uuid = require("uuid");
 const qs = require("qs");
 const { DateTime } = require("luxon");
 const Json2iob = require("./lib/extractKeys");
+const Dishwasher = require("./lib/dishwasher");
 const constants = require("./lib/constants");
 const { URL } = require("node:url");
 const helper = require("./lib/helper");
@@ -44,6 +45,7 @@ class LgThinq extends utils.Adapter {
             maxRedirects: 10,
             maxContentLength: 50 * 1000 * 1000,
         });
+        this.dishwasher = new Dishwasher(this);
         this.updateInterval = null;
         this.qualityInterval = null;
         this.refreshTokenInterval = null;
@@ -295,7 +297,7 @@ class LgThinq extends utils.Adapter {
                 }
                 this.subscribeStates("*");
                 for (const element of listDevices) {
-                    this.log.info(`Create or update datapoints for ${element.deviceId}`);
+                    this.log.info(`Create or update objects for ${element.deviceId}`);
                     this.modelInfos[element.deviceId] = await this.getDeviceModelInfo(element);
                     if (!this.modelInfos[element.deviceId]) {
                         this.log.error(`Missing Modelinfo for device - ${element.deviceId}. Restart adapter please!!!`);
@@ -307,7 +309,6 @@ class LgThinq extends utils.Adapter {
                         type: "device",
                         common: {
                             name: element.alias,
-                            role: "state",
                         },
                         native: {},
                     });
@@ -329,7 +330,7 @@ class LgThinq extends utils.Adapter {
                             },
                             type: "string",
                             role: "json",
-                            desc: "Datapoints Quality",
+                            desc: "Object Quality",
                             read: true,
                             write: false,
                             def: "",
@@ -339,16 +340,20 @@ class LgThinq extends utils.Adapter {
                     if (element.area != null) {
                         area[element.area] = element.deviceId;
                     }
-                    await this.json2iob.parse(element.deviceId, element, {
-                        forceIndex: true,
-                        write: true,
-                        preferedArrayName: null,
-                        channelName: null,
-                        autoCast: true,
-                        checkvalue: false,
-                        checkType: true,
-                        firstload: true,
-                    });
+                    if (element.deviceType === 204) {
+                        await this.dishwasher.createDevice(element);
+                    } else {
+                        await this.json2iob.parse(element.deviceId, element, {
+                            forceIndex: true,
+                            write: true,
+                            preferedArrayName: null,
+                            channelName: null,
+                            autoCast: true,
+                            checkvalue: false,
+                            checkType: true,
+                            firstload: true,
+                        });
+                    }
                     if (element.snapshot && element.snapshot.online != null) {
                         this.extendObject(element.deviceId, {
                             common: {
@@ -364,6 +369,8 @@ class LgThinq extends utils.Adapter {
                     this.modelInfos[element.deviceId]["signature"] = false;
                     this.modelInfos[element.deviceId]["deviceState"] = element.deviceState;
                     this.modelInfos[element.deviceId]["deviceType"] = 0;
+                    this.modelInfos[element.deviceId]["modelName"] = element.modelName;
+                    this.modelInfos[element.deviceId]["deviceCode"] = element.deviceCode;
                     if (element.platformType && element.platformType === "thinq2") {
                         this.isThinq2 = true;
                         if (
@@ -387,7 +394,7 @@ class LgThinq extends utils.Adapter {
                     }
                     await this.pollMonitor(element);
                     //await this.sleep(2000);
-                    this.log.info(`Update raw datapoints for ${element.deviceId}`);
+                    this.log.info(`Update raw objects for ${element.deviceId}`);
                     await this.extractValues(element);
                 }
                 this.log.debug(JSON.stringify(listDevices));
@@ -397,15 +404,14 @@ class LgThinq extends utils.Adapter {
                 if (isThinq1 && this.config.interval_thinq1 > 0) {
                     await this.sleep(2000);
                     await this.createInterval();
-                    this.setState("interval.interval", this.config.interval_thinq1, true);
-                    this.setState("interval.active", 0, true);
-                    this.setState("interval.active", 0, true);
-                    this.setState("interval.last_update", 0, true);
-                    this.setState("interval.status_devices", JSON.stringify({}), true);
-                    this.startPollMonitor();
+                    await this.setState("interval.interval", this.config.interval_thinq1, true);
+                    await this.setState("interval.active", 0, true);
+                    await this.setState("interval.last_update", 0, true);
+                    await this.setState("interval.status_devices", JSON.stringify({}), true);
+                    await this.startPollMonitor();
                 }
                 this.log.debug(`AREA: ${JSON.stringify(area)}`);
-                this.createWeather(area);
+                await this.createWeather(area);
                 this.updateInterval = this.setInterval(
                     async () => {
                         await this.updateDevices();
@@ -1094,15 +1100,19 @@ class LgThinq extends utils.Adapter {
         if (typeof listDevices == "object") {
             for (const element of listDevices) {
                 this.log.debug(`UPDATE: ${JSON.stringify(element)}`);
-                await this.json2iob.parse(element.deviceId, element, {
-                    forceIndex: true,
-                    write: true,
-                    preferedArrayName: null,
-                    channelName: null,
-                    autoCast: true,
-                    checkvalue: this.isFinished,
-                    checkType: true,
-                });
+                if (element.deviceType === 204) {
+                    await this.dishwasher.createDevice(element);
+                } else {
+                    await this.json2iob.parse(element.deviceId, element, {
+                        forceIndex: true,
+                        write: true,
+                        preferedArrayName: null,
+                        channelName: null,
+                        autoCast: true,
+                        checkvalue: this.isFinished,
+                        checkType: true,
+                    });
+                }
                 if (Object.keys(this.workIds).length === 0 || this.config.interval_thinq1 === 0) {
                     await this.pollMonitor(element);
                 }
@@ -2156,8 +2166,7 @@ class LgThinq extends utils.Adapter {
             await this.setObjectNotExistsAsync(`${device.deviceId}.remote`, {
                 type: "channel",
                 common: {
-                    name: "remote control device",
-                    role: "state",
+                    name: "Device remote control",
                 },
                 native: {},
             });
@@ -2194,6 +2203,22 @@ class LgThinq extends utils.Adapter {
                     stopp = true;
                 } else {
                     this.log.warn(`DeviceType 406 with platformType ${device.platformType} is not supported yet`);
+                    this.log.info(JSON.stringify(device));
+                }
+            }
+            if (device.deviceType === 204) {
+                if (device.platformType == "thinq2") {
+                    await this.dishwasher.createRemote(device, deviceModel, constants[`${this.lang}Translation`]);
+                    await this.dishwasher.createSendJson(device.deviceId);
+                    await this.createStatistic(device, 204);
+                    //await this.lastDeviceCourse(device.deviceId, 204);
+                    stopp = true;
+                    if (deviceModel) {
+                        deviceModel["folder"] = "dishwasher";
+                    }
+                    stopp = true;
+                } else {
+                    this.log.warn(`DeviceType 204 with platformType ${device.platformType} is not supported yet`);
                     this.log.info(JSON.stringify(device));
                 }
             }
@@ -2268,9 +2293,6 @@ class LgThinq extends utils.Adapter {
                     return deviceModel;
                 } else {
                     if (controlWifi) {
-                        if (device.deviceType === 204) {
-                            await this.createSendJson(device.deviceId);
-                        }
                         for (const control in controlWifi) {
                             if (control === "WMDownload" && device.platformType === "thinq2") {
                                 await this.createremote(device.deviceId, control, deviceModel, device.deviceType);
@@ -2307,6 +2329,9 @@ class LgThinq extends utils.Adapter {
         const deviceModel = this.modelInfos[device.deviceId];
         if (!deviceModel) {
             this.log.warn(`No model info for ${device.deviceId}`);
+            return;
+        }
+        if (deviceModel === 204) {
             return;
         }
         let langPack = null;
@@ -2493,7 +2518,7 @@ class LgThinq extends utils.Adapter {
                         });
                     } else {
                         obj.common = common;
-                        await this.setObjectAsync(path + state, obj);
+                        await this.setObject(path + state, obj);
                     }
                 }
             }
@@ -2585,7 +2610,7 @@ class LgThinq extends utils.Adapter {
                         });
                     } else {
                         obj.common = common;
-                        await this.setObjectAsync(path + state, obj);
+                        await this.setObject(path + state, obj);
                     }
                 }
             }

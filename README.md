@@ -55,6 +55,11 @@ Adapter for LG ThinQ
 -->
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- (Lucky-ESA) Added dishwasher type 204
+
 ### 1.2.3 (2026-09-24)
 
 - (TA2k) Login flow changed
